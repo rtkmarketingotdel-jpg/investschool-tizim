@@ -17,8 +17,9 @@ function Header({ icon: Icon, name, sub }: { icon: typeof Users; name: string; s
 }
 
 /** Who teaches this subject (teachers and tutors), each opening the employee's page. */
-export function SubjectDrawer({ subject, onClose }: { subject: Subject | null; onClose: () => void }) {
+export function SubjectDrawer({ subject: raw, onClose }: { subject: Subject | null; onClose: () => void }) {
   const { t } = useTranslation();
+  const subject = raw ? { ...raw, people: raw.people ?? [] } : null;
   return (
     <Drawer open={!!subject} onClose={onClose} title={subject?.name ?? ''} width={520}>
       {subject && (

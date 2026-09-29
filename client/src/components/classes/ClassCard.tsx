@@ -46,8 +46,8 @@ export function ClassCard({ cls: c, branchName, canEdit, onOpen, onEdit }: Props
               <p className="tabular-nums"><span className="text-2xl">{c.studentCount}</span><span className="text-text-muted"> / {c.capacity}</span></p>
             </div>
             <div className="space-y-1.5">
-              <SplitBar boys={c.boys} girls={c.girls} />
-              <p className="flex justify-between text-xs text-text-muted"><span>{t('classes.boys', { count: c.boys })}</span><span>{t('classes.girls', { count: c.girls })}</span></p>
+              <SplitBar boys={c.boys ?? 0} girls={c.girls ?? 0} />
+              <p className="flex justify-between text-xs text-text-muted"><span>{t('classes.boys', { count: c.boys ?? 0 })}</span><span>{t('classes.girls', { count: c.girls ?? 0 })}</span></p>
             </div>
           </div>
         </div>

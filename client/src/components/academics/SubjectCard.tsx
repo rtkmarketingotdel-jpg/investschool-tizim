@@ -11,8 +11,10 @@ interface Props {
   onDelete: () => void;
 }
 
-export function SubjectCard({ subject: s, onOpen, onEdit, onDelete }: Props) {
+export function SubjectCard({ subject, onOpen, onEdit, onDelete }: Props) {
   const { t } = useTranslation();
+  // `people` comes from a newer API; tolerate an older server during a rolling deploy instead of crashing the page
+  const s = { ...subject, people: subject.people ?? [] };
   const Icon = subjectIcon(s.name);
   const teachers = s.people.filter((p) => p.kind === 'teacher').length;
   const tutors = s.people.length - teachers;
