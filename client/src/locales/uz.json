@@ -705,5 +705,18 @@
     "skip": "Oʻtkazib yuborish",
     "finish": "Yakunlash",
     "done": "Profil toʻldirildi"
+  },
+  "install": {
+    "button": "Ilovani oʻrnatish",
+    "bannerTitle": "Ilovani telefonga oʻrnating",
+    "bannerText": "Bosh ekrandan bir bosishda oching, davomat qilish osonlashadi.",
+    "iosTitle": "Bosh ekranga qoʻshish",
+    "iosStep1": "Safari pastidagi “Ulashish” tugmasini bosing.",
+    "iosStep2": "Roʻyxatdan “Bosh ekranga qoʻshish” ni tanlang.",
+    "iosStep3": "“Qoʻshish” ni bosing. Bosh ekranda “{{name}}” ikonkasi paydo boʻladi.",
+    "iosNote": "Safari brauzeridan oching. Telegram yoki boshqa ilova ichidagi brauzerda bu tugma chiqmasligi mumkin.",
+    "gotIt": "Tushundim",
+    "offline": "Internet yoʻq. Davomat va maʼlumotlar internet bilan ishlaydi.",
+    "dismiss": "Yopish (bu xabarni yashirish)"
   }
 }

@@ -8,6 +8,7 @@ import { setLanguage } from '@/i18n';
 import { api } from '@/lib/api';
 import { Avatar, Dropdown, DropdownItem, IconButton } from '../ui';
 import { GlobalSearch } from './GlobalSearch';
+import { InstallButton } from '../InstallApp';
 import { NotificationsButton } from './NotificationsPanel';
 
 export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
@@ -45,6 +46,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         >
           <Maximize className="h-5 w-5" />
         </IconButton>
+        <InstallButton />
         <IconButton aria-label={t('topbar.theme')} onClick={toggle}>
           {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </IconButton>

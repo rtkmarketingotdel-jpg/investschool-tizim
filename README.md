@@ -29,6 +29,12 @@ public signing page with OTP), settings, notifications (bell, 60 s polling), Tel
 - **Live map:** Attendance → Map (Leaflet + OpenStreetMap, no API key). A dot appears on check-in and disappears on check-out.
 - Telegram uses the Bot HTTP API directly (`TELEGRAM_BOT_TOKEN` + chat id in Settings); it is a no-op when not configured.
 
+## Install as an app (PWA)
+The client is an installable web app: `manifest.webmanifest` is generated at build time from `VITE_BRAND_NAME` / `VITE_BRAND_SHORT`
+(icons in `client/public/brand/`: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` — replace them when rebranding).
+`client/public/sw.js` caches only the app shell; API calls and uploads are never cached, and check-in needs a connection by design.
+Android/Chrome shows a real install prompt; iOS Safari has none, so the app shows "Share → Add to Home Screen" steps.
+
 ## Checks
 `npm run build`, `npm run typecheck`, `npm run lint` in both folders; `npm test` in `server` (money words, debt, payroll).
 `grep -ri "gorizont" client/src server/src` must list only `brand.config.ts` files (and locale files).

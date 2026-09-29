@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { InstallBanner } from '@/components/InstallApp';
 import { AttendanceSelf } from '@/components/attendance/AttendanceSelf';
 import { MyPayslips } from '@/components/attendance/MyPayslips';
 
@@ -7,6 +8,7 @@ export default function Me() {
   return (
     <div className="space-y-8">
       <h1 className="text-[28px] font-medium">{t('nav.me')}</h1>
+      <InstallBanner />
       <AttendanceSelf />
       <MyPayslips />
     </div>
