@@ -43,6 +43,7 @@ export interface StudentFilters {
   status?: string;
   classId?: string;
   boarding?: string;
+  club?: string;
   debtor?: string;
   sort?: string;
   page: number;
@@ -77,16 +78,25 @@ export interface Branch {
 }
 export type BranchInput = Pick<Branch, 'name' | 'address' | 'lat' | 'lng' | 'radiusM'>;
 
+export interface SubjectPerson {
+  id: string;
+  fullName: string;
+  photoUrl: string | null;
+  position: string;
+  kind: 'teacher' | 'tutor';
+}
 export interface Subject {
   id: string;
   name: string;
   teachers: number;
+  people: SubjectPerson[];
 }
 export interface Club {
   id: string;
   name: string;
   teacherId: string | null;
   teacherName: string | null;
+  teacherPhotoUrl: string | null;
   monthlyFee: number;
   members: number;
 }

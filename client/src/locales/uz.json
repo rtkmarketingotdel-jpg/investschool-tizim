@@ -722,7 +722,27 @@
     "deleteConfirm": "“{{name}}” fanini oʻchirasizmi?",
     "deleteClubConfirm": "“{{name}}” toʻgaragini oʻchirasizmi? Unga yozilgan {{count}} oʻquvchidan ham olib tashlanadi.",
     "tutorsHint": "Repetitor — alohida fan boʻyicha individual dars beradigan xodim. Kartani bossangiz, batafsil maʼlumot ochiladi.",
-    "noTutors": "Repetitorlar yoʻq"
+    "noTutors": "Repetitorlar yoʻq",
+    "search": "Qidirish...",
+    "stats": {
+      "teachers": "Oʻqituvchilar",
+      "members": "Toʻgaraklarga yozilganlar"
+    },
+    "whoTeaches": "Bu fanni kim oʻqitadi",
+    "teachersCount": "{{count}} oʻqituvchi",
+    "tutorsCount": "{{count}} repetitor",
+    "noTeacher": "Oʻqituvchi biriktirilmagan",
+    "noTeacherHint": "Bu fan uchun oʻqituvchi qoʻshing: xodim yaratishda shu fanni tanlang.",
+    "noSubjects": "Hali fanlar qoʻshilmagan",
+    "noClubs": "Hali toʻgaraklar qoʻshilmagan",
+    "noMatch": "Hech narsa topilmadi",
+    "clubMembers": "Yozilgan oʻquvchilar",
+    "membersShort": "oʻquvchi",
+    "feePerMonth": "{{fee}} / oy",
+    "free": "Bepul",
+    "noLeader": "Rahbar tayinlanmagan",
+    "noMembers": "Hali hech kim yozilmagan",
+    "noMembersHint": "Oʻquvchi kartasida toʻgarakni belgilang, shunda shu yerda koʻrinadi."
   },
   "profile": {
     "title": "Mening profilim",

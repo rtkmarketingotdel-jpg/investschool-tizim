@@ -45,6 +45,7 @@ const listQuery = z.object({
   status: z.enum(['ACTIVE', 'TRIAL', 'LEFT']).optional(),
   classId: z.string().optional(),
   boarding: z.enum(['true', 'false']).optional(),
+  club: z.string().max(80).optional(),
   sort: z.enum(['name', 'date', 'debt']).default('name'),
   debtor: z.enum(['true']).optional(),
 });
@@ -70,7 +71,7 @@ studentsRouter.get('/', async (req, res, next) => {
   try {
     const q = listQuery.parse(req.query);
     const rows = await studentRepo.list({
-      q: q.q, status: q.status, classId: q.classId, sort: q.sort === 'debt' ? 'name' : q.sort,
+      q: q.q, status: q.status, classId: q.classId, club: q.club, sort: q.sort === 'debt' ? 'name' : q.sort,
       boarding: q.boarding === undefined ? undefined : q.boarding === 'true',
     });
     const finance = seesFinance(req.user!.role);
@@ -91,7 +92,7 @@ studentsRouter.get('/export', async (req, res, next) => {
   try {
     const q = listQuery.parse({ ...req.query, page: 1, limit: 100 });
     const rows = await studentRepo.list({
-      q: q.q, status: q.status, classId: q.classId, sort: q.sort === 'debt' ? 'name' : q.sort,
+      q: q.q, status: q.status, classId: q.classId, club: q.club, sort: q.sort === 'debt' ? 'name' : q.sort,
       boarding: q.boarding === undefined ? undefined : q.boarding === 'true',
     });
     const head = ['Full name', 'Class', 'Status', 'Boarding', 'Parent', 'Parent phone', 'Monthly fee', 'Discount %', 'Enrolled'];

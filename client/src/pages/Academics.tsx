@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, GraduationCap, Pencil, Plus, Trash2, Trophy } from 'lucide-react';
+import { BookOpen, GraduationCap, Phone, Plus, Search, Trophy } from 'lucide-react';
 import { errorCode } from '@/lib/api';
 import { schoolApi, type Club, type Subject } from '@/lib/schoolApi';
-import { formatMoney } from '@/lib/format';
 import { PageHeader } from '@/components/PageHeader';
-import { Avatar, Badge, Button, Card, EmptyState, Input, Modal, Select, Skeleton, Table, Td, Th, Thead, Tr, Tabs, useToast } from '@/components/ui';
-import { useNavigate } from 'react-router-dom';
+import { ClubCard } from '@/components/academics/ClubCard';
+import { ClubDrawer, SubjectDrawer } from '@/components/academics/DetailDrawers';
+import { cardShell } from '@/components/academics/parts';
+import { SubjectCard } from '@/components/academics/SubjectCard';
+import { Avatar, Badge, Button, Card, EmptyState, Input, Modal, Select, Skeleton, Tabs, useToast } from '@/components/ui';
 
 type Tab = 'subjects' | 'clubs' | 'tutors';
 
@@ -17,53 +20,52 @@ function useFail() {
   return (e: unknown) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error');
 }
 
-function SubjectsTab() {
+const CardGrid = ({ children }: { children: React.ReactNode }) => <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{children}</div>;
+const GridSkeleton = () => <CardGrid>{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-48 rounded-3xl" />)}</CardGrid>;
+
+function SubjectsTab({ q, adding, onAddDone }: { q: string; adding: boolean; onAddDone: () => void }) {
   const { t } = useTranslation();
   const toast = useToast();
   const fail = useFail();
   const qc = useQueryClient();
   const list = useQuery({ queryKey: ['subjects'], queryFn: schoolApi.subjects });
   const [edit, setEdit] = useState<{ id: string | null; name: string } | null>(null);
+  const [open, setOpen] = useState<Subject | null>(null);
+  const modal = adding && !edit ? { id: null, name: '' } : edit;
+  const close = () => { setEdit(null); onAddDone(); };
   const done = () => { void qc.invalidateQueries({ queryKey: ['subjects'] }); void qc.invalidateQueries({ queryKey: ['staff'] }); };
-  const save = useMutation({ mutationFn: () => schoolApi.saveSubject(edit!.id, edit!.name.trim()), onSuccess: () => { toast(t('academics.saved')); setEdit(null); done(); }, onError: fail });
+  const save = useMutation({ mutationFn: () => schoolApi.saveSubject(modal!.id, modal!.name.trim()), onSuccess: () => { toast(t('academics.saved')); close(); done(); }, onError: fail });
   const del = useMutation({ mutationFn: (s: Subject) => schoolApi.deleteSubject(s.id), onSuccess: () => { toast(t('academics.deleted')); done(); }, onError: fail });
+  const rows = (list.data ?? []).filter((s) => !q.trim() || s.name.toLowerCase().includes(q.trim().toLowerCase()));
+  const current = open ? (list.data ?? []).find((s) => s.id === open.id) ?? open : null;
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end"><Button onClick={() => setEdit({ id: null, name: '' })}><Plus className="h-5 w-5" /> {t('academics.addSubject')}</Button></div>
-      {list.isLoading ? <Skeleton className="h-64" /> : !list.data?.length ? <EmptyState icon={BookOpen} title={t('common.empty')} /> : (
-        <Table>
-          <Thead><tr><Th>{t('staff.subject')}</Th><Th>{t('academics.teachers')}</Th><Th className="w-28"><span className="sr-only">{t('common.actions')}</span></Th></tr></Thead>
-          <tbody>
-            {list.data.map((s) => (
-              <Tr key={s.id}>
-                <Td>{s.name}</Td>
-                <Td className="text-text-muted">{s.teachers}</Td>
-                <Td>
-                  <div className="flex gap-1">
-                    <button aria-label={t('common.edit')} onClick={() => setEdit({ id: s.id, name: s.name })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
-                    <button aria-label={t('common.delete')} onClick={() => window.confirm(t('academics.deleteConfirm', { name: s.name })) && del.mutate(s)} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
-                  </div>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
+    <>
+      {list.isLoading ? <GridSkeleton /> : rows.length === 0 ? (
+        <EmptyState icon={BookOpen} title={q ? t('academics.noMatch') : t('academics.noSubjects')} />
+      ) : (
+        <CardGrid>
+          {rows.map((s) => (
+            <SubjectCard key={s.id} subject={s} onOpen={() => setOpen(s)} onEdit={() => setEdit({ id: s.id, name: s.name })}
+              onDelete={() => window.confirm(t('academics.deleteConfirm', { name: s.name })) && del.mutate(s)} />
+          ))}
+        </CardGrid>
       )}
-      <Modal open={!!edit} onClose={() => setEdit(null)} title={t(edit?.id ? 'academics.editSubject' : 'academics.addSubject')}>
-        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (edit && edit.name.trim().length >= 2) save.mutate(); }}>
-          <Input label={t('academics.name')} value={edit?.name ?? ''} onChange={(e) => setEdit((x) => x && { ...x, name: e.target.value })} autoFocus />
+      <SubjectDrawer subject={current} onClose={() => setOpen(null)} />
+      <Modal open={!!modal} onClose={close} title={t(modal?.id ? 'academics.editSubject' : 'academics.addSubject')}>
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (modal && modal.name.trim().length >= 2) save.mutate(); }}>
+          <Input label={t('academics.name')} value={modal?.name ?? ''} onChange={(e) => setEdit({ id: modal?.id ?? null, name: e.target.value })} autoFocus />
           <div className="flex gap-3">
-            <Button type="button" variant="secondary" className="flex-1" onClick={() => setEdit(null)}>{t('common.cancel')}</Button>
-            <Button type="submit" className="flex-1" loading={save.isPending} disabled={(edit?.name.trim().length ?? 0) < 2}>{t('common.save')}</Button>
+            <Button type="button" variant="secondary" className="flex-1" onClick={close}>{t('common.cancel')}</Button>
+            <Button type="submit" className="flex-1" loading={save.isPending} disabled={(modal?.name.trim().length ?? 0) < 2}>{t('common.save')}</Button>
           </div>
         </form>
       </Modal>
-    </div>
+    </>
   );
 }
 
-function ClubsTab() {
+function ClubsTab({ q, adding, onAddDone }: { q: string; adding: boolean; onAddDone: () => void }) {
   const { t } = useTranslation();
   const toast = useToast();
   const fail = useFail();
@@ -71,79 +73,91 @@ function ClubsTab() {
   const list = useQuery({ queryKey: ['clubs'], queryFn: schoolApi.clubs });
   const teachers = useQuery({ queryKey: ['staff', 'teachers-all'], queryFn: () => schoolApi.staff({ active: 'true', page: 1, limit: 100 }) });
   const [edit, setEdit] = useState<{ id: string | null; name: string; teacherId: string; fee: string } | null>(null);
+  const [open, setOpen] = useState<Club | null>(null);
+  const blank = { id: null, name: '', teacherId: '', fee: '' };
+  const modal = adding && !edit ? blank : edit;
+  const close = () => { setEdit(null); onAddDone(); };
   const done = () => { void qc.invalidateQueries({ queryKey: ['clubs'] }); void qc.invalidateQueries({ queryKey: ['students'] }); };
   const save = useMutation({
-    mutationFn: () => schoolApi.saveClub(edit!.id, { name: edit!.name.trim(), teacherId: edit!.teacherId || null, monthlyFee: Number(edit!.fee) || 0 }),
-    onSuccess: () => { toast(t('academics.saved')); setEdit(null); done(); }, onError: fail,
+    mutationFn: () => schoolApi.saveClub(modal!.id, { name: modal!.name.trim(), teacherId: modal!.teacherId || null, monthlyFee: Number(modal!.fee) || 0 }),
+    onSuccess: () => { toast(t('academics.saved')); close(); done(); }, onError: fail,
   });
   const del = useMutation({ mutationFn: (c: Club) => schoolApi.deleteClub(c.id), onSuccess: () => { toast(t('academics.deleted')); done(); }, onError: fail });
+  const rows = (list.data ?? []).filter((c) => !q.trim() || c.name.toLowerCase().includes(q.trim().toLowerCase()));
   const cur = t('common.currency');
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end"><Button onClick={() => setEdit({ id: null, name: '', teacherId: '', fee: '' })}><Plus className="h-5 w-5" /> {t('academics.addClub')}</Button></div>
-      {list.isLoading ? <Skeleton className="h-64" /> : !list.data?.length ? <EmptyState icon={Trophy} title={t('common.empty')} /> : (
-        <Table>
-          <Thead><tr><Th>{t('academics.club')}</Th><Th>{t('academics.leader')}</Th><Th numeric>{t('academics.fee')}</Th><Th numeric>{t('academics.members')}</Th><Th className="w-28"><span className="sr-only">{t('common.actions')}</span></Th></tr></Thead>
-          <tbody>
-            {list.data.map((c) => (
-              <Tr key={c.id}>
-                <Td>{c.name}</Td>
-                <Td className="text-text-muted">{c.teacherName ?? '—'}</Td>
-                <Td numeric>{c.monthlyFee ? formatMoney(c.monthlyFee, cur) : '—'}</Td>
-                <Td numeric>{c.members}</Td>
-                <Td>
-                  <div className="flex gap-1">
-                    <button aria-label={t('common.edit')} onClick={() => setEdit({ id: c.id, name: c.name, teacherId: c.teacherId ?? '', fee: String(c.monthlyFee) })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
-                    <button aria-label={t('common.delete')} onClick={() => window.confirm(t('academics.deleteClubConfirm', { name: c.name, count: c.members })) && del.mutate(c)} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
-                  </div>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
+    <>
+      {list.isLoading ? <GridSkeleton /> : rows.length === 0 ? (
+        <EmptyState icon={Trophy} title={q ? t('academics.noMatch') : t('academics.noClubs')} />
+      ) : (
+        <CardGrid>
+          {rows.map((c) => (
+            <ClubCard key={c.id} club={c} onOpen={() => setOpen(c)} onEdit={() => setEdit({ id: c.id, name: c.name, teacherId: c.teacherId ?? '', fee: String(c.monthlyFee) })}
+              onDelete={() => window.confirm(t('academics.deleteClubConfirm', { name: c.name, count: c.members })) && del.mutate(c)} />
+          ))}
+        </CardGrid>
       )}
-      <Modal open={!!edit} onClose={() => setEdit(null)} title={t(edit?.id ? 'academics.editClub' : 'academics.addClub')}>
-        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (edit && edit.name.trim().length >= 2) save.mutate(); }}>
-          <Input label={t('academics.name')} value={edit?.name ?? ''} onChange={(e) => setEdit((x) => x && { ...x, name: e.target.value })} autoFocus />
-          <Select label={t('academics.leader')} value={edit?.teacherId ?? ''} onChange={(e) => setEdit((x) => x && { ...x, teacherId: e.target.value })}>
+      <ClubDrawer club={open ? (list.data ?? []).find((c) => c.id === open.id) ?? open : null} onClose={() => setOpen(null)} />
+      <Modal open={!!modal} onClose={close} title={t(modal?.id ? 'academics.editClub' : 'academics.addClub')}>
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (modal && modal.name.trim().length >= 2) save.mutate(); }}>
+          <Input label={t('academics.name')} value={modal?.name ?? ''} onChange={(e) => setEdit({ ...(modal ?? blank), name: e.target.value })} autoFocus />
+          <Select label={t('academics.leader')} value={modal?.teacherId ?? ''} onChange={(e) => setEdit({ ...(modal ?? blank), teacherId: e.target.value })}>
             <option value="">—</option>
             {teachers.data?.items.map((u) => <option key={u.id} value={u.id}>{u.fullName}</option>)}
           </Select>
-          <Input type="number" min={0} step={10000} label={`${t('academics.fee')} (${cur})`} value={edit?.fee ?? ''} onChange={(e) => setEdit((x) => x && { ...x, fee: e.target.value })} />
+          <Input type="number" min={0} step={10000} label={`${t('academics.fee')} (${cur})`} value={modal?.fee ?? ''} onChange={(e) => setEdit({ ...(modal ?? blank), fee: e.target.value })} />
           <div className="flex gap-3">
-            <Button type="button" variant="secondary" className="flex-1" onClick={() => setEdit(null)}>{t('common.cancel')}</Button>
-            <Button type="submit" className="flex-1" loading={save.isPending} disabled={(edit?.name.trim().length ?? 0) < 2}>{t('common.save')}</Button>
+            <Button type="button" variant="secondary" className="flex-1" onClick={close}>{t('common.cancel')}</Button>
+            <Button type="submit" className="flex-1" loading={save.isPending} disabled={(modal?.name.trim().length ?? 0) < 2}>{t('common.save')}</Button>
           </div>
         </form>
       </Modal>
+    </>
+  );
+}
+
+function TutorsTab({ q }: { q: string }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const list = useQuery({ queryKey: ['staff', 'tutors'], queryFn: () => schoolApi.staff({ tutor: 'true', page: 1, limit: 100 }) });
+  const rows = (list.data?.items ?? []).filter((u) => !q.trim() || `${u.fullName} ${u.position}`.toLowerCase().includes(q.trim().toLowerCase()));
+  return (
+    <div className="space-y-4">
+      <p className="max-w-2xl text-text-muted">{t('academics.tutorsHint')}</p>
+      {list.isLoading ? <GridSkeleton /> : rows.length === 0 ? (
+        <EmptyState icon={GraduationCap} title={q ? t('academics.noMatch') : t('academics.noTutors')} />
+      ) : (
+        <CardGrid>
+          {rows.map((u) => (
+            <article key={u.id} className={cardShell}>
+              <button type="button" onClick={() => navigate(`/staff/${u.id}`)} className="block w-full p-6 text-left focus-visible:rounded-3xl" aria-label={u.fullName}>
+                <div className="flex items-center gap-4">
+                  <Avatar name={u.fullName} size={60} src={u.photoUrl} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-lg">{u.fullName}</p>
+                    <p className="truncate text-sm text-text-muted">{u.position}</p>
+                  </div>
+                </div>
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
+                  <span className="flex items-center gap-2 text-sm text-text-muted"><Phone className="h-4 w-4" /> {u.phone}</span>
+                  <Badge tone={u.isActive ? 'success' : 'danger'}>{t(u.isActive ? 'staff.active' : 'staff.inactive')}</Badge>
+                </div>
+              </button>
+            </article>
+          ))}
+        </CardGrid>
+      )}
     </div>
   );
 }
 
-function TutorsTab() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const list = useQuery({ queryKey: ['staff', 'tutors'], queryFn: () => schoolApi.staff({ tutor: 'true', page: 1, limit: 100 }) });
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="space-y-4">
-      <p className="text-text-muted">{t('academics.tutorsHint')}</p>
-      {list.isLoading ? <Skeleton className="h-48" /> : !list.data?.items.length ? <EmptyState icon={GraduationCap} title={t('academics.noTutors')} /> : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {list.data.items.map((u) => (
-            <Card key={u.id} className="flex cursor-pointer items-center gap-4 transition hover:bg-surface-muted/60" onClick={() => navigate(`/staff/${u.id}`)}>
-              <Avatar name={u.fullName} size={52} src={u.photoUrl} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate">{u.fullName}</p>
-                <p className="truncate text-sm text-text-muted">{u.position}</p>
-                <p className="text-sm text-text-muted">{u.phone}</p>
-              </div>
-              <Badge tone={u.isActive ? 'success' : 'danger'}>{t(u.isActive ? 'staff.active' : 'staff.inactive')}</Badge>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+    <Card className="rounded-3xl p-4 sm:p-6">
+      <p className="text-sm text-text-muted">{label}</p>
+      <p className="mt-1 text-2xl tabular-nums tracking-tight sm:text-3xl">{value}</p>
+    </Card>
   );
 }
 
@@ -151,17 +165,40 @@ export default function Academics() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('subjects');
+  const [q, setQ] = useState('');
+  const [adding, setAdding] = useState(false);
+  const subjects = useQuery({ queryKey: ['subjects'], queryFn: schoolApi.subjects });
+  const clubs = useQuery({ queryKey: ['clubs'], queryFn: schoolApi.clubs });
+  const teachers = useQuery({ queryKey: ['staff', 'count', 'teacher'], queryFn: () => schoolApi.staff({ teacher: 'true', page: 1, limit: 1 }) });
+  const tutors = useQuery({ queryKey: ['staff', 'tutors'], queryFn: () => schoolApi.staff({ tutor: 'true', page: 1, limit: 100 }) });
+  const counts = useMemo(() => ({ subjects: subjects.data?.length ?? 0, clubs: clubs.data?.length ?? 0, tutors: tutors.data?.total ?? 0 }), [subjects.data, clubs.data, tutors.data]);
+  const members = (clubs.data ?? []).reduce((n, c) => n + c.members, 0);
+
+  const action =
+    tab === 'tutors' ? (
+      <Button onClick={() => navigate('/staff?add=tutor')} className="shadow-lg shadow-primary/25"><Plus className="h-5 w-5" /> {t('staff.addTutor')}</Button>
+    ) : (
+      <Button onClick={() => setAdding(true)} className="shadow-lg shadow-primary/25"><Plus className="h-5 w-5" /> {t(tab === 'subjects' ? 'academics.addSubject' : 'academics.addClub')}</Button>
+    );
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t('nav.academics')}
-        subtitle={t('academics.subtitle')}
-        action={tab === 'tutors' ? <Button onClick={() => navigate('/staff?add=tutor')}><Plus className="h-5 w-5" /> {t('staff.addTutor')}</Button> : undefined}
-      />
-      <Tabs value={tab} onChange={setTab} tabs={(['subjects', 'clubs', 'tutors'] as Tab[]).map((id) => ({ id, label: t(`academics.tabs.${id}`) }))} />
-      {tab === 'subjects' && <SubjectsTab />}
-      {tab === 'clubs' && <ClubsTab />}
-      {tab === 'tutors' && <TutorsTab />}
+    <div className="space-y-8">
+      <PageHeader title={t('nav.academics')} subtitle={t('academics.subtitle')} action={action} />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <Stat label={t('academics.tabs.subjects')} value={counts.subjects} />
+        <Stat label={t('academics.stats.teachers')} value={teachers.data?.total ?? '…'} />
+        <Stat label={t('academics.tabs.clubs')} value={counts.clubs} />
+        <Stat label={t('academics.stats.members')} value={members} />
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <Tabs value={tab} onChange={(v) => { setTab(v); setQ(''); }} tabs={(['subjects', 'clubs', 'tutors'] as Tab[]).map((id) => ({ id, label: `${t(`academics.tabs.${id}`)} · ${counts[id]}` }))} />
+        </div>
+        <div className="w-full sm:w-72"><Input aria-label={t('common.search')} placeholder={t('academics.search')} value={q} onChange={(e) => setQ(e.target.value)} icon={<Search className="h-4 w-4" />} /></div>
+      </div>
+      {tab === 'subjects' && <SubjectsTab q={q} adding={adding} onAddDone={() => setAdding(false)} />}
+      {tab === 'clubs' && <ClubsTab q={q} adding={adding} onAddDone={() => setAdding(false)} />}
+      {tab === 'tutors' && <TutorsTab q={q} />}
     </div>
   );
 }

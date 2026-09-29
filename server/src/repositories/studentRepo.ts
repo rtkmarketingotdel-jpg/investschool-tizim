@@ -8,6 +8,8 @@ export interface StudentFilter {
   status?: StudentStatus;
   classId?: string;
   boarding?: boolean;
+  /** exact club name from the catalog */
+  club?: string;
   sort?: 'name' | 'date';
 }
 
@@ -21,6 +23,7 @@ export const studentRepo = {
       if (f.status && s.status !== f.status) return false;
       if (f.classId && s.classId !== f.classId) return false;
       if (f.boarding !== undefined && s.isBoarding !== f.boarding) return false;
+      if (f.club && !s.clubs.includes(f.club)) return false;
       if (q) {
         const byName = fullName(s).toLowerCase().includes(q);
         const byPhone = !!digits && (s.parentPhone.includes(digits) || (s.parentPhone2 ?? '').includes(digits));

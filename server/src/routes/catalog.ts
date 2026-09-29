@@ -16,7 +16,13 @@ const subjectSchema = z.object({ name: z.string().trim().min(2).max(60) });
 
 catalogRouter.get('/subjects', async (_req, res, next) => {
   try {
-    const items = (await subjectRepo.list()).map((s) => ({ ...s, teachers: subjectRepo.usage(s.name) }));
+    const users = (await userRepo.list()).filter((u) => u.isActive);
+    const items = (await subjectRepo.list()).map((s) => {
+      const people = users
+        .filter((u) => u.subject === s.name)
+        .map((u) => ({ id: u.id, fullName: u.fullName, photoUrl: u.photoUrl, position: u.position, kind: u.isTutor && !u.isTeacher ? ('tutor' as const) : ('teacher' as const) }));
+      return { ...s, teachers: subjectRepo.usage(s.name), people };
+    });
     res.json({ items });
   } catch (e) {
     next(e);
@@ -72,7 +78,7 @@ const clubSchema = z.object({
 
 async function presentClub(c: NonNullable<Awaited<ReturnType<typeof clubRepo.findById>>>) {
   const t = c.teacherId ? await userRepo.findById(c.teacherId) : null;
-  return { ...c, teacherName: t?.fullName ?? null, members: clubRepo.members(c.name) };
+  return { ...c, teacherName: t?.fullName ?? null, teacherPhotoUrl: t?.photoUrl ?? null, members: clubRepo.members(c.name) };
 }
 
 catalogRouter.get('/clubs', async (_req, res, next) => {
