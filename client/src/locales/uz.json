@@ -104,7 +104,8 @@
     "TELEGRAM_NOT_CONFIGURED": "Telegram bot tokeni yoki chat ID sozlanmagan",
     "BRANCH_LAST": "Oxirgi filialni oʻchirib boʻlmaydi",
     "BRANCH_HAS_DATA": "Filialga xodim yoki sinflar biriktirilgan",
-    "reload": "Sahifani qayta yuklash"
+    "reload": "Sahifani qayta yuklash",
+    "ATTENDANCE_NOT_TRACKED": "Direktor davomat qilmaydi"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",

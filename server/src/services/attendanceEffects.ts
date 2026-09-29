@@ -38,7 +38,7 @@ export async function markAbsentees(date = toLocalDate()): Promise<number> {
   if (!settings.workDays.includes(isoWeekday(date))) return 0;
   const absent: User[] = [];
   for (const u of await userRepo.list()) {
-    if (!u.isActive) continue;
+    if (!u.isActive || u.role === 'DIRECTOR') continue; // the director supervises attendance, he is not tracked
     if (await attendanceRepo.findByUserDate(u.id, date)) continue;
     const rec = await attendanceRepo.create({
       userId: u.id, date, status: 'ABSENT', lateMinutes: 0, checkInAt: null, checkInPhotoUrl: null, checkInLat: null, checkInLng: null,

@@ -71,6 +71,7 @@ async function validate(input: PunchInput, now: Date, user: User) {
 }
 
 export async function checkIn(user: User, input: PunchInput, userAgent: string | undefined) {
+  if (user.role === 'DIRECTOR') throw new ApiError(403, 'ATTENDANCE_NOT_TRACKED');
   const now = new Date();
   const date = toLocalDate(now);
   if (!settings.workDays.includes(isoWeekday(date))) throw new ApiError(400, 'ATTENDANCE_NOT_WORKDAY');
@@ -109,6 +110,7 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
 }
 
 export async function checkOut(user: User, input: PunchInput) {
+  if (user.role === 'DIRECTOR') throw new ApiError(403, 'ATTENDANCE_NOT_TRACKED');
   const now = new Date();
   const date = toLocalDate(now);
   const rec = await attendanceRepo.findByUserDate(user.id, date);

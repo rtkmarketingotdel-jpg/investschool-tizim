@@ -122,7 +122,7 @@ async function buildMatrix(month: string) {
   const daysInMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`);
   const records = await attendanceRepo.list({ from: `${month}-01`, to: `${month}-31` });
-  const users = (await userRepo.list()).filter((u) => u.isActive).sort((a, b) => a.fullName.localeCompare(b.fullName));
+  const users = (await userRepo.list()).filter((u) => u.isActive && u.role !== 'DIRECTOR').sort((a, b) => a.fullName.localeCompare(b.fullName));
   const rows = users.map((u) => {
     const mine = records.filter((r) => r.userId === u.id);
     const byDate: Record<string, string> = {};
@@ -168,7 +168,7 @@ attendanceRouter.get('/day', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), asy
     const byUser = new Map(records.map((r) => [r.userId, r]));
     const bName = new Map(branches.map((b) => [b.id, b.name]));
     const rows = users
-      .filter((u) => u.isActive && (!q.branchId || u.branchId === q.branchId))
+      .filter((u) => u.isActive && u.role !== 'DIRECTOR' && (!q.branchId || u.branchId === q.branchId))
       .sort((a, b) => a.fullName.localeCompare(b.fullName))
       .map((u) => {
         const r = byUser.get(u.id) ?? null;

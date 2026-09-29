@@ -15,6 +15,8 @@ export default function Attendance() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('day');
   const isManager = user?.role !== 'STAFF';
+  // The director supervises everyone else and does not check in himself.
+  const tracked = user?.role !== 'DIRECTOR';
   return (
     <div className="space-y-10">
       <div>
@@ -30,10 +32,12 @@ export default function Attendance() {
           {tab === 'matrix' && <AttendanceMatrix />}
         </div>
       )}
-      <div className="space-y-4">
-        {isManager && <h2 className="text-xl">{t('attendance.mine')}</h2>}
-        <AttendanceSelf />
-      </div>
+      {tracked && (
+        <div className="space-y-4">
+          {isManager && <h2 className="text-xl">{t('attendance.mine')}</h2>}
+          <AttendanceSelf />
+        </div>
+      )}
     </div>
   );
 }

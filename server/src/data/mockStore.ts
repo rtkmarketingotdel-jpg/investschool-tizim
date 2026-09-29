@@ -69,6 +69,7 @@ export const attendances: Attendance[] = [];
     const date = addDays(today, -back);
     if (!settings.workDays.includes(isoWeekday(date))) continue;
     for (const u of users) {
+      if (u.role === 'DIRECTOR') continue; // the director is not tracked
       const r = rnd();
       const base = {
         id: `a${id++}`, userId: u.id, date, lateMinutes: 0,

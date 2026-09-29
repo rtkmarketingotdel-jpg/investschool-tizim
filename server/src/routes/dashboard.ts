@@ -32,7 +32,7 @@ dashboardRouter.get('/', async (req, res, next) => {
     out.classFill = { items: classFill, freeSeats: classFill.reduce((n, c) => n + Math.max(0, c.capacity - c.count), 0) };
 
     if (seesAttendance) {
-      const users = (await userRepo.list()).filter((u) => u.isActive);
+      const users = (await userRepo.list()).filter((u) => u.isActive && u.role !== 'DIRECTOR');
       const todays = await attendanceRepo.list({ from: today, to: today });
       const byUser = new Map(todays.map((r) => [r.userId, r]));
       out.attendance = {
