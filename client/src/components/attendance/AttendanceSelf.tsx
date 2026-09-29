@@ -135,26 +135,50 @@ export function AttendanceSelf() {
         {mine.isLoading ? (
           <Skeleton className="h-40" />
         ) : mine.data && mine.data.records.length > 0 ? (
-          <Table>
-            <Thead>
-              <tr>
-                <Th>{t('attendance.date')}</Th>
-                <Th>{t('attendance.came')}</Th>
-                <Th>{t('attendance.left')}</Th>
-                <Th>{t('attendance.statusCol')}</Th>
-              </tr>
-            </Thead>
-            <tbody>
-              {mine.data.records.map((r: AttendanceRecord) => (
-                <Tr key={r.id}>
-                  <Td>{fmtDay(r.date, i18n.language, 'd-MMM')}</Td>
-                  <Td><PunchCell at={r.checkInAt} photo={r.checkInPhotoUrl} lat={r.checkInLat} lng={r.checkInLng} distanceM={r.checkInDistanceM} title={t('attendance.came')} /></Td>
-                  <Td><PunchCell at={r.checkOutAt} photo={r.checkOutPhotoUrl} lat={r.checkOutLat} lng={r.checkOutLng} distanceM={r.checkOutDistanceM} title={t('attendance.left')} /></Td>
-                  <Td><StatusBadge status={r.status} lateMinutes={r.lateMinutes} /></Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
+          <>
+          <ul className="divide-y divide-border rounded-2xl border border-border bg-surface md:hidden">
+            {mine.data.records.map((r: AttendanceRecord) => (
+              <li key={r.id} className="space-y-3 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{fmtDay(r.date, i18n.language, 'd-MMM, EEE')}</span>
+                  <StatusBadge status={r.status} lateMinutes={r.lateMinutes} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="mb-1 text-xs text-text-muted">{t('attendance.came')}</p>
+                    <PunchCell at={r.checkInAt} photo={r.checkInPhotoUrl} lat={r.checkInLat} lng={r.checkInLng} distanceM={r.checkInDistanceM} title={t('attendance.came')} />
+                  </div>
+                  <div>
+                    <p className="mb-1 text-xs text-text-muted">{t('attendance.left')}</p>
+                    <PunchCell at={r.checkOutAt} photo={r.checkOutPhotoUrl} lat={r.checkOutLat} lng={r.checkOutLng} distanceM={r.checkOutDistanceM} title={t('attendance.left')} />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden md:block">
+  <Table>
+              <Thead>
+                <tr>
+                  <Th>{t('attendance.date')}</Th>
+                  <Th>{t('attendance.came')}</Th>
+                  <Th>{t('attendance.left')}</Th>
+                  <Th>{t('attendance.statusCol')}</Th>
+                </tr>
+              </Thead>
+              <tbody>
+                {mine.data.records.map((r: AttendanceRecord) => (
+                  <Tr key={r.id}>
+                    <Td>{fmtDay(r.date, i18n.language, 'd-MMM')}</Td>
+                    <Td><PunchCell at={r.checkInAt} photo={r.checkInPhotoUrl} lat={r.checkInLat} lng={r.checkInLng} distanceM={r.checkInDistanceM} title={t('attendance.came')} /></Td>
+                    <Td><PunchCell at={r.checkOutAt} photo={r.checkOutPhotoUrl} lat={r.checkOutLat} lng={r.checkOutLng} distanceM={r.checkOutDistanceM} title={t('attendance.left')} /></Td>
+                    <Td><StatusBadge status={r.status} lateMinutes={r.lateMinutes} /></Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          </>
         ) : (
           <EmptyState icon={CalendarCheck} title={t('common.empty')} />
         )}

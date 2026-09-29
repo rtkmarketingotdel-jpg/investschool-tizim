@@ -8,6 +8,7 @@ export interface AttendanceRecord {
   date: string;
   status: AttendanceStatus;
   lateMinutes: number;
+  note?: string | null;
   checkInAt: string | null;
   checkInPhotoUrl: string | null;
   checkInLat: number | null;

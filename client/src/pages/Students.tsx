@@ -22,6 +22,7 @@ export default function Students() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
+  const seesFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get('q') ?? '');
   const q = useDebounce(search);
@@ -31,6 +32,7 @@ export default function Students() {
   const status = params.get('status') ?? '';
   const classId = params.get('classId') ?? '';
   const boarding = params.get('boarding') ?? '';
+  const debtor = seesFinance ? (params.get('debtor') ?? '') : '';
   const sort = params.get('sort') ?? 'name';
   const page = Number(params.get('page') ?? 1);
 
@@ -46,7 +48,7 @@ export default function Students() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  const filters = { q: params.get('q') ?? '', status, classId, boarding, sort };
+  const filters = { q: params.get('q') ?? '', status, classId, boarding, debtor, sort };
   const list = useQuery({
     queryKey: ['students', filters, page],
     queryFn: () => schoolApi.students({ ...filters, page, limit: LIMIT }),
@@ -54,7 +56,7 @@ export default function Students() {
   });
   const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
 
-  const exportCsv = async () => downloadBlob(await schoolApi.exportStudents(filters), 'students.csv');
+  const exportCsv = async () => downloadBlob(await schoolApi.exportStudents({ q: filters.q, status, classId, boarding, sort: sort === 'debt' ? 'name' : sort }), 'students.csv');
   const rows = list.data?.items ?? [];
 
   return (
@@ -81,7 +83,7 @@ export default function Students() {
             icon={<Search className="h-4 w-4" />}
           />
         </div>
-        <div className="w-40">
+        <div className="w-48">
           <Select aria-label={t('students.status')} value={status} onChange={(e) => setParam('status', e.target.value)}>
             <option value="">{t('students.allStatuses')}</option>
             {(['ACTIVE', 'TRIAL', 'LEFT'] as const).map((s) => (
@@ -97,17 +99,26 @@ export default function Students() {
             ))}
           </Select>
         </div>
-        <div className="w-40">
+        <div className="w-48">
           <Select aria-label={t('students.boarding')} value={boarding} onChange={(e) => setParam('boarding', e.target.value)}>
             <option value="">{t('students.boardingAny')}</option>
             <option value="true">{t('students.boardingYes')}</option>
             <option value="false">{t('students.boardingNo')}</option>
           </Select>
         </div>
+        {seesFinance && (
+          <div className="w-48">
+            <Select aria-label={t('students.debtorsFilter')} value={debtor} onChange={(e) => setParam('debtor', e.target.value)}>
+              <option value="">{t('students.debtAny')}</option>
+              <option value="true">{t('students.debtOnly')}</option>
+            </Select>
+          </div>
+        )}
         <div className="w-40">
           <Select aria-label={t('students.sort')} value={sort} onChange={(e) => setParam('sort', e.target.value)}>
             <option value="name">{t('students.sortName')}</option>
             <option value="date">{t('students.sortDate')}</option>
+            {seesFinance && <option value="debt">{t('students.sortDebt')}</option>}
           </Select>
         </div>
         <Button variant="secondary" onClick={exportCsv} aria-label={t('students.export')} className="py-3">
@@ -150,6 +161,7 @@ export default function Students() {
                   <Th>{t('students.status')}</Th>
                   <Th>{t('students.boarding')}</Th>
                   <Th numeric>{t('students.monthlyFee')}</Th>
+                  {seesFinance && <Th numeric>{t('students.debt')}</Th>}
                   <Th>{t('students.enrolledAt')}</Th>
                   <Th className="w-16"><span className="sr-only">{t('common.details')}</span></Th>
                 </tr>
@@ -174,7 +186,10 @@ export default function Students() {
                       {formatMoney(s.monthlyFee, t('common.currency'))}
                       {s.discountPercent > 0 && <p className="text-[13px] text-text-muted">−{s.discountPercent}%</p>}
                     </Td>
-                    <Td className="text-text-muted">{fmtDay(s.enrolledAt, i18n.language, 'd MMM yyyy')}</Td>
+                    {seesFinance && (
+                      <Td numeric className={s.debt ? 'font-semibold text-red-600' : 'text-text-muted'}>{s.debt ? formatMoney(s.debt, t('common.currency')) : '—'}</Td>
+                    )}
+                    <Td className="whitespace-nowrap text-text-muted">{fmtDay(s.enrolledAt, i18n.language, 'd MMM yyyy')}</Td>
                     <Td>
                       <Link to={`/students/${s.id}`} aria-label={t('common.details')} className="inline-flex rounded-lg p-2 text-text-muted hover:bg-surface-muted">
                         <Eye className="h-5 w-5" />
@@ -202,6 +217,7 @@ export default function Students() {
                     {s.isBoarding && <BedDouble className="h-4 w-4 text-primary" />}
                   </div>
                   <p className="mt-3 font-semibold tabular-nums">{formatMoney(s.monthlyFee, t('common.currency'))}</p>
+                  {s.debt ? <p className="text-sm font-medium text-red-600">{t('students.debt')}: {formatMoney(s.debt, t('common.currency'))}</p> : null}
                 </Card>
               </Link>
             ))}

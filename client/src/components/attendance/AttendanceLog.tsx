@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
-import { attendanceApi } from '@/lib/attendanceApi';
+import { ChevronLeft, ChevronRight, ClipboardList, Pencil } from 'lucide-react';
+import { attendanceApi, type AttendanceRecord } from '@/lib/attendanceApi';
+import { StatusDialog } from './StatusDialog';
 import { fmtDay } from '@/lib/dates';
 import { Avatar, Button, Card, EmptyState, Input, Skeleton, Table, Td, Th, Thead, Tr } from '../ui';
 import { PunchCell } from './PunchCell';
@@ -16,6 +17,7 @@ export function AttendanceLog() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [page, setPage] = useState(1);
+  const [editing, setEditing] = useState<AttendanceRecord | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['attendance', 'log', from, to, page],
@@ -79,6 +81,7 @@ export function AttendanceLog() {
                 <Th>{t('attendance.came')}</Th>
                 <Th>{t('attendance.left')}</Th>
                 <Th>{t('attendance.statusCol')}</Th>
+                <Th className="w-16"><span className="sr-only">{t('common.actions')}</span></Th>
               </tr>
             </Thead>
             <tbody>
@@ -96,7 +99,13 @@ export function AttendanceLog() {
                   </Td>
                   <Td><PunchCell at={r.checkInAt} photo={r.checkInPhotoUrl} lat={r.checkInLat} lng={r.checkInLng} distanceM={r.checkInDistanceM} title={`${r.user?.fullName} · ${t('attendance.came')}`} /></Td>
                   <Td><PunchCell at={r.checkOutAt} photo={r.checkOutPhotoUrl} lat={r.checkOutLat} lng={r.checkOutLng} distanceM={r.checkOutDistanceM} title={`${r.user?.fullName} · ${t('attendance.left')}`} /></Td>
-                  <Td><StatusBadge status={r.status} lateMinutes={r.lateMinutes} /></Td>
+                  <Td>
+                    <StatusBadge status={r.status} lateMinutes={r.lateMinutes} />
+                    {r.note && <p className="mt-1 max-w-40 truncate text-xs text-text-muted" title={r.note}>{r.note}</p>}
+                  </Td>
+                  <Td>
+                    <button aria-label={t('attendance.edit')} title={t('attendance.edit')} onClick={() => setEditing(r)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
+                  </Td>
                 </Tr>
               ))}
             </tbody>
@@ -117,6 +126,7 @@ export function AttendanceLog() {
       ) : (
         <EmptyState icon={ClipboardList} title={t('common.empty')} />
       )}
+      <StatusDialog record={editing} onClose={() => setEditing(null)} />
     </div>
   );
 }

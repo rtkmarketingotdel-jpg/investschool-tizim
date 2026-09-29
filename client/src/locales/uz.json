@@ -95,7 +95,13 @@
     "CLASS_FULL": "Bu sinf toʻlgan",
     "CLASS_NAME_EXISTS": "Bunday sinf mavjud",
     "STAFF_PHONE_EXISTS": "Bu telefon raqam bilan xodim mavjud",
-    "STAFF_CANNOT_MODIFY_SELF": "Oʻzingizning rolingiz yoki holatingizni oʻzgartira olmaysiz"
+    "STAFF_CANNOT_MODIFY_SELF": "Oʻzingizning rolingiz yoki holatingizni oʻzgartira olmaysiz",
+    "PAYROLL_LOCKED": "Oylik tasdiqlangan, oʻzgartirib boʻlmaydi",
+    "PAYROLL_BAD_STATE": "Oylik holati bu amalga mos emas",
+    "CONTRACT_BAD_STATE": "Shartnoma holati bu amalga mos emas",
+    "CONTRACT_NOT_SIGNABLE": "Bu shartnomani imzolab boʻlmaydi",
+    "TEMPLATE_IN_USE": "Shablon shartnomalarda ishlatilgan, oʻchirib boʻlmaydi",
+    "TELEGRAM_NOT_CONFIGURED": "Telegram bot tokeni yoki chat ID sozlanmagan"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",
@@ -143,6 +149,15 @@
       "LATE": "Kechikdi",
       "ABSENT": "Kelmadi",
       "EXCUSED": "Sababli"
+    },
+    "edit": "Holatni oʻzgartirish",
+    "updated": "Davomat yangilandi",
+    "note": "Izoh",
+    "excusedHint": "“Sababli” tanlansa, bogʻlangan jarima avtomatik oʻchiriladi.",
+    "dayOff": "Dam olish kuni",
+    "tabs": {
+      "log": "Kunlik jurnal",
+      "matrix": "Oylik hisobot"
     }
   },
   "students": {
@@ -204,7 +219,14 @@
       "info": "Umumiy maʼlumot",
       "payments": "Toʻlovlar",
       "contracts": "Shartnomalar"
-    }
+    },
+    "debt": "Qarz",
+    "debtorsFilter": "Qarzdorlik",
+    "debtAny": "Qarz: hammasi",
+    "debtOnly": "Faqat qarzdorlar",
+    "sortDebt": "Qarz boʻyicha",
+    "balance": "Balans",
+    "chargeFor": "{{period}} uchun hisoblangan"
   },
   "classes": {
     "subtitle": "Boʻsh oʻrinlar: {{free}}",
@@ -246,6 +268,246 @@
     "resetConfirm": "{{name}} uchun yangi vaqtinchalik parol yaratilsinmi? Eski parol ishlamay qoladi.",
     "tempPasswordTitle": "Vaqtinchalik parol",
     "tempPasswordText": "{{name}} uchun parol:",
-    "tempPasswordWarning": "Bu parol faqat hozir koʻrsatiladi. Xodimga yetkazing va u keyin oʻzgartirsin."
+    "tempPasswordWarning": "Bu parol faqat hozir koʻrsatiladi. Xodimga yetkazing va u keyin oʻzgartirsin.",
+    "calendar": "Davomat kalendari",
+    "payrollHistory": "Oyliklar tarixi"
+  },
+  "dashboard": {
+    "welcome": "Xush kelibsiz, {{name}}!",
+    "activeStudents": "Faol oʻquvchilar",
+    "newThisMonth": "Shu oy qoʻshilgan: {{count}}",
+    "todayAttendance": "Bugungi davomat",
+    "lateCount": "Kechikkan: {{count}}",
+    "dayOff": "Bugun dam olish kuni",
+    "monthRevenue": "Shu oy tushum",
+    "ofPlan": "Reja: {{plan}}",
+    "vsLastMonth": "oʻtgan oyga nisbatan",
+    "totalDebt": "Umumiy qarzdorlik",
+    "debtorsCount": "Qarzdorlar: {{count}}",
+    "revenueChart": "Tushum (oxirgi 6 oy)",
+    "plan": "Reja",
+    "fact": "Fakt",
+    "classFill": "Sinflar toʻlganligi",
+    "freeSeats": "Boʻsh oʻrinlar: {{count}}",
+    "problems": "Bugun kelmagan va kechikkan xodimlar",
+    "allPresent": "Hammasi vaqtida keldi",
+    "problem": {
+      "LATE": "Kechikdi",
+      "ABSENT": "Kelmadi",
+      "NOT_ARRIVED": "Hali kelmagan"
+    },
+    "topDebtors": "Eng katta qarzdorlar",
+    "noDebtors": "Qarzdorlar yoʻq",
+    "days": "{{count}} kun"
+  },
+  "notif": {
+    "late": {
+      "title": "Kechikish",
+      "body": "{{name}} {{minutes}} daqiqa kechikdi"
+    },
+    "absent": {
+      "title": "Kelmagan xodimlar",
+      "body": "{{count}} nafar xodim kelmadi: {{names}}"
+    },
+    "contractSigned": {
+      "title": "Shartnoma imzolandi",
+      "body": "{{number}} · {{student}}"
+    },
+    "payrollPending": {
+      "title": "Oylik tasdiqlash kutilmoqda",
+      "body": "{{period}} davri uchun oyliklar hisoblandi"
+    },
+    "otp": {
+      "title": "Shartnoma tasdiqlash kodi (demo)",
+      "body": "{{number}}: {{code}}"
+    }
+  },
+  "finance": {
+    "methods": {
+      "CASH": "Naqd",
+      "CARD": "Karta",
+      "CLICK": "Click",
+      "PAYME": "Payme",
+      "TRANSFER": "Bank oʻtkazmasi"
+    },
+    "payments": {
+      "subtitle": "Oʻquvchilardan tushgan toʻlovlar",
+      "receive": "Toʻlov qabul qilish",
+      "created": "Toʻlov qabul qilindi",
+      "receipt": "Chek",
+      "student": "Oʻquvchi",
+      "change": "Oʻzgartirish",
+      "currentDebt": "Joriy qarz",
+      "amount": "Summa",
+      "method": "Toʻlov usuli",
+      "allMethods": "Barcha usullar",
+      "period": "Davr",
+      "note": "Izoh",
+      "receivedBy": "Qabul qildi",
+      "total": "Tanlangan davr tushumi",
+      "count": "{{count}} ta toʻlov",
+      "byMethod": "Usullar boʻyicha",
+      "empty": "Bu davrda toʻlovlar yoʻq",
+      "presets": {
+        "today": "Bugun",
+        "week": "Hafta",
+        "month": "Oy",
+        "custom": "Oraliq"
+      },
+      "title": "Toʻlov"
+    },
+    "debtors": {
+      "subtitle": "Muddati oʻtgan toʻlovlar",
+      "totalDebt": "Jami qarz",
+      "count": "Qarzdorlar soni",
+      "debt": "Qarz",
+      "overdue": "Muddati oʻtgan",
+      "lastPayment": "Oxirgi toʻlov",
+      "empty": "Qarzdorlar yoʻq",
+      "reminder": "Eslatma matni",
+      "copy": "Nusxa olish",
+      "copied": "Nusxa olindi"
+    },
+    "contracts": {
+      "subtitle": "Elektron shartnomalar · Jami: {{count}}",
+      "search": "Raqam, oʻquvchi yoki ota-ona boʻyicha qidirish...",
+      "create": "Shartnoma yaratish",
+      "createDraft": "Qoralama yaratish",
+      "created": "Shartnoma qoralamasi yaratildi",
+      "template": "Shablon",
+      "start": "Boshlanish",
+      "end": "Tugash",
+      "number": "Raqam",
+      "term": "Muddat",
+      "actions": "Amallar",
+      "empty": "Shartnomalar yoʻq",
+      "statuses": {
+        "DRAFT": "Qoralama",
+        "SENT": "Yuborilgan",
+        "SIGNED": "Imzolangan",
+        "CANCELLED": "Bekor"
+      },
+      "viewPdf": "PDF koʻrish",
+      "send": "Ota-onaga yuborish",
+      "copyLink": "Havolani nusxalash",
+      "cancel": "Bekor qilish",
+      "cancelConfirm": "{{number}} shartnomani bekor qilasizmi?",
+      "cancelled": "Shartnoma bekor qilindi",
+      "sentCopied": "Yuborildi. Havola nusxalandi",
+      "linkCopied": "Havola nusxalandi",
+      "demoCode": "Demo kod"
+    },
+    "payroll": {
+      "subtitle": "Xodimlar oyliklari va jarima/bonuslar",
+      "calculate": "Oylikni hisoblash",
+      "calculated": "Hisoblandi: {{calculated}}, tasdiqlangani oʻtkazib yuborildi: {{skipped}}",
+      "total": "Jami oyliklar",
+      "totalCol": "Jami",
+      "bonus": "Bonus",
+      "fine": "Jarima",
+      "base": "Asosiy oylik",
+      "empty": "Bu oy uchun oylik hisoblanmagan",
+      "emptyHint": "“Oylikni hisoblash” tugmasini bosing",
+      "statuses": {
+        "DRAFT": "Qoralama",
+        "APPROVED": "Tasdiqlangan",
+        "PAID": "Toʻlangan"
+      },
+      "approve": "Tasdiqlash",
+      "markPaid": "Toʻlandi",
+      "approvedToast": "Oylik tasdiqlandi",
+      "paidToast": "Oylik toʻlandi deb belgilandi",
+      "details": "Oylik tafsiloti",
+      "workedDays": "Ish kunlari",
+      "lateCount": "Kechikishlar",
+      "absentCount": "Kelmagan kunlar",
+      "adjustments": "Jarima va bonuslar",
+      "addAdjustment": "Qoʻshish",
+      "lockedHint": "Tasdiqlangan oylikni oʻzgartirib boʻlmaydi",
+      "sourceAuto": "davomatdan",
+      "sourceManual": "qoʻlda",
+      "reasonLate": "Kechikish: {{minutes}} daqiqa",
+      "reasonAbsent": "Ishga kelmagan",
+      "type": "Turi",
+      "reason": "Sabab (majburiy)",
+      "adjustmentAdded": "Qoʻshildi",
+      "mine": "Mening oyligim",
+      "noPayslips": "Oylik varaqasi hali yoʻq"
+    }
+  },
+  "settings": {
+    "subtitle": "Maktab, davomat, moliya va tizim sozlamalari",
+    "saved": "Saqlandi",
+    "tabs": {
+      "location": "Maktab joylashuvi",
+      "work": "Ish vaqti va jarimalar",
+      "payments": "Toʻlovlar",
+      "users": "Foydalanuvchilar",
+      "templates": "Shartnoma shablonlari",
+      "telegram": "Telegram",
+      "interface": "Interfeys"
+    },
+    "location": {
+      "hint": "Xodimlar davomatini maktab joylashuviga nisbatan tekshirish uchun koordinata va radiusni kiriting. Maktabda turib “Hozirgi joylashuvimni olish” tugmasini bosing.",
+      "lat": "Kenglik (lat)",
+      "lng": "Uzunlik (lng)",
+      "radius": "Radius (metr)",
+      "accuracy": "Maksimal GPS xatoligi (metr)",
+      "useMine": "Hozirgi joylashuvimni olish",
+      "openMap": "Xaritada tekshirish",
+      "enforce": "Radiusdan tashqarida davomatni rad etish",
+      "enforceHint": "Oʻchiq boʻlsa, masofa yoziladi, lekin davomat rad etilmaydi (sinov uchun)."
+    },
+    "work": {
+      "start": "Ish boshlanishi",
+      "end": "Ish tugashi",
+      "grace": "Imtiyoz (daqiqa)",
+      "days": "Ish kunlari",
+      "day": {
+        "1": "Du",
+        "2": "Se",
+        "3": "Cho",
+        "4": "Pa",
+        "5": "Ju",
+        "6": "Sha",
+        "7": "Ya"
+      },
+      "finePerMinute": "Kechikish jarimasi (1 daqiqa, soʻm)",
+      "fineMax": "Kunlik maksimal jarima (soʻm)",
+      "absentFine": "Kelmaslik jarimasi (soʻm)"
+    },
+    "payments": {
+      "dueDay": "Toʻlov muddati (oyning kuni)",
+      "prefix": "Shartnoma prefiksi",
+      "hint": "Yangi shartnomalar shu prefiks bilan raqamlanadi. Qarz muddati har oyning belgilangan kunidan hisoblanadi."
+    },
+    "users": {
+      "deactivate": "Faolsizlantirish",
+      "activate": "Faollashtirish"
+    },
+    "templates": {
+      "new": "Yangi shablon",
+      "name": "Nomi",
+      "language": "Til",
+      "default": "Shu tilda standart shablon",
+      "placeholders": "Oʻrniga qoʻyiladigan maydonlar (bosing)",
+      "body": "Shablon matni",
+      "hint": "“## ” bilan boshlangan qator — boʻlim sarlavhasi.",
+      "samplePdf": "Namuna PDF",
+      "delete": "Oʻchirish",
+      "deleteConfirm": "Shablonni oʻchirasizmi?",
+      "deleted": "Shablon oʻchirildi"
+    },
+    "telegram": {
+      "chatId": "Chat ID (direktor/admin guruhi)",
+      "hint": "Bot tokeni serverda (TELEGRAM_BOT_TOKEN) saqlanadi. Botni guruhga qoʻshing va guruh ID sini kiriting.",
+      "test": "Test xabar yuborish",
+      "sent": "Test xabar yuborildi"
+    },
+    "interface": {
+      "theme": "Mavzu",
+      "light": "Kunduzgi",
+      "dark": "Tungi"
+    }
   }
 }

@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Pencil, UserX } from 'lucide-react';
+import { ArrowLeft, FileSignature, Pencil, Printer, UserX, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { schoolApi } from '@/lib/schoolApi';
+import { financeApi, openPdf } from '@/lib/financeApi';
 import { fmtDay } from '@/lib/dates';
 import { formatMoney } from '@/lib/format';
 import { StudentDrawer } from '@/components/students/StudentDrawer';
+import { PaymentDrawer } from '@/components/finance/PaymentDrawer';
+import { ContractDrawer } from '@/components/finance/ContractDrawer';
+import { ContractTable } from '@/components/finance/ContractTable';
 import { Avatar, Badge, Button, Card, EmptyState, Skeleton, Tabs } from '@/components/ui';
 import { statusTone } from './Students';
 
@@ -20,7 +24,13 @@ export default function StudentDetail() {
   const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
   const [tab, setTab] = useState<Tab>('info');
   const [editing, setEditing] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [contracting, setContracting] = useState(false);
+  const seesFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
+  const canContract = seesFinance || user?.role === 'ADMIN';
   const { data: s, isLoading, isError } = useQuery({ queryKey: ['student', id], queryFn: () => schoolApi.student(id) });
+  const finance = useQuery({ queryKey: ['student', id, 'finance'], queryFn: () => financeApi.studentFinance(id), enabled: seesFinance && tab === 'payments' });
+  const contracts = useQuery({ queryKey: ['contracts', 'student', id], queryFn: () => financeApi.contracts({ studentId: id, page: 1, limit: 50 }), enabled: canContract && tab === 'contracts' });
 
   if (isLoading) return <Skeleton className="h-64" />;
   if (isError || !s) return <EmptyState icon={UserX} title={t('errors.NOT_FOUND')} action={<Link to="/students" className="text-primary">{t('common.back')}</Link>} />;
@@ -57,11 +67,23 @@ export default function StudentDetail() {
             </div>
           </div>
         </div>
-        {canEdit && (
-          <Button variant="secondary" onClick={() => setEditing(true)}>
-            <Pencil className="h-4 w-4" /> {t('students.edit')}
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {canEdit && (
+            <Button variant="secondary" onClick={() => setEditing(true)}>
+              <Pencil className="h-4 w-4" /> {t('students.edit')}
+            </Button>
+          )}
+          {seesFinance && (
+            <Button variant="secondary" onClick={() => setPaying(true)}>
+              <Wallet className="h-4 w-4" /> {t('finance.payments.receive')}
+            </Button>
+          )}
+          {canContract && (
+            <Button onClick={() => setContracting(true)}>
+              <FileSignature className="h-4 w-4" /> {t('finance.contracts.create')}
+            </Button>
+          )}
+        </div>
       </Card>
 
       <Tabs
@@ -84,11 +106,58 @@ export default function StudentDetail() {
             ))}
           </dl>
         </Card>
+      ) : tab === 'payments' ? (
+        !seesFinance ? (
+          <EmptyState icon={Wallet} title={t('errors.FORBIDDEN')} />
+        ) : finance.isLoading ? (
+          <Skeleton className="h-48" />
+        ) : finance.data ? (
+          <div className="space-y-4">
+            <Card className="flex flex-wrap items-baseline justify-between gap-2">
+              <span className="text-text-muted">{t('students.balance')}</span>
+              <span className={finance.data.debt > 0 ? 'text-2xl font-semibold tabular-nums text-red-600' : 'text-2xl font-semibold tabular-nums text-green-600'}>
+                {finance.data.debt > 0 ? `−${formatMoney(finance.data.debt, t('common.currency'))}` : formatMoney(-finance.data.balance, t('common.currency'))}
+              </span>
+            </Card>
+            {finance.data.timeline.length === 0 ? (
+              <EmptyState icon={Wallet} title={t('common.empty')} />
+            ) : (
+              <Card className="p-0">
+                <ul className="divide-y divide-border">
+                  {finance.data.timeline.map((e) => (
+                    <li key={`${e.kind}${e.id}`} className="flex items-center gap-4 px-6 py-4">
+                      <span className="w-24 shrink-0 text-sm text-text-muted">{fmtDay(e.date, i18n.language, 'd MMM yyyy')}</span>
+                      <span className="flex-1">
+                        {e.kind === 'CHARGE' ? t('students.chargeFor', { period: e.period }) : `${t('finance.payments.title')}${e.method ? ` · ${t(`finance.methods.${e.method}`)}` : ''}`}
+                      </span>
+                      <span className={e.kind === 'PAYMENT' ? 'font-semibold tabular-nums text-green-600' : 'font-semibold tabular-nums'}>
+                        {e.kind === 'PAYMENT' ? '+' : '−'}{formatMoney(e.amount, t('common.currency'))}
+                      </span>
+                      {e.kind === 'PAYMENT' && (
+                        <button aria-label={t('finance.payments.receipt')} onClick={() => void openPdf(`/payments/${e.id}/receipt?lang=${i18n.language}`)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted">
+                          <Printer className="h-4 w-4" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+          </div>
+        ) : null
+      ) : !canContract ? (
+        <EmptyState icon={FileSignature} title={t('errors.FORBIDDEN')} />
+      ) : contracts.isLoading ? (
+        <Skeleton className="h-40" />
+      ) : contracts.data && contracts.data.items.length > 0 ? (
+        <ContractTable rows={contracts.data.items} />
       ) : (
-        <EmptyState icon={UserX} title={t('placeholder.title')} text={t('placeholder.text')} />
+        <EmptyState icon={FileSignature} title={t('finance.contracts.empty')} />
       )}
 
       <StudentDrawer open={editing} student={s} onClose={() => setEditing(false)} />
+      <PaymentDrawer open={paying} onClose={() => setPaying(false)} student={{ id: s.id, fullName: s.fullName, className: s.className, debt: s.debt ?? 0 }} />
+      <ContractDrawer open={contracting} onClose={() => setContracting(false)} student={{ id: s.id, fullName: s.fullName }} />
     </div>
   );
 }

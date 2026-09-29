@@ -33,8 +33,8 @@ export function Drawer({ open, onClose, title, children, width = 560 }: Props) {
         aria-label={title}
         style={{ width, maxWidth: '100vw' }}
         className={cn(
-          'absolute right-0 top-0 flex h-full flex-col border-l border-border bg-surface shadow-2xl transition-transform',
-          open ? 'translate-x-0' : 'translate-x-full',
+          'absolute right-0 top-0 flex h-full flex-col border-l border-border bg-surface transition-transform',
+          open ? 'translate-x-0 shadow-2xl' : 'translate-x-full',
         )}
       >
         <header className="flex items-center justify-between border-b border-border px-6 py-5">

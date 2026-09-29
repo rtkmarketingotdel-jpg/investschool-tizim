@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bell, Check, Globe, LogOut, Maximize, Menu, Moon, Search, Sun } from 'lucide-react';
+import { Globe, LogOut, Maximize, Menu, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { setLanguage } from '@/i18n';
 import { api } from '@/lib/api';
-import { Avatar, Dropdown, DropdownItem, Drawer, IconButton } from '../ui';
+import { Avatar, Dropdown, DropdownItem, IconButton } from '../ui';
+import { GlobalSearch } from './GlobalSearch';
+import { NotificationsButton } from './NotificationsPanel';
 
 export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
-  const [notifOpen, setNotifOpen] = useState(false);
-  const unread = 0; // wired to the notifications API in a later stage
 
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
   useEffect(() => {
@@ -33,14 +33,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         <IconButton aria-label={t('topbar.toggleSidebar')} onClick={onToggleSidebar}>
           <Menu className="h-5 w-5" />
         </IconButton>
-        <label className="relative hidden w-full max-w-md sm:block">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-          <input
-            aria-label={t('topbar.search')}
-            placeholder={t('topbar.search')}
-            className="w-full rounded-xl border-0 bg-surface-muted py-3 pl-11 pr-4 placeholder:text-text-muted"
-          />
-        </label>
+        {user.role !== 'STAFF' && <GlobalSearch />}
       </div>
 
       <div className="flex items-center gap-2">
@@ -72,14 +65,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             </>
           )}
         </Dropdown>
-        <IconButton aria-label={t('topbar.notifications')} onClick={() => setNotifOpen(true)}>
-          <Bell className="h-5 w-5" />
-          {unread > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white">
-              {unread}
-            </span>
-          )}
-        </IconButton>
+        <NotificationsButton />
         <div className="ml-2 hidden items-center gap-3 lg:flex">
           <Avatar name={user.fullName} size={40} />
           <div className="leading-tight">
@@ -92,12 +78,6 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         </IconButton>
       </div>
 
-      <Drawer open={notifOpen} onClose={() => setNotifOpen(false)} title={t('topbar.notifications')} width={400}>
-        <div className="flex flex-col items-center gap-3 py-16 text-text-muted">
-          <Check className="h-8 w-8" />
-          <p>{t('topbar.noNotifications')}</p>
-        </div>
-      </Drawer>
     </header>
   );
 }

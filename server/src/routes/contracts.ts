@@ -32,7 +32,7 @@ async function present(c: Contract) {
 }
 
 const listQuery = z.object({
-  ...pageQuery, q: z.string().optional(), status: z.enum(['DRAFT', 'SENT', 'SIGNED', 'CANCELLED']).optional(),
+  ...pageQuery, q: z.string().optional(), studentId: z.string().optional(), status: z.enum(['DRAFT', 'SENT', 'SIGNED', 'CANCELLED']).optional(),
 });
 
 contractsRouter.get('/', async (req, res, next) => {
@@ -40,7 +40,7 @@ contractsRouter.get('/', async (req, res, next) => {
     const q = listQuery.parse(req.query);
     const term = q.q?.trim().toLowerCase();
     const all = [...(await contractRepo.all())].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    const presented = await Promise.all(all.filter((c) => !q.status || c.status === q.status).map(present));
+    const presented = await Promise.all(all.filter((c) => (!q.status || c.status === q.status) && (!q.studentId || c.studentId === q.studentId)).map(present));
     const rows = presented.filter((c) => !term || [c.number, c.studentName, c.parentName].some((v) => v.toLowerCase().includes(term)));
     res.json(((page) => ({ ...page }))(paginate(rows, q.page, q.limit)));
   } catch (e) {

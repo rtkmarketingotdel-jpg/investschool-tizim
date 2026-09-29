@@ -12,6 +12,7 @@ const Students = lazy(() => import('@/pages/Students'));
 const StudentDetail = lazy(() => import('@/pages/StudentDetail'));
 const Classes = lazy(() => import('@/pages/Classes'));
 const Staff = lazy(() => import('@/pages/Staff'));
+const StaffDetail = lazy(() => import('@/pages/StaffDetail'));
 const Attendance = lazy(() => import('@/pages/Attendance'));
 const Me = lazy(() => import('@/pages/Me'));
 const Settings = lazy(() => import('@/pages/Settings'));
@@ -51,6 +52,7 @@ export default function App() {
           <Route element={<RoleGuard roles={['DIRECTOR', 'ADMIN']} />}>
             <Route path="/classes" element={<Classes />} />
             <Route path="/staff" element={<Staff />} />
+            <Route path="/staff/:id" element={<StaffDetail />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'ACCOUNTANT']} />}>

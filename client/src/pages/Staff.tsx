@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Check, Copy, KeyRound, Pencil, Plus, Search, Users } from 'lucide-react';
@@ -107,7 +108,7 @@ export default function Staff() {
                     <div className="flex items-center gap-3">
                       <Avatar name={m.fullName} size={44} />
                       <div>
-                        <p className="font-medium">{m.fullName}</p>
+                        <Link to={`/staff/${m.id}`} className="font-medium hover:text-primary">{m.fullName}</Link>
                         <p className="text-[13px] text-text-muted">{m.phone}</p>
                       </div>
                     </div>

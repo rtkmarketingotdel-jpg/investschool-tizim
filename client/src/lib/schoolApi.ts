@@ -33,14 +33,17 @@ export interface Student {
   enrolledAt: string;
   leftAt: string | null;
   notes: string | null;
+  /** null when the current role may not see finances */
+  debt: number | null;
 }
-export type StudentInput = Omit<Student, 'id' | 'fullName' | 'className' | 'leftAt'>;
+export type StudentInput = Omit<Student, 'id' | 'fullName' | 'className' | 'leftAt' | 'debt'>;
 
 export interface StudentFilters {
   q?: string;
   status?: string;
   classId?: string;
   boarding?: string;
+  debtor?: string;
   sort?: string;
   page: number;
   limit: number;
@@ -80,7 +83,7 @@ export const schoolApi = {
   student: (id: string) => api.get<Student>(`/students/${id}`).then((r) => r.data),
   createStudent: (d: StudentInput) => api.post<Student>('/students', d).then((r) => r.data),
   updateStudent: (id: string, d: StudentInput) => api.patch<Student>(`/students/${id}`, d).then((r) => r.data),
-  exportStudents: (f: Omit<StudentFilters, 'page' | 'limit'>) =>
+  exportStudents: (f: Omit<StudentFilters, 'page' | 'limit' | 'debtor'>) =>
     api.get<Blob>('/students/export', { params: clean(f), responseType: 'blob' }).then((r) => r.data),
 
   classes: () => api.get<{ items: SchoolClass[] }>('/classes').then((r) => r.data.items),

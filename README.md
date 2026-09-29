@@ -13,8 +13,19 @@ cd client && cp .env.example .env && npm install && npm run dev   # :5173
 ```
 Demo logins (password `demo1234`): Director `+998900000001`, Accountant `…02`, Admin `…03`, Staff `…10`.
 
+## Modules (all on mock data)
+Dashboard, students, classes, staff, attendance (selfie + geolocation check-in/out, monitoring log, monthly matrix),
+payments + A6 receipt PDF, debtors, payroll (auto fines from attendance, approve/pay), e-contracts (PDF via pdfmake/Roboto,
+public signing page with OTP), settings, notifications (bell, 60 s polling), Telegram notices, cron jobs
+(12:00 absentees, 09:00 daily report, monthly charges on the 1st).
+
+- **OTP in demo mode:** `SMS_PROVIDER=demo` — the code is shown to staff in the contracts table (while valid), in the bell
+  panel and in the Telegram group. With `SMS_PROVIDER=eskiz` + `ESKIZ_EMAIL`/`ESKIZ_PASSWORD` it is sent by SMS (untested against the live API).
+- **Check-in radius:** recorded always; enforced only when enabled in Settings → Location.
+- Telegram uses the Bot HTTP API directly (`TELEGRAM_BOT_TOKEN` + chat id in Settings); it is a no-op when not configured.
+
 ## Checks
-`npm run build`, `npm run typecheck`, `npm run lint` in both folders.
+`npm run build`, `npm run typecheck`, `npm run lint` in both folders; `npm test` in `server` (money words, debt, payroll).
 `grep -ri "gorizont" client/src server/src` must list only `brand.config.ts` files (and locale files).
 
 ## Rebranding
