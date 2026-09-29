@@ -37,13 +37,10 @@ export function Sidebar({ collapsed, mobileOpen, onNavigate }: Props) {
           <span className={cn('truncate text-lg font-medium', collapsed && 'md:hidden')}>{brand.name}</span>
         </div>
         <nav className="flex-1 space-y-6 overflow-y-auto p-4">
-          <NavItemLink
-            collapsed={collapsed}
-            onNavigate={onNavigate}
-            to="/me"
-            label={t('nav.me')}
-            icon={UserCircle}
-          />
+          {/* The director does not need a personal cabinet: own attendance is on the Attendance page, payroll is in Finance. */}
+          {user.role !== 'DIRECTOR' && (
+            <NavItemLink collapsed={collapsed} onNavigate={onNavigate} to="/me" label={t('nav.me')} icon={UserCircle} />
+          )}
           {groups.map((g) => (
             <div key={g.titleKey}>
               <p className={cn('mb-2 px-3 text-xs uppercase tracking-wider text-text-muted', collapsed && 'md:hidden')}>
