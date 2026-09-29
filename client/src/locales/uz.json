@@ -309,7 +309,45 @@
     "teacher": "Sinf rahbari",
     "noTeacher": "Rahbar tayinlanmagan",
     "free": "{{count}} boʻsh oʻrin",
-    "full": "Toʻlgan"
+    "full": "Toʻlgan",
+    "subtitleNew": "Maktab sinflari va ularning toʻlganligi · Jami: {{count}}",
+    "search": "Sinf yoki sinf rahbari boʻyicha qidirish...",
+    "level": "Bosqich",
+    "levels": {
+      "all": "Barchasi",
+      "junior": "Boshlangʻich (1–4)",
+      "middle": "Oʻrta (5–9)",
+      "senior": "Yuqori (10–11)"
+    },
+    "onlyFree": "Boʻsh oʻrin borlari",
+    "sort": {
+      "grade": "Sinf boʻyicha",
+      "fill": "Toʻlganlik boʻyicha",
+      "free": "Boʻsh oʻrin boʻyicha"
+    },
+    "groupCount": "{{classes}} sinf · {{students}} oʻquvchi",
+    "stats": {
+      "classes": "Sinflar",
+      "students": "Oʻquvchilar",
+      "fill": "Toʻlganlik",
+      "free": "Boʻsh oʻrinlar",
+      "avg": "Oʻrtacha {{n}} nafar",
+      "ofCapacity": "{{capacity}} oʻrindan",
+      "freeClasses": "{{count}} ta sinfda"
+    },
+    "fill": {
+      "open": "Boʻsh oʻrin bor",
+      "almost": "Deyarli toʻlgan",
+      "full": "Toʻlgan"
+    },
+    "students": "Oʻquvchilar",
+    "boys": "{{count}} oʻgʻil",
+    "girls": "{{count}} qiz",
+    "freeShort": "{{count}} boʻsh",
+    "roster": "Sinf tarkibi",
+    "openStudents": "Oʻquvchilar sahifasi",
+    "emptyRoster": "Bu sinfda oʻquvchilar yoʻq",
+    "noMatch": "Mos sinf topilmadi"
   },
   "staff": {
     "subtitle": "Barcha xodimlar · Jami: {{count}}",

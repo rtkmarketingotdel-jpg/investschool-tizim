@@ -22,7 +22,12 @@ async function withStats(c: Awaited<ReturnType<typeof classRepo.list>>[number]) 
   const occ = await studentRepo.occupancy();
   const teacher = c.teacherId ? await userRepo.findById(c.teacherId) : null;
   const taken = occ.get(c.id) ?? 0;
-  return { ...c, studentCount: taken, freeSeats: Math.max(0, c.capacity - taken), teacherName: teacher?.fullName ?? null };
+  const roster = (await studentRepo.list({ classId: c.id })).filter((s) => s.status !== 'LEFT');
+  return {
+    ...c, studentCount: taken, freeSeats: Math.max(0, c.capacity - taken),
+    teacherName: teacher?.fullName ?? null, teacherPhone: teacher?.phone ?? null, teacherPhotoUrl: teacher?.photoUrl ?? null,
+    boys: roster.filter((s) => s.gender === 'MALE').length, girls: roster.filter((s) => s.gender === 'FEMALE').length,
+  };
 }
 
 classesRouter.get('/', async (_req, res, next) => {

@@ -56,6 +56,10 @@ export interface SchoolClass {
   capacity: number;
   teacherId: string | null;
   teacherName: string | null;
+  teacherPhone: string | null;
+  teacherPhotoUrl: string | null;
+  boys: number;
+  girls: number;
   branchId: string | null;
   studentCount: number;
   freeSeats: number;
