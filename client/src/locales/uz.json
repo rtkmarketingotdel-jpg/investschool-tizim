@@ -1,0 +1,37 @@
+{
+  "brand": { "slogan": "Maktab boshqaruvi bir joyda" },
+  "nav": {
+    "main": "Asosiy", "students": "Oʻquvchilar", "staff": "Xodimlar", "finance": "Moliya", "management": "Boshqaruv",
+    "dashboard": "Bosh sahifa", "studentsList": "Oʻquvchilar", "classes": "Sinflar", "staffList": "Xodimlar",
+    "attendance": "Davomat", "payments": "Tushumlar", "debtors": "Qarzdorlar", "payroll": "Oyliklar",
+    "contracts": "Shartnomalar", "settings": "Sozlamalar", "me": "Mening kabinetim"
+  },
+  "roles": { "DIRECTOR": "Direktor", "ACCOUNTANT": "Buxgalter", "ADMIN": "Administrator", "STAFF": "Xodim" },
+  "auth": {
+    "loginTitle": "Tizimga kirish", "loginSubtitle": "Telefon raqam va parolingizni kiriting",
+    "phone": "Telefon raqam", "password": "Parol", "submit": "Kirish", "demoAccounts": "Demo hisoblar",
+    "logout": "Chiqish"
+  },
+  "topbar": {
+    "search": "Oʻquvchi yoki xodim qidirish...", "toggleSidebar": "Menyuni ochish/yopish", "fullscreen": "Toʻliq ekran",
+    "theme": "Mavzuni almashtirish", "language": "Til", "notifications": "Bildirishnomalar", "markAllRead": "Barchasini oʻqilgan qilish",
+    "noNotifications": "Bildirishnomalar yoʻq"
+  },
+  "placeholder": { "title": "Tez orada", "text": "Bu boʻlim keyingi bosqichlarda qoʻshiladi." },
+  "common": {
+    "save": "Saqlash", "cancel": "Bekor qilish", "close": "Yopish", "loading": "Yuklanmoqda...", "search": "Qidirish",
+    "empty": "Maʼlumot topilmadi", "currency": "soʻm", "back": "Ortga"
+  },
+  "errors": {
+    "AUTH_INVALID_CREDENTIALS": "Telefon yoki parol notoʻgʻri",
+    "AUTH_TOO_MANY_ATTEMPTS": "Juda koʻp urinish. 15 daqiqadan soʻng qayta urinib koʻring",
+    "AUTH_REQUIRED": "Tizimga kiring",
+    "AUTH_INVALID_TOKEN": "Sessiya tugadi, qayta kiring",
+    "AUTH_WRONG_PASSWORD": "Joriy parol notoʻgʻri",
+    "FORBIDDEN": "Sizda ruxsat yoʻq",
+    "VALIDATION_ERROR": "Kiritilgan maʼlumotlar notoʻgʻri",
+    "NETWORK_ERROR": "Server bilan aloqa yoʻq",
+    "INTERNAL_ERROR": "Xatolik yuz berdi",
+    "NOT_FOUND": "Topilmadi"
+  }
+}

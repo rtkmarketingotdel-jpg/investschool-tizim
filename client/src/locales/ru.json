@@ -1,0 +1,37 @@
+{
+  "brand": { "slogan": "Управление школой в одном месте" },
+  "nav": {
+    "main": "Основное", "students": "Ученики", "staff": "Сотрудники", "finance": "Финансы", "management": "Управление",
+    "dashboard": "Главная", "studentsList": "Ученики", "classes": "Классы", "staffList": "Сотрудники",
+    "attendance": "Посещаемость", "payments": "Поступления", "debtors": "Должники", "payroll": "Зарплаты",
+    "contracts": "Договоры", "settings": "Настройки", "me": "Мой кабинет"
+  },
+  "roles": { "DIRECTOR": "Директор", "ACCOUNTANT": "Бухгалтер", "ADMIN": "Администратор", "STAFF": "Сотрудник" },
+  "auth": {
+    "loginTitle": "Вход в систему", "loginSubtitle": "Введите номер телефона и пароль",
+    "phone": "Номер телефона", "password": "Пароль", "submit": "Войти", "demoAccounts": "Демо-аккаунты",
+    "logout": "Выйти"
+  },
+  "topbar": {
+    "search": "Поиск ученика или сотрудника...", "toggleSidebar": "Открыть/закрыть меню", "fullscreen": "Полный экран",
+    "theme": "Сменить тему", "language": "Язык", "notifications": "Уведомления", "markAllRead": "Отметить все прочитанными",
+    "noNotifications": "Уведомлений нет"
+  },
+  "placeholder": { "title": "Скоро", "text": "Этот раздел будет добавлен на следующих этапах." },
+  "common": {
+    "save": "Сохранить", "cancel": "Отмена", "close": "Закрыть", "loading": "Загрузка...", "search": "Поиск",
+    "empty": "Данные не найдены", "currency": "сум", "back": "Назад"
+  },
+  "errors": {
+    "AUTH_INVALID_CREDENTIALS": "Неверный телефон или пароль",
+    "AUTH_TOO_MANY_ATTEMPTS": "Слишком много попыток. Повторите через 15 минут",
+    "AUTH_REQUIRED": "Войдите в систему",
+    "AUTH_INVALID_TOKEN": "Сессия истекла, войдите снова",
+    "AUTH_WRONG_PASSWORD": "Текущий пароль неверен",
+    "FORBIDDEN": "Нет доступа",
+    "VALIDATION_ERROR": "Введены неверные данные",
+    "NETWORK_ERROR": "Нет связи с сервером",
+    "INTERNAL_ERROR": "Произошла ошибка",
+    "NOT_FOUND": "Не найдено"
+  }
+}
