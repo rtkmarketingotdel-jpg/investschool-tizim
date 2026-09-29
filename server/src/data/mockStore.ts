@@ -79,6 +79,10 @@ export const settings: Setting = {
   paymentDueDay: 10,
   contractPrefix: 'GS',
   telegramChatId: null,
+  smsDebtAutoEnabled: false,
+  smsDebtEveryDays: 7,
+  smsDebtMinOverdueDays: 3,
+  smsDebtTemplateId: 'st1',
 };
 
 // Deterministic mock history for the last 14 days (no photos: UI falls back to initials).

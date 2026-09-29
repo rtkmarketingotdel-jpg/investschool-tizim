@@ -26,6 +26,10 @@ const patchSchema = z
     paymentDueDay: z.number().int().min(1).max(28),
     contractPrefix: z.string().trim().regex(/^[A-Za-z0-9]{1,6}$/),
     telegramChatId: z.string().trim().max(64).nullable(),
+    smsDebtAutoEnabled: z.boolean(),
+    smsDebtEveryDays: z.number().int().min(1).max(60),
+    smsDebtMinOverdueDays: z.number().int().min(0).max(120),
+    smsDebtTemplateId: z.string().nullable(),
   })
   .partial();
 

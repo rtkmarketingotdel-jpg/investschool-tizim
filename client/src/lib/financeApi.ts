@@ -127,6 +127,10 @@ export interface Settings {
   paymentDueDay: number;
   contractPrefix: string;
   telegramChatId: string | null;
+  smsDebtAutoEnabled: boolean;
+  smsDebtEveryDays: number;
+  smsDebtMinOverdueDays: number;
+  smsDebtTemplateId: string | null;
 }
 export interface Matrix {
   month: string;

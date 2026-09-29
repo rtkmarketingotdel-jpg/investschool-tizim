@@ -29,6 +29,15 @@ public signing page with OTP), settings, notifications (bell, 60 s polling), Tel
 - **Live map:** Attendance → Map (Leaflet + OpenStreetMap, no API key). A dot appears on check-in and disappears on check-out.
 - Telegram uses the Bot HTTP API directly (`TELEGRAM_BOT_TOKEN` + chat id in Settings); it is a no-op when not configured.
 
+## SMS (Eskiz)
+The SMS section (`/sms`) sends debtor reminders, holiday greetings and notices to parents/staff: templates with variables,
+audiences (all parents, classes, branch, debtors, staff, typed numbers), scheduling, history with per-message status,
+retry of failed messages and an optional daily automatic debtor reminder (10:00, Tashkent).
+Until Eskiz is connected it runs in **demo mode** (messages are only recorded, never sent). To go live set on the server (Railway):
+`SMS_PROVIDER=eskiz`, `ESKIZ_EMAIL`, `ESKIZ_PASSWORD`, optionally `ESKIZ_FROM` (sender, default `4546`), then send a test SMS
+from SMS → “Avtomatik va sinov”. Eskiz usually requires templates to be approved first, so keep the approved text in the templates.
+Uzbek text is normalised to plain ASCII apostrophes so it stays GSM-7 (160 chars per part instead of 70).
+
 ## Install as an app (PWA)
 The client is an installable web app: `manifest.webmanifest` is generated at build time from `VITE_BRAND_NAME` / `VITE_BRAND_SHORT`
 (icons in `client/public/brand/`: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` — replace them when rebranding).

@@ -11,4 +11,5 @@ export const env = {
   smsProvider: process.env.SMS_PROVIDER ?? 'demo',
   eskizEmail: process.env.ESKIZ_EMAIL ?? '',
   eskizPassword: process.env.ESKIZ_PASSWORD ?? '',
+  smsFrom: process.env.ESKIZ_FROM || '4546',
 };

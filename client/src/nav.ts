@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, GraduationCap, School, Users, CalendarCheck, Wallet, AlertCircle,
-  Banknote, BookOpen, FileSignature, Settings, type LucideIcon,
+  Banknote, BookOpen, FileSignature, MessageSquare, Settings, type LucideIcon,
 } from 'lucide-react';
 import type { Role } from '@/context/AuthContext';
 
@@ -46,6 +46,10 @@ export const navGroups: NavGroup[] = [
       { to: '/finance/payroll', labelKey: 'nav.payroll', icon: Banknote, roles: ['DIRECTOR', 'ACCOUNTANT'] },
       { to: '/finance/contracts', labelKey: 'nav.contracts', icon: FileSignature, roles: ALL_MGMT },
     ],
+  },
+  {
+    titleKey: 'nav.communication',
+    items: [{ to: '/sms', labelKey: 'nav.sms', icon: MessageSquare, roles: ['DIRECTOR', 'ACCOUNTANT', 'ADMIN'] }],
   },
   {
     titleKey: 'nav.management',

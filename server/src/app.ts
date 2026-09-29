@@ -6,6 +6,7 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { meRouter } from './routes/me.js';
 import { branchesRouter } from './routes/branches.js';
+import { smsRouter } from './routes/sms.js';
 import { profileRouter } from './routes/profile.js';
 import { catalogRouter } from './routes/catalog.js';
 import { classesRouter } from './routes/classes.js';
@@ -38,6 +39,7 @@ export function createApp() {
   app.use('/api/staff', staffRouter);
   app.use('/api/catalog', catalogRouter);
   app.use('/api/profile', profileRouter);
+  app.use('/api/sms', smsRouter);
   app.use('/api/branches', branchesRouter);
   app.use('/api/payments', paymentsRouter);
   app.use('/api/debtors', debtorsRouter);

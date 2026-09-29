@@ -14,6 +14,7 @@ const loaders = {
   StudentDetail: () => import('@/pages/StudentDetail'),
   Classes: () => import('@/pages/Classes'),
   Academics: () => import('@/pages/Academics'),
+  Sms: () => import('@/pages/Sms'),
   Profile: () => import('@/pages/Profile'),
   ProfileSetup: () => import('@/pages/ProfileSetup'),
   Staff: () => import('@/pages/Staff'),
@@ -34,6 +35,7 @@ const Students = lazy(loaders.Students);
 const StudentDetail = lazy(loaders.StudentDetail);
 const Classes = lazy(loaders.Classes);
 const Academics = lazy(loaders.Academics);
+const Sms = lazy(loaders.Sms);
 const Profile = lazy(loaders.Profile);
 const ProfileSetup = lazy(loaders.ProfileSetup);
 const Staff = lazy(loaders.Staff);
@@ -83,6 +85,7 @@ export default function App() {
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/students" element={<Students />} />
             <Route path="/students/:id" element={<StudentDetail />} />
+            <Route path="/sms" element={<Sms />} />
             <Route path="/finance/contracts" element={<Contracts />} />
             <Route path="/finance/contracts/class/:classId" element={<ContractClass />} />
           </Route>

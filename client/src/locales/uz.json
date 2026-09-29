@@ -19,7 +19,9 @@
     "contracts": "Shartnomalar",
     "settings": "Sozlamalar",
     "me": "Mening kabinetim",
-    "academics": "Fanlar va toʻgaraklar"
+    "academics": "Fanlar va toʻgaraklar",
+    "communication": "Aloqa",
+    "sms": "SMS"
   },
   "roles": {
     "DIRECTOR": "Direktor",
@@ -114,7 +116,15 @@
     "FILE_LIMIT_REACHED": "Hujjatlar soni chegaraga yetdi",
     "PROFILE_PHOTO_REQUIRED": "Avval rasm yuklang",
     "CATALOG_NAME_EXISTS": "Bunday nom allaqachon mavjud",
-    "CATALOG_IN_USE": "Bu fan xodimlarga biriktirilgan, oʻchirib boʻlmaydi"
+    "CATALOG_IN_USE": "Bu fan xodimlarga biriktirilgan, oʻchirib boʻlmaydi",
+    "SMS_BAD_VARIABLE": "Notoʻgʻri oʻzgaruvchi: {{list}}",
+    "SMS_EMPTY_TEXT": "Xabar matni boʻsh",
+    "SMS_TOO_MANY": "Bir vaqtda juda koʻp xabar",
+    "SMS_NO_RECIPIENTS": "Qabul qiluvchilar topilmadi",
+    "SMS_SCHEDULE_IN_PAST": "Yuborish vaqti oʻtib ketgan",
+    "SMS_BAD_STATE": "Bu amalni hozir bajarib boʻlmaydi",
+    "SMS_BAD_PHONE": "Telefon raqam notoʻgʻri",
+    "SMS_PROVIDER_ERROR": "SMS provayderi xato qaytardi"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",
@@ -403,6 +413,10 @@
     "otp": {
       "title": "Shartnoma tasdiqlash kodi (demo)",
       "body": "{{number}}: {{code}}"
+    },
+    "smsDone": {
+      "title": "SMS yuborildi",
+      "body": "{{title}}: {{sent}} ta yuborildi, {{failed}} ta xato"
     }
   },
   "finance": {
@@ -718,5 +732,141 @@
     "gotIt": "Tushundim",
     "offline": "Internet yoʻq. Davomat va maʼlumotlar internet bilan ishlaydi.",
     "dismiss": "Yopish (bu xabarni yashirish)"
+  },
+  "sms": {
+    "subtitle": "Qarzdorlarga eslatma, bayram tabriklari va ogohlantirishlar",
+    "tabs": {
+      "compose": "Yuborish",
+      "history": "Tarix",
+      "templates": "Shablonlar",
+      "auto": "Avtomatik va sinov"
+    },
+    "status": {
+      "demoTitle": "Demo rejim: SMS haqiqatda yuborilmaydi",
+      "demoText": "Eskiz ulanmagan. Xabarlar tarixda “Demo” belgisi bilan saqlanadi. Eskiz shartnomasi tayyor boʻlgach serverga ESKIZ_EMAIL, ESKIZ_PASSWORD va SMS_PROVIDER=eskiz qiymatlarini qoʻying, tizim oʻzi haqiqiy SMS yubora boshlaydi.",
+      "demoConfirm": "Demo rejim: xabarlar haqiqatda yuborilmaydi, faqat tarixga yoziladi.",
+      "connected": "Eskiz ulangan (jonatuvchi: {{from}})",
+      "balance": "balans: {{count}}"
+    },
+    "categories": {
+      "DEBT": "Qarzdorlik",
+      "GREETING": "Tabrik",
+      "WARNING": "Ogohlantirish",
+      "OTHER": "Boshqa"
+    },
+    "audience": {
+      "ALL_PARENTS": "Barcha ota-onalar",
+      "CLASSES": "Tanlangan sinflar ota-onalari",
+      "BRANCH": "Filial ota-onalari",
+      "DEBTORS": "Qarzdorlar",
+      "STAFF": "Xodimlar",
+      "NUMBERS": "Raqamlarni qoʻlda kiritish",
+      "DEBTORS_AUTO": "Qarzdorlar (avtomatik)",
+      "anyBranch": "Barcha filiallar",
+      "minOverdue": "Muddati kamida (kun) oʻtganlar",
+      "staffAll": "Barcha xodimlar",
+      "staffTeachers": "Oʻqituvchilar",
+      "staffTutors": "Repetitorlar",
+      "numbersLabel": "Telefon raqamlar (probel, vergul yoki yangi qator bilan)",
+      "bothPhones": "Ikkala telefon raqamga yuborish (agar ikkinchisi bor boʻlsa)"
+    },
+    "audienceCount": {
+      "CLASSES": "{{count}} ta sinf ota-onalari",
+      "DEBTORS": "Qarzdorlar (≥ {{count}} kun)",
+      "STUDENTS": "{{count}} ta oʻquvchi ota-onasi",
+      "NUMBERS": "{{count}} ta raqam"
+    },
+    "holidays": {
+      "navruz": "Navroʻz",
+      "women": "8-mart",
+      "independence": "Mustaqillik kuni",
+      "teachers": "Ustozlar kuni",
+      "newyear": "Yangi yil",
+      "eid": "Hayit"
+    },
+    "compose": {
+      "type": "Xabar turi",
+      "holidays": "Bayram tabrigi (bosing, sana avtomatik qoʻyiladi)",
+      "audience": "Kimga",
+      "message": "Xabar matni",
+      "template": "Shablon",
+      "writeOwn": "Oʻzim yozaman",
+      "language": "Til",
+      "variables": "Oʻzgaruvchilar",
+      "counter": "{{length}}/{{limit}} belgi · {{segments}} ta SMS",
+      "gsm": "lotin (160 belgi)",
+      "unicode": "kirill yoki maxsus belgi (70 belgi)",
+      "when": "Qachon yuboriladi",
+      "now": "Hozir",
+      "later": "Rejalashtirish",
+      "whenHint": "Vaqt Toshkent vaqti boʻyicha. Bayramlar uchun tabrik soat 09:00 ga qoʻyiladi.",
+      "preview": "Oldindan koʻrish",
+      "previewEmpty": "Xabar matnini va kimga yuborilishini tanlang",
+      "recipients": "Qabul qiluvchilar",
+      "totalSegments": "Jami SMS",
+      "skipped": "Oʻtkazib yuborildi: notoʻgʻri raqam {{invalid}}, takroriy {{duplicates}}",
+      "parts": "{{count}} ta SMS",
+      "send": "Yuborish",
+      "schedule": "Rejalashtirish",
+      "confirmTitle": "Yuborishni tasdiqlang",
+      "confirmText": "{{count}} ta qabul qiluvchiga jami {{segments}} ta SMS yuboriladi.",
+      "confirmWhen": "Yuborish vaqti: {{when}}",
+      "sending": "Yuborilmoqda",
+      "scheduled": "Rejalashtirildi"
+    },
+    "history": {
+      "empty": "Hali xabar yuborilmagan",
+      "emptyHint": "“Yuborish” tabidan birinchi xabarni yuboring",
+      "title": "Xabar",
+      "audience": "Kimga",
+      "total": "Jami",
+      "failed": "Xato",
+      "sent": "Yuborilgan",
+      "segments": "SMS qismlari",
+      "auto": "avtomatik",
+      "details": "Tafsilot",
+      "messages": "Xabarlar",
+      "retry": "Xatolarni qayta yuborish",
+      "retried": "Qayta yuborish boshlandi: {{count}} ta",
+      "cancel": "Rejani bekor qilish",
+      "cancelled": "Bekor qilindi",
+      "cancelConfirm": "Rejalashtirilgan yuborishni bekor qilasizmi?",
+      "scheduledFor": "Yuborish vaqti: {{when}}",
+      "simulatedNote": "{{count}} ta xabar demo rejimda “yuborilgan” deb belgilangan, haqiqatda ketmagan."
+    },
+    "campaignStatus": {
+      "SCHEDULED": "Rejalashtirilgan",
+      "SENDING": "Yuborilmoqda",
+      "DONE": "Yakunlandi",
+      "CANCELLED": "Bekor"
+    },
+    "messageStatus": {
+      "QUEUED": "Navbatda",
+      "SENT": "Yuborildi",
+      "SIMULATED": "Demo",
+      "FAILED": "Xato"
+    },
+    "templates": {
+      "hint": "Shablonlar tez yuborish uchun. Eskiz odatda shablonni oldindan tasdiqlaydi, shuning uchun tasdiqlangan matnni shu yerga kiriting.",
+      "add": "Shablon qoʻshish",
+      "edit": "Shablonni tahrirlash",
+      "saved": "Shablon saqlandi",
+      "deleteConfirm": "“{{name}}” shablonini oʻchirasizmi?"
+    },
+    "auto": {
+      "title": "Qarzdorlarga avtomatik eslatma",
+      "hint": "Yoqilsa, har kuni soat 10:00 da muddati oʻtgan qarzdorlarga tanlangan shablon yuboriladi. Bir oʻquvchiga takroran eslatma belgilangan kundan keyin ketadi.",
+      "enable": "Avtomatik eslatmani yoqish",
+      "minOverdue": "Muddati oʻtgan (kun) dan boshlab",
+      "every": "Takror eslatma (kun)",
+      "runNow": "Hozir ishga tushirish",
+      "runConfirm": "Shartlarga mos qarzdorlarga hozir SMS yuborilsinmi?",
+      "ran": "Yuborish boshlandi: {{count}} ta xabar",
+      "testTitle": "Sinov SMS",
+      "testHint": "Eskiz ulangach, birinchi navbatda oʻz raqamingizga sinov xabar yuboring.",
+      "testSend": "Sinov yuborish",
+      "testSent": "Sinov SMS yuborildi",
+      "testSimulated": "Demo rejim: SMS haqiqatda yuborilmadi"
+    }
   }
 }

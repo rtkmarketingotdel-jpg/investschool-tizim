@@ -106,6 +106,11 @@ export interface Setting {
   paymentDueDay: number;
   contractPrefix: string;
   telegramChatId: string | null;
+  /** Automatic debtor reminders (daily job). */
+  smsDebtAutoEnabled: boolean;
+  smsDebtEveryDays: number;
+  smsDebtMinOverdueDays: number;
+  smsDebtTemplateId: string | null;
 }
 
 export type StudentStatus = 'ACTIVE' | 'TRIAL' | 'LEFT';
@@ -247,4 +252,43 @@ export interface AuditLog {
   entityId: string | null;
   meta: Record<string, unknown> | null;
   createdAt: Date;
+}
+
+export type SmsCategory = 'DEBT' | 'GREETING' | 'WARNING' | 'OTHER';
+export type SmsMessageStatus = 'QUEUED' | 'SENT' | 'FAILED' | 'SIMULATED';
+export type SmsCampaignStatus = 'SCHEDULED' | 'SENDING' | 'DONE' | 'CANCELLED';
+
+export interface SmsTemplate {
+  id: string;
+  name: string;
+  category: SmsCategory;
+  language: Lang;
+  body: string;
+}
+
+export interface SmsMessage {
+  id: string;
+  phone: string;
+  name: string;
+  text: string;
+  segments: number;
+  status: SmsMessageStatus;
+  error: string | null;
+  providerId: string | null;
+  studentId: string | null;
+  sentAt: Date | null;
+}
+
+export interface SmsCampaign {
+  id: string;
+  category: SmsCategory;
+  title: string;
+  audienceLabel: string;
+  text: string;
+  status: SmsCampaignStatus;
+  scheduledAt: Date | null;
+  createdAt: Date;
+  createdById: string | null;
+  auto: boolean;
+  messages: SmsMessage[];
 }
