@@ -23,12 +23,13 @@ const schema = z.object({
   subject: z.string(),
   customSubject: z.string(),
   homeroomClassId: z.string(),
+  branchId: z.string(),
   baseSalary: z.number({ invalid_type_error: 'errors.required' }).int().min(0),
   isActive: z.boolean(),
 });
 type FormValues = z.infer<typeof schema>;
 
-const empty: FormValues = { fullName: '', phone: '', role: 'STAFF', position: '', subject: '', customSubject: '', homeroomClassId: '', baseSalary: 4_000_000, isActive: true };
+const empty: FormValues = { fullName: '', phone: '', role: 'STAFF', position: '', subject: '', customSubject: '', homeroomClassId: '', branchId: '', baseSalary: 4_000_000, isActive: true };
 const OTHER = '__other';
 
 interface Props {
@@ -50,6 +51,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState(false);
   const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open && isTeacher });
+  const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches, enabled: open });
 
   const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: empty });
   useEffect(() => {
@@ -61,7 +63,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
     reset({
       fullName: member.fullName, phone: member.phone, role: member.role, position: member.position,
       subject: member.subject ? (known ? member.subject : OTHER) : '', customSubject: member.subject && !known ? member.subject : '',
-      homeroomClassId: '', baseSalary: member.baseSalary, isActive: member.isActive,
+      homeroomClassId: '', branchId: member.branchId ?? '', baseSalary: member.baseSalary, isActive: member.isActive,
     });
   }, [open, member, reset]);
 
@@ -76,6 +78,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
         isTeacher, subject: subj,
         position: isTeacher && subj ? `${subj} oʻqituvchisi` : v.position,
         homeroomClassId: isTeacher && v.homeroomClassId ? v.homeroomClassId : null,
+        branchId: v.branchId || null,
       };
       if (member) return schoolApi.updateStaff(member.id, body).then(() => null);
       return schoolApi.createStaff({ ...body, password: password || undefined });
@@ -119,6 +122,10 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
           <Input label={t('staff.position')} error={err('position')} {...register('position')} />
         )}
 
+        <Select label={t('staff.branch')} {...register('branchId')}>
+          <option value="">{t('staff.anyBranch')}</option>
+          {branches.data?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+        </Select>
         <Select label={t('staff.role')} {...register('role')}>
           {roles.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
         </Select>

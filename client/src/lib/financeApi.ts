@@ -115,9 +115,6 @@ export interface Template {
   isDefault: boolean;
 }
 export interface Settings {
-  schoolLat: number;
-  schoolLng: number;
-  radiusM: number;
   maxGpsAccuracyM: number;
   geoEnforced: boolean;
   workStart: string;

@@ -56,10 +56,22 @@ export interface SchoolClass {
   capacity: number;
   teacherId: string | null;
   teacherName: string | null;
+  branchId: string | null;
   studentCount: number;
   freeSeats: number;
 }
-export type ClassInput = Pick<SchoolClass, 'name' | 'grade' | 'capacity' | 'teacherId'>;
+export type ClassInput = Pick<SchoolClass, 'name' | 'grade' | 'capacity' | 'teacherId' | 'branchId'>;
+
+export interface Branch {
+  id: string;
+  name: string;
+  address: string | null;
+  lat: number;
+  lng: number;
+  radiusM: number;
+  usage: { users: number; classes: number };
+}
+export type BranchInput = Pick<Branch, 'name' | 'address' | 'lat' | 'lng' | 'radiusM'>;
 
 export type Role = 'DIRECTOR' | 'ACCOUNTANT' | 'ADMIN' | 'STAFF';
 export interface StaffMember {
@@ -70,12 +82,13 @@ export interface StaffMember {
   position: string;
   isTeacher: boolean;
   subject: string | null;
+  branchId: string | null;
   baseSalary: number;
   isActive: boolean;
   lateCount: number;
   absentCount: number;
 }
-export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive' | 'isTeacher' | 'subject'> & {
+export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive' | 'isTeacher' | 'subject' | 'branchId'> & {
   password?: string;
   homeroomClassId?: string | null;
 };
@@ -90,6 +103,12 @@ export const schoolApi = {
   updateStudent: (id: string, d: StudentInput) => api.patch<Student>(`/students/${id}`, d).then((r) => r.data),
   exportStudents: (f: Omit<StudentFilters, 'page' | 'limit' | 'debtor'>) =>
     api.get<Blob>('/students/export', { params: clean(f), responseType: 'blob' }).then((r) => r.data),
+
+  branches: () => api.get<{ items: Branch[] }>('/branches').then((r) => r.data.items),
+  createBranch: (d: BranchInput) => api.post<Branch>('/branches', d).then((r) => r.data),
+  updateBranch: (id: string, d: BranchInput) => api.patch<Branch>(`/branches/${id}`, d).then((r) => r.data),
+  deleteBranch: (id: string, moveTo?: string) => api.delete(`/branches/${id}`, { params: moveTo ? { moveTo } : {} }).then((r) => r.data),
+  assignBranch: (id: string, userIds: string[], classIds: string[]) => api.put(`/branches/${id}/assign`, { userIds, classIds }).then((r) => r.data),
 
   classes: () => api.get<{ items: SchoolClass[] }>('/classes').then((r) => r.data.items),
   createClass: (d: ClassInput) => api.post<SchoolClass>('/classes', d).then((r) => r.data),

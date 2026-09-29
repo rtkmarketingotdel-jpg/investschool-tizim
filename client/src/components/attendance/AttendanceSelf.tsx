@@ -8,22 +8,10 @@ import { errorCode } from '@/lib/api';
 import { fmtDay, fmtTime, todayLocal } from '@/lib/dates';
 import { Button, Card, EmptyState, Skeleton, Table, Td, Th, Thead, Tr, useToast } from '../ui';
 import { CameraCapture } from './CameraCapture';
+import { LocationStep, type Fix } from './LocationStep';
 import { PunchCell } from './PunchCell';
 import { StatusBadge } from './StatusBadge';
 import axios from 'axios';
-
-interface Fix { lat: number; lng: number; accuracy: number }
-
-function getPosition(): Promise<Fix> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject(new Error('GEO_UNSUPPORTED'));
-    navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
-      (err) => reject(new Error(err.code === err.PERMISSION_DENIED ? 'GEO_DENIED' : 'GEO_FAILED')),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-    );
-  });
-}
 
 export function AttendanceSelf() {
   const { t, i18n } = useTranslation();
@@ -32,7 +20,7 @@ export function AttendanceSelf() {
   const qc = useQueryClient();
   const [mode, setMode] = useState<'in' | 'out' | null>(null);
   const [fix, setFix] = useState<Fix | null>(null);
-  const [locating, setLocating] = useState(false);
+  const [locating, setLocating] = useState<'in' | 'out' | null>(null);
 
   const today = useQuery({ queryKey: ['attendance', 'today'], queryFn: attendanceApi.today });
   const month = todayLocal().slice(0, 7);
@@ -48,23 +36,11 @@ export function AttendanceSelf() {
     },
     onError: (e) => {
       const code = errorCode(e);
-      const distanceM = axios.isAxiosError(e) ? e.response?.data?.details?.distanceM : undefined;
-      toast(t(`errors.${code}`, { defaultValue: t('errors.INTERNAL_ERROR'), distance: distanceM }), 'error');
+      const details = axios.isAxiosError(e) ? (e.response?.data?.details ?? {}) : {};
+      toast(String(t(`errors.${code}`, { defaultValue: t('errors.INTERNAL_ERROR'), ...(details as Record<string, string | number>) })), 'error');
       if (code !== 'ATTENDANCE_BAD_TIMESTAMP' && code !== 'ATTENDANCE_INVALID_PHOTO') setMode(null);
     },
   });
-
-  const begin = async (m: 'in' | 'out') => {
-    setLocating(true);
-    try {
-      setFix(await getPosition());
-      setMode(m);
-    } catch (e) {
-      toast(t(`errors.${(e as Error).message}`, { defaultValue: t('errors.GEO_FAILED') }), 'error');
-    } finally {
-      setLocating(false);
-    }
-  };
 
   const rec = today.data?.record ?? null;
   const st = today.data?.settings;
@@ -98,8 +74,7 @@ export function AttendanceSelf() {
           <Button
             className="flex-1 py-4 text-lg md:flex-none md:px-10"
             disabled={!!rec?.checkInAt || today.isLoading}
-            loading={locating && mode === null}
-            onClick={() => void begin('in')}
+            onClick={() => setLocating('in')}
           >
             <LogIn className="h-5 w-5" /> {t('attendance.checkIn')}
           </Button>
@@ -107,13 +82,21 @@ export function AttendanceSelf() {
             variant="secondary"
             className="flex-1 py-4 text-lg md:flex-none md:px-10"
             disabled={!rec?.checkInAt || done}
-            onClick={() => void begin('out')}
+            onClick={() => setLocating('out')}
           >
             <LogOut className="h-5 w-5" /> {t('attendance.checkOut')}
           </Button>
         </div>
       </Card>
 
+      <LocationStep
+        open={locating !== null}
+        branches={today.data?.branches ?? []}
+        geoEnforced={today.data?.settings.geoEnforced ?? false}
+        maxAccuracyM={today.data?.settings.maxGpsAccuracyM ?? 100}
+        onCancel={() => setLocating(null)}
+        onConfirm={(f) => { setFix(f); setMode(locating); setLocating(null); }}
+      />
       <CameraCapture
         open={mode !== null}
         submitting={punch.isPending}

@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { financeApi } from '@/lib/financeApi';
 import { PageHeader } from '@/components/PageHeader';
 import { InterfaceTab } from '@/components/settings/InterfaceTab';
-import { LocationTab } from '@/components/settings/LocationTab';
+import { BranchesTab } from '@/components/settings/BranchesTab';
 import { PaymentsTab } from '@/components/settings/PaymentsTab';
 import { TelegramTab } from '@/components/settings/TelegramTab';
 import { TemplatesTab } from '@/components/settings/TemplatesTab';
@@ -14,14 +14,14 @@ import { WorkTab } from '@/components/settings/WorkTab';
 import { EmptyState, Skeleton, Tabs } from '@/components/ui';
 import { Settings as SettingsIcon } from 'lucide-react';
 
-type Tab = 'location' | 'work' | 'payments' | 'users' | 'templates' | 'telegram' | 'interface';
+type Tab = 'branches' | 'work' | 'payments' | 'users' | 'templates' | 'telegram' | 'interface';
 
 export default function Settings() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isDirector = user?.role === 'DIRECTOR';
-  const tabs: Tab[] = isDirector ? ['location', 'work', 'payments', 'users', 'templates', 'telegram', 'interface'] : ['location', 'templates', 'interface'];
-  const [tab, setTab] = useState<Tab>('location');
+  const tabs: Tab[] = isDirector ? ['branches', 'work', 'payments', 'users', 'templates', 'telegram', 'interface'] : ['branches', 'templates', 'interface'];
+  const [tab, setTab] = useState<Tab>('branches');
   const { data, isLoading, isError } = useQuery({ queryKey: ['settings'], queryFn: financeApi.settings });
 
   return (
@@ -32,7 +32,7 @@ export default function Settings() {
         <EmptyState icon={SettingsIcon} title={t('errors.INTERNAL_ERROR')} />
       ) : (
         <>
-          {tab === 'location' && <LocationTab settings={data} />}
+          {tab === 'branches' && <BranchesTab settings={data} />}
           {tab === 'work' && <WorkTab settings={data} />}
           {tab === 'payments' && <PaymentsTab settings={data} />}
           {tab === 'users' && <UsersTab />}

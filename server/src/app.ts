@@ -5,6 +5,7 @@ import { env } from './env.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { meRouter } from './routes/me.js';
+import { branchesRouter } from './routes/branches.js';
 import { classesRouter } from './routes/classes.js';
 import { staffRouter } from './routes/staff.js';
 import { studentsRouter } from './routes/students.js';
@@ -33,6 +34,7 @@ export function createApp() {
   app.use('/api/students', studentsRouter);
   app.use('/api/classes', classesRouter);
   app.use('/api/staff', staffRouter);
+  app.use('/api/branches', branchesRouter);
   app.use('/api/payments', paymentsRouter);
   app.use('/api/debtors', debtorsRouter);
   app.use('/api/payroll', payrollRouter);

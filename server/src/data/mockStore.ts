@@ -1,10 +1,17 @@
 import bcrypt from 'bcryptjs';
-import type { Attendance, AttendanceStatus, Role, Setting, User } from './types.js';
-import { addDays, atLocal, isoWeekday, toLocalDate } from '../lib/date.js';
+import type { Attendance, AttendanceStatus, Branch, Role, Setting, User } from './types.js';
+import { addDays, atLocal, isoWeekday, localMinutes, toLocalDate } from '../lib/date.js';
+import { haversineM } from '../lib/geo.js';
 
 // In-memory mock data. Replaced by a real database (hosted in Uzbekistan) later;
 // only the repositories depend on this file.
 const hash = bcrypt.hashSync('demo1234', 10);
+
+export const branches: Branch[] = [
+  { id: 'b1', name: 'Asosiy filial', address: 'Samarqand shahri', lat: 39.6542, lng: 66.9597, radiusM: 150 },
+  { id: 'b2', name: 'Bulungʻur filiali', address: 'Bulungʻur tumani', lat: 39.7644, lng: 67.4813, radiusM: 150 },
+];
+const SECOND_BRANCH_USERS = new Set([13, 14, 15]);
 
 const seedUser = (n: number, fullName: string, role: Role, position: string, baseSalary: number): User => ({
   id: `u${n}`,
@@ -15,6 +22,7 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
   position,
   isTeacher: position.includes('oʻqituvchisi'),
   subject: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
+  branchId: SECOND_BRANCH_USERS.has(n) ? 'b2' : 'b1',
   baseSalary,
   language: 'uz',
   isActive: true,
@@ -36,9 +44,6 @@ export const users: User[] = [
 ];
 
 export const settings: Setting = {
-  schoolLat: 39.6542,
-  schoolLng: 66.9597,
-  radiusM: 150,
   maxGpsAccuracyM: 100,
   geoEnforced: false,
   workStart: '08:00',
@@ -69,7 +74,7 @@ export const attendances: Attendance[] = [];
         id: `a${id++}`, userId: u.id, date, lateMinutes: 0,
         checkInPhotoUrl: null, checkInLat: null, checkInLng: null, checkInAccuracy: null, checkInDistanceM: null,
         checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null,
-        deviceInfo: null, note: null,
+        deviceInfo: null, note: null, branchId: u.branchId,
       };
       if (r < 0.05) {
         attendances.push({ ...base, status: 'ABSENT', checkInAt: null, checkOutAt: null });
@@ -84,6 +89,24 @@ export const attendances: Attendance[] = [];
         ...base, status, lateMinutes: late ? inMin : 0,
         checkInAt: atLocal(date, hhmm(8 * 60 + Math.max(inMin, 0) - (late ? 0 : 10))),
         checkOutAt: atLocal(date, hhmm(outMin)),
+      });
+    }
+  }
+  // Today: a few employees already checked in (no check-out yet) so the live map has dots.
+  if (settings.workDays.includes(isoWeekday(today)) && localMinutes(new Date()) >= 8 * 60 + 30) {
+    const arrivals: Array<[string, string]> = [['u11', '07:52'], ['u12', '08:04'], ['u13', '08:21'], ['u14', '07:48'], ['u16', '08:09']];
+    for (const [uid, hhmm] of arrivals) {
+      const u = users.find((x) => x.id === uid)!;
+      const b = branches.find((x) => x.id === u.branchId)!;
+      const lat = b.lat + (rnd() - 0.5) * 0.0009;
+      const lng = b.lng + (rnd() - 0.5) * 0.0009;
+      const [h, m] = hhmm.split(':').map(Number) as [number, number];
+      const late = h * 60 + m > 8 * 60 + settings.graceMinutes;
+      attendances.push({
+        id: `a${id++}`, userId: u.id, date: today, status: late ? 'LATE' : 'ON_TIME', lateMinutes: late ? h * 60 + m - 8 * 60 : 0,
+        checkInAt: atLocal(today, hhmm), checkInPhotoUrl: null, checkInLat: lat, checkInLng: lng, checkInAccuracy: 15,
+        checkInDistanceM: haversineM(lat, lng, b.lat, b.lng), checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null,
+        checkOutLng: null, checkOutDistanceM: null, deviceInfo: null, note: null, branchId: b.id,
       });
     }
   }

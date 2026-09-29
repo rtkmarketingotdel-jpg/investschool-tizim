@@ -15,6 +15,7 @@ const classSchema = z.object({
   grade: z.number().int().min(1).max(11),
   capacity: z.number().int().min(1).max(100),
   teacherId: z.string().nullable(),
+  branchId: z.string().nullable().default(null),
 });
 
 async function withStats(c: Awaited<ReturnType<typeof classRepo.list>>[number]) {

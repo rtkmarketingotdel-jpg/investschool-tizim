@@ -9,6 +9,7 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   lateMinutes: number;
   note?: string | null;
+  branchId?: string | null;
   checkInAt: string | null;
   checkInPhotoUrl: string | null;
   checkInLat: number | null;
@@ -43,11 +44,29 @@ export const attendanceApi = {
       .get<{
         today: string;
         record: AttendanceRecord | null;
-        settings: { workStart: string; workEnd: string; graceMinutes: number; radiusM: number };
+        settings: { workStart: string; workEnd: string; graceMinutes: number; geoEnforced: boolean; maxGpsAccuracyM: number };
+        branches: Array<{ id: string; name: string; lat: number; lng: number; radiusM: number }>;
       }>('/attendance/today')
       .then((r) => r.data),
   checkIn: (p: PunchPayload) => api.post('/attendance/check-in', p).then((r) => r.data.record as AttendanceRecord),
   checkOut: (p: PunchPayload) => api.post('/attendance/check-out', p).then((r) => r.data.record as AttendanceRecord),
+  day: (date: string, branchId: string) =>
+    api
+      .get<{
+        date: string;
+        isWorkday: boolean;
+        rows: Array<{ user: { id: string; fullName: string; position: string; role: string }; branchId: string | null; branchName: string | null; record: AttendanceRecord | null; state: AttendanceStatus | 'NOT_YET' }>;
+        summary: { total: number; came: number; onTime: number; late: number; absent: number; excused: number; notYet: number; left: number };
+      }>('/attendance/day', { params: { date, branchId: branchId || undefined } })
+      .then((r) => r.data),
+  map: () =>
+    api
+      .get<{
+        branches: Array<{ id: string; name: string; lat: number; lng: number; radiusM: number }>;
+        points: Array<{ userId: string; fullName: string; position: string; lat: number; lng: number; checkInAt: string; status: AttendanceStatus; lateMinutes: number; distanceM: number | null; photoUrl: string | null; branchName: string | null }>;
+        counts: { onSite: number; left: number };
+      }>('/attendance/map')
+      .then((r) => r.data),
   mine: (month: string) =>
     api.get<{ records: AttendanceRecord[]; stats: Stats }>('/attendance/mine', { params: { month } }).then((r) => r.data),
   list: (params: { from?: string; to?: string; page: number; limit: number }) =>

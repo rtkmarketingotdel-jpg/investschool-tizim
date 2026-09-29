@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { settings } from '../data/mockStore.js';
-import { addDays, toLocalDate } from '../lib/date.js';
+import { addDays, isoWeekday, toLocalDate } from '../lib/date.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
+import { branchRepo } from '../repositories/branchRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 import { setStatus } from '../services/attendanceEffects.js';
 import { ApiError } from '../lib/errors.js';
-import { checkIn, checkOut, monthStats, punchSchema, type PunchInput } from '../services/attendance.js';
+import { allowedBranches, checkIn, checkOut, monthStats, punchSchema, type PunchInput } from '../services/attendance.js';
 
 export const attendanceRouter = Router();
 attendanceRouter.use(requireAuth);
@@ -17,7 +18,6 @@ const publicSettings = () => ({
   workStart: settings.workStart,
   workEnd: settings.workEnd,
   graceMinutes: settings.graceMinutes,
-  radiusM: settings.radiusM,
   workDays: settings.workDays,
 });
 
@@ -25,7 +25,8 @@ attendanceRouter.get('/today', async (req, res, next) => {
   try {
     const today = toLocalDate();
     const record = await attendanceRepo.findByUserDate(req.user!.id, today);
-    res.json({ today, record, settings: publicSettings() });
+    const branches = (await allowedBranches(req.user!)).map((b) => ({ id: b.id, name: b.name, lat: b.lat, lng: b.lng, radiusM: b.radiusM }));
+    res.json({ today, record, settings: { ...publicSettings(), geoEnforced: settings.geoEnforced, maxGpsAccuracyM: settings.maxGpsAccuracyM }, branches });
   } catch (e) {
     next(e);
   }
@@ -150,6 +151,64 @@ attendanceRouter.get('/matrix/export', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNT
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="attendance-${m.month}.csv"`);
     res.send('\uFEFF' + lines.join('\r\n'));
+  } catch (e) {
+    next(e);
+  }
+});
+
+const dayQuery = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), branchId: z.string().optional() });
+
+/** Every active employee for one day (also those without a record), for the director's overview. */
+attendanceRouter.get('/day', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+  try {
+    const q = dayQuery.parse(req.query);
+    const date = q.date ?? toLocalDate();
+    const [users, records, branches] = await Promise.all([userRepo.list(), attendanceRepo.list({ from: date, to: date }), branchRepo.list()]);
+    const byUser = new Map(records.map((r) => [r.userId, r]));
+    const bName = new Map(branches.map((b) => [b.id, b.name]));
+    const rows = users
+      .filter((u) => u.isActive && (!q.branchId || u.branchId === q.branchId))
+      .sort((a, b) => a.fullName.localeCompare(b.fullName))
+      .map((u) => {
+        const r = byUser.get(u.id) ?? null;
+        const branchId = r?.branchId ?? u.branchId;
+        return {
+          user: { id: u.id, fullName: u.fullName, position: u.position, role: u.role },
+          branchId, branchName: branchId ? (bName.get(branchId) ?? null) : null,
+          record: r, state: r ? r.status : 'NOT_YET',
+        };
+      });
+    const count = (s: string) => rows.filter((r) => r.state === s).length;
+    res.json({
+      date, rows, isWorkday: settings.workDays.includes(isoWeekday(date)),
+      summary: { total: rows.length, came: rows.filter((r) => r.record?.checkInAt).length, onTime: count('ON_TIME'), late: count('LATE'), absent: count('ABSENT'), excused: count('EXCUSED'), notYet: count('NOT_YET'), left: rows.filter((r) => r.record?.checkOutAt).length },
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/** Live map: employees who checked in today and have not left yet (a dot disappears on check-out). */
+attendanceRouter.get('/map', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (_req, res, next) => {
+  try {
+    const today = toLocalDate();
+    const [records, branches] = await Promise.all([attendanceRepo.list({ from: today, to: today }), branchRepo.list()]);
+    const points = [];
+    for (const r of records) {
+      if (!r.checkInAt || r.checkOutAt || r.checkInLat == null || r.checkInLng == null) continue;
+      const u = await userRepo.findById(r.userId);
+      if (!u) continue;
+      points.push({
+        userId: u.id, fullName: u.fullName, position: u.position, lat: r.checkInLat, lng: r.checkInLng, checkInAt: r.checkInAt,
+        status: r.status, lateMinutes: r.lateMinutes, distanceM: r.checkInDistanceM, photoUrl: r.checkInPhotoUrl,
+        branchName: branches.find((b) => b.id === r.branchId)?.name ?? null,
+      });
+    }
+    res.json({
+      branches: branches.map((b) => ({ id: b.id, name: b.name, lat: b.lat, lng: b.lng, radiusM: b.radiusM })),
+      points,
+      counts: { onSite: points.length, left: records.filter((r) => r.checkOutAt).length },
+    });
   } catch (e) {
     next(e);
   }

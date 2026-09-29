@@ -43,7 +43,7 @@ export async function markAbsentees(date = toLocalDate()): Promise<number> {
     const rec = await attendanceRepo.create({
       userId: u.id, date, status: 'ABSENT', lateMinutes: 0, checkInAt: null, checkInPhotoUrl: null, checkInLat: null, checkInLng: null,
       checkInAccuracy: null, checkInDistanceM: null, checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null,
-      checkOutDistanceM: null, deviceInfo: null, note: null,
+      checkOutDistanceM: null, deviceInfo: null, note: null, branchId: u.branchId,
     });
     await syncFine(rec);
     absent.push(u);

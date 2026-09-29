@@ -15,6 +15,8 @@ export default function Classes() {
   const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
   const [drawer, setDrawer] = useState<{ open: boolean; cls: SchoolClass | null }>({ open: false, cls: null });
   const { data, isLoading, isError } = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
+  const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches });
+  const branchName = new Map((branches.data ?? []).map((b) => [b.id, b.name]));
   const free = data?.reduce((n, c) => n + c.freeSeats, 0) ?? 0;
 
   return (
@@ -38,7 +40,7 @@ export default function Classes() {
               <Card key={c.id} className="relative transition hover:bg-surface-muted/60">
                 <Link to={`/students?classId=${c.id}`} className="block after:absolute after:inset-0 after:content-['']">
                   <h2 className="text-xl font-medium">{c.name}</h2>
-                  <p className="mt-1 text-sm text-text-muted">{c.teacherName ?? t('classes.noTeacher')}</p>
+                  <p className="mt-1 text-sm text-text-muted">{c.teacherName ?? t('classes.noTeacher')}{c.branchId && branchName.size > 1 ? ` · ${branchName.get(c.branchId) ?? ''}` : ''}</p>
                 </Link>
                 <div className="mt-5 flex items-baseline justify-between">
                   <span className="text-2xl font-medium tabular-nums">{c.studentCount}/{c.capacity}</span>

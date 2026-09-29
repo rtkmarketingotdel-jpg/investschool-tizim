@@ -86,7 +86,7 @@
     "ATTENDANCE_NOT_CHECKED_IN": "Avval “Keldim” tugmasini bosing",
     "ATTENDANCE_NOT_WORKDAY": "Bugun ish kuni emas",
     "ATTENDANCE_LOW_ACCURACY": "Joylashuv aniqligi past. Ochiq joyga chiqib qayta urinib koʻring",
-    "ATTENDANCE_OUT_OF_RADIUS": "Siz maktabdan {{distance}} m uzoqdasiz",
+    "ATTENDANCE_OUT_OF_RADIUS": "Siz “{{branch}}” filialidan {{distance}} m uzoqdasiz (ruxsat: {{radius}} m)",
     "ATTENDANCE_BAD_TIMESTAMP": "Qurilma vaqti notoʻgʻri. Vaqtni tekshirib qayta urinib koʻring",
     "ATTENDANCE_INVALID_PHOTO": "Rasm notoʻgʻri, qayta oling",
     "ATTENDANCE_PHOTO_TOO_LARGE": "Rasm hajmi katta",
@@ -101,7 +101,10 @@
     "CONTRACT_BAD_STATE": "Shartnoma holati bu amalga mos emas",
     "CONTRACT_NOT_SIGNABLE": "Bu shartnomani imzolab boʻlmaydi",
     "TEMPLATE_IN_USE": "Shablon shartnomalarda ishlatilgan, oʻchirib boʻlmaydi",
-    "TELEGRAM_NOT_CONFIGURED": "Telegram bot tokeni yoki chat ID sozlanmagan"
+    "TELEGRAM_NOT_CONFIGURED": "Telegram bot tokeni yoki chat ID sozlanmagan",
+    "BRANCH_LAST": "Oxirgi filialni oʻchirib boʻlmaydi",
+    "BRANCH_HAS_DATA": "Filialga xodim yoki sinflar biriktirilgan",
+    "reload": "Sahifani qayta yuklash"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",
@@ -156,8 +159,44 @@
     "excusedHint": "“Sababli” tanlansa, bogʻlangan jarima avtomatik oʻchiriladi.",
     "dayOff": "Dam olish kuni",
     "tabs": {
-      "log": "Kunlik jurnal",
-      "matrix": "Oylik hisobot"
+      "log": "Jurnal",
+      "matrix": "Oylik hisobot",
+      "day": "Barcha xodimlar",
+      "map": "Xarita"
+    },
+    "mine": "Mening davomatim",
+    "day": {
+      "branch": "Filial",
+      "allBranches": "Barcha filiallar",
+      "notYet": "Hali kelmagan",
+      "left": "Ketgan"
+    },
+    "map": {
+      "title": "Bugungi holat xaritasi",
+      "onSite": "Hozir maktabda",
+      "left": "Bugun ketganlar",
+      "empty": "Hozir maktabda hech kim belgilanmagan",
+      "hint": "Nuqta “Keldim” bosilganda paydo boladi va “Ketdim” bosilganda oʻchadi",
+      "updated": "yangilandi {{time}}"
+    },
+    "location": {
+      "title": "Joylashuvni aniqlash",
+      "locating": "Joylashuv aniqlanmoqda…",
+      "allowHint": "Brauzer soʻrasa, joylashuvga ruxsat bering.",
+      "denied": "Joylashuvga ruxsat berilmagan. Davomat uchun ruxsat kerak.",
+      "failed": "Joylashuvni aniqlab boʻlmadi. Ochiq joyga chiqib qayta urinib koʻring.",
+      "step1": "Brauzer manzil satridagi qulf (yoki sozlamalar) belgisini bosing",
+      "step2": "“Joylashuv” ni “Ruxsat berish” ga oʻzgartiring",
+      "step3": "Sahifani yangilab, qayta urinib koʻring",
+      "detected": "Joylashuv aniqlandi",
+      "problem": "Davomat qilish mumkin emas",
+      "accuracy": "Aniqlik: ±{{m}} m",
+      "nearest": "Eng yaqin filial: {{name}} ({{distance}} m)",
+      "inRange": "Filial hududidasiz (radius {{radius}} m)",
+      "outOfRange": "Filialdan {{distance}} m uzoqdasiz, ruxsat etilgan radius: {{radius}} m",
+      "lowAccuracy": "GPS aniqligi past (ruxsat: ±{{max}} m). Ochiq joyga chiqing.",
+      "refresh": "Qayta aniqlash",
+      "continue": "Davom etish"
     }
   },
   "students": {
@@ -285,7 +324,9 @@
     "login": "Login",
     "password": "Parol",
     "passwordMin": "Kamida 8 belgi",
-    "generate": "Yaratish"
+    "generate": "Yaratish",
+    "branch": "Filial",
+    "anyBranch": "Istalgan filial"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",
@@ -469,7 +510,8 @@
       "users": "Foydalanuvchilar",
       "templates": "Shartnoma shablonlari",
       "telegram": "Telegram",
-      "interface": "Interfeys"
+      "interface": "Interfeys",
+      "branches": "Filiallar"
     },
     "location": {
       "hint": "Xodimlar davomatini maktab joylashuviga nisbatan tekshirish uchun koordinata va radiusni kiriting. Maktabda turib “Hozirgi joylashuvimni olish” tugmasini bosing.",
@@ -543,6 +585,33 @@
       "theme": "Mavzu",
       "light": "Kunduzgi",
       "dark": "Tungi"
+    },
+    "branches": {
+      "hint": "Maktabning har bir filialini belgilang. Xodim davomatni faqat oʻz filiali hududida (yoki filial biriktirilmagan boʻlsa, istalgan filialda) qila oladi.",
+      "add": "Filial qoʻshish",
+      "edit": "Filialni tahrirlash",
+      "delete": "Filialni oʻchirish",
+      "deleted": "Filial oʻchirildi",
+      "deleteConfirm": "“{{name}}” filialini oʻchirasizmi?",
+      "hasData": "Biriktirilgan: {{users}} xodim, {{classes}} sinf. Ularni qayerga koʻchiramiz?",
+      "moveTo": "Maʼlumotlarni koʻchirish",
+      "detach": "Biriktirishni olib tashlash",
+      "empty": "Filiallar yoʻq",
+      "name": "Nomi",
+      "address": "Manzil",
+      "lat": "Kenglik",
+      "lng": "Uzunlik",
+      "radius": "Radius (m)",
+      "useMine": "Hozirgi joylashuvim",
+      "pickHint": "Xaritani bosib joylashuvni belgilashingiz ham mumkin.",
+      "employees": "Xodimlar",
+      "classes": "Sinflar",
+      "assignHint": "Belgilanganlar shu filialga biriktiriladi.",
+      "saved": "Filial saqlandi",
+      "rules": "Davomat qoidalari",
+      "enforce": "Filial radiusidan tashqarida davomatni rad etish",
+      "enforceHint": "Oʻchiq boʻlsa, masofa yoziladi, lekin davomat rad etilmaydi (sinov uchun).",
+      "accuracy": "Maksimal GPS xatoligi (metr)"
     }
   }
 }

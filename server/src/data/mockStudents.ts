@@ -21,6 +21,7 @@ export const classes: SchoolClass[] = CLASS_NAMES.map((name, i) => ({
   grade: parseInt(name, 10),
   capacity: 15,
   teacherId: teachers[i % teachers.length]?.id ?? null,
+  branchId: i < 8 ? 'b1' : 'b2',
 }));
 
 const phone = () => `+99890${String(Math.floor(rnd() * 9_000_000) + 1_000_000)}`;

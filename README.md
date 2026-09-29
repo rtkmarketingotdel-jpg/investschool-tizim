@@ -21,7 +21,8 @@ public signing page with OTP), settings, notifications (bell, 60 s polling), Tel
 
 - **OTP in demo mode:** `SMS_PROVIDER=demo` — the code is shown to staff in the contracts table (while valid), in the bell
   panel and in the Telegram group. With `SMS_PROVIDER=eskiz` + `ESKIZ_EMAIL`/`ESKIZ_PASSWORD` it is sent by SMS (untested against the live API).
-- **Check-in radius:** recorded always; enforced only when enabled in Settings → Location.
+- **Branches:** Settings → Branches (create/edit/delete, attach employees and classes, pick location on a map). An employee checks in within their own branch radius (any branch when none is assigned). The radius is recorded always and enforced only when enabled there.
+- **Live map:** Attendance → Map (Leaflet + OpenStreetMap, no API key). A dot appears on check-in and disappears on check-out.
 - Telegram uses the Bot HTTP API directly (`TELEGRAM_BOT_TOKEN` + chat id in Settings); it is a no-op when not configured.
 
 ## Checks

@@ -13,6 +13,7 @@ const schema = z.object({
   grade: z.number({ invalid_type_error: 'errors.required' }).int().min(1).max(11),
   capacity: z.number({ invalid_type_error: 'errors.required' }).int().min(1).max(100),
   teacherId: z.string(),
+  branchId: z.string(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -27,17 +28,18 @@ export function ClassDrawer({ open, cls, onClose }: Props) {
   const toast = useToast();
   const qc = useQueryClient();
   const staff = useQuery({ queryKey: ['staff', 'all'], queryFn: () => schoolApi.staff({ active: 'true', teacher: 'true', page: 1, limit: 100 }), enabled: open });
+  const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches, enabled: open });
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', grade: 1, capacity: 15, teacherId: '' },
+    defaultValues: { name: '', grade: 1, capacity: 15, teacherId: '', branchId: '' },
   });
   useEffect(() => {
-    if (open) reset(cls ? { name: cls.name, grade: cls.grade, capacity: cls.capacity, teacherId: cls.teacherId ?? '' } : { name: '', grade: 1, capacity: 15, teacherId: '' });
+    if (open) reset(cls ? { name: cls.name, grade: cls.grade, capacity: cls.capacity, teacherId: cls.teacherId ?? '', branchId: cls.branchId ?? '' } : { name: '', grade: 1, capacity: 15, teacherId: '', branchId: '' });
   }, [open, cls, reset]);
 
   const save = useMutation({
     mutationFn: (v: FormValues) => {
-      const body = { ...v, teacherId: v.teacherId || null };
+      const body = { ...v, teacherId: v.teacherId || null, branchId: v.branchId || null };
       return cls ? schoolApi.updateClass(cls.id, body) : schoolApi.createClass(body);
     },
     onSuccess: () => {
@@ -62,6 +64,10 @@ export function ClassDrawer({ open, cls, onClose }: Props) {
           {staff.data?.items.map((u) => (
             <option key={u.id} value={u.id}>{u.fullName}</option>
           ))}
+        </Select>
+        <Select label={t('staff.branch')} {...register('branchId')}>
+          <option value="">{t('staff.anyBranch')}</option>
+          {branches.data?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
         </Select>
         <div className="flex gap-3 pt-4">
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>

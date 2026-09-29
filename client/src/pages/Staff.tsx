@@ -30,6 +30,8 @@ export default function Staff() {
   const [resetTarget, setResetTarget] = useState<StaffMember | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches });
+  const branchName = new Map((branches.data ?? []).map((b) => [b.id, b.name]));
   const list = useQuery({
     queryKey: ['staff', q, role, active, teacher, page],
     queryFn: () => schoolApi.staff({ q, role, active, teacher, page, limit: LIMIT }),
@@ -105,6 +107,7 @@ export default function Staff() {
                 <Th className="w-16">№</Th>
                 <Th>{t('staff.fullName')}</Th>
                 <Th>{t('staff.position')}</Th>
+                <Th>{t('staff.branch')}</Th>
                 <Th>{t('staff.role')}</Th>
                 <Th numeric>{t('staff.baseSalary')}</Th>
                 <Th>{t('staff.thisMonth')}</Th>
@@ -126,6 +129,7 @@ export default function Staff() {
                     </div>
                   </Td>
                   <Td>{m.position}</Td>
+                  <Td className="text-text-muted">{m.branchId ? (branchName.get(m.branchId) ?? '—') : t('staff.anyBranch')}</Td>
                   <Td><Badge>{t(`roles.${m.role}`)}</Badge></Td>
                   <Td numeric>{formatMoney(m.baseSalary, t('common.currency'))}</Td>
                   <Td className="whitespace-nowrap text-sm">

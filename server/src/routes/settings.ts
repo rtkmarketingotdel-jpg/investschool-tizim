@@ -14,9 +14,6 @@ const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
 const patchSchema = z
   .object({
-    schoolLat: z.number().min(-90).max(90),
-    schoolLng: z.number().min(-180).max(180),
-    radiusM: z.number().int().min(10).max(5000),
     maxGpsAccuracyM: z.number().int().min(10).max(1000),
     geoEnforced: z.boolean(),
     workStart: hhmm,
@@ -33,7 +30,7 @@ const patchSchema = z
   .partial();
 
 /** ADMIN may only change where the school is (needed to set up the check-in radius). */
-const ADMIN_FIELDS = new Set(['schoolLat', 'schoolLng', 'radiusM', 'maxGpsAccuracyM', 'geoEnforced']);
+const ADMIN_FIELDS = new Set(['maxGpsAccuracyM', 'geoEnforced']);
 
 settingsRouter.get('/', (_req, res) => {
   res.json({ settings });

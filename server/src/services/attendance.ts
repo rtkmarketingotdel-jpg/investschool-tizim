@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { settings } from '../data/mockStore.js';
-import type { Attendance, User } from '../data/types.js';
+import type { Attendance, Branch, User } from '../data/types.js';
+import { branchRepo } from '../repositories/branchRepo.js';
 import { ApiError } from '../lib/errors.js';
 import { haversineM } from '../lib/geo.js';
 import { isoWeekday, localMinutes, parseHHMM, toLocalDate } from '../lib/date.js';
@@ -40,17 +41,33 @@ async function savePhoto(buf: Buffer, userId: string, date: string, kind: 'in' |
   return `/uploads/${rel.split(path.sep).join('/')}`;
 }
 
-function validate(input: PunchInput, now: Date) {
+/** Branches the employee may check in at: their own, or all when none is assigned. */
+export async function allowedBranches(user: Pick<User, 'branchId'>) {
+  const all = await branchRepo.list();
+  const own = user.branchId ? all.filter((b) => b.id === user.branchId) : [];
+  return own.length ? own : all;
+}
+
+export function nearestBranch(branches: Branch[], lat: number, lng: number) {
+  let best: { branch: Branch; distanceM: number } | null = null;
+  for (const b of branches) {
+    const d = haversineM(lat, lng, b.lat, b.lng);
+    if (!best || d < best.distanceM) best = { branch: b, distanceM: d };
+  }
+  return best;
+}
+
+async function validate(input: PunchInput, now: Date, user: User) {
   if (Math.abs(now.getTime() - new Date(input.capturedAt).getTime()) > MAX_CLOCK_SKEW_MS) {
     throw new ApiError(400, 'ATTENDANCE_BAD_TIMESTAMP');
   }
   const photo = decodeJpeg(input.photo);
   if (input.accuracy > settings.maxGpsAccuracyM) throw new ApiError(400, 'ATTENDANCE_LOW_ACCURACY');
-  const distanceM = haversineM(input.lat, input.lng, settings.schoolLat, settings.schoolLng);
-  if (settings.geoEnforced && distanceM > settings.radiusM) {
-    throw new ApiError(400, 'ATTENDANCE_OUT_OF_RADIUS', { distanceM, radiusM: settings.radiusM });
+  const near = nearestBranch(await allowedBranches(user), input.lat, input.lng);
+  if (near && settings.geoEnforced && near.distanceM > near.branch.radiusM) {
+    throw new ApiError(400, 'ATTENDANCE_OUT_OF_RADIUS', { distanceM: near.distanceM, radiusM: near.branch.radiusM, branch: near.branch.name });
   }
-  return { photo, distanceM };
+  return { photo, distanceM: near?.distanceM ?? null, branchId: near?.branch.id ?? user.branchId };
 }
 
 export async function checkIn(user: User, input: PunchInput, userAgent: string | undefined) {
@@ -60,7 +77,7 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
   const existing = await attendanceRepo.findByUserDate(user.id, date);
   if (existing?.checkInAt) throw new ApiError(409, 'ATTENDANCE_ALREADY_CHECKED_IN');
 
-  const { photo, distanceM } = validate(input, now);
+  const { photo, distanceM, branchId } = await validate(input, now, user);
   const photoUrl = await savePhoto(photo, user.id, date, 'in');
 
   const workStart = parseHHMM(settings.workStart);
@@ -75,6 +92,7 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
     checkInLng: input.lng,
     checkInAccuracy: input.accuracy,
     checkInDistanceM: distanceM,
+    branchId,
     deviceInfo: userAgent ?? null,
   };
   // An ABSENT row (from the noon job) is overwritten by a late check-in.
@@ -97,7 +115,7 @@ export async function checkOut(user: User, input: PunchInput) {
   if (!rec?.checkInAt) throw new ApiError(400, 'ATTENDANCE_NOT_CHECKED_IN');
   if (rec.checkOutAt) throw new ApiError(409, 'ATTENDANCE_ALREADY_CHECKED_OUT');
 
-  const { photo, distanceM } = validate(input, now);
+  const { photo, distanceM } = await validate(input, now, user);
   const photoUrl = await savePhoto(photo, user.id, date, 'out');
   return (await attendanceRepo.update(rec.id, {
     checkOutAt: now,

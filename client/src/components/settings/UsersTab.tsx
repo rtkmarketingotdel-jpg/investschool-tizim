@@ -19,7 +19,7 @@ export function UsersTab() {
 
   const update = useMutation({
     mutationFn: ({ m, patch }: { m: StaffMember; patch: Partial<StaffMember> }) =>
-      schoolApi.updateStaff(m.id, { fullName: m.fullName, phone: m.phone, role: m.role, position: m.position, baseSalary: m.baseSalary, isActive: m.isActive, isTeacher: m.isTeacher, subject: m.subject, ...patch }),
+      schoolApi.updateStaff(m.id, { fullName: m.fullName, phone: m.phone, role: m.role, position: m.position, baseSalary: m.baseSalary, isActive: m.isActive, isTeacher: m.isTeacher, subject: m.subject, branchId: m.branchId, ...patch }),
     onSuccess: () => { toast(t('staff.updated')); void qc.invalidateQueries({ queryKey: ['staff'] }); },
     onError: fail,
   });

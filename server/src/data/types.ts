@@ -10,6 +10,8 @@ export interface User {
   position: string;
   isTeacher: boolean;
   subject: string | null;
+  /** null = may check in at any branch */
+  branchId: string | null;
   baseSalary: number;
   language: Lang;
   isActive: boolean;
@@ -18,6 +20,15 @@ export interface User {
 }
 
 export type PublicUser = Omit<User, 'passwordHash'>;
+
+export interface Branch {
+  id: string;
+  name: string;
+  address: string | null;
+  lat: number;
+  lng: number;
+  radiusM: number;
+}
 
 export type AttendanceStatus = 'ON_TIME' | 'LATE' | 'ABSENT' | 'EXCUSED';
 
@@ -40,12 +51,10 @@ export interface Attendance {
   checkOutDistanceM: number | null;
   deviceInfo: string | null;
   note: string | null;
+  branchId: string | null;
 }
 
 export interface Setting {
-  schoolLat: number;
-  schoolLng: number;
-  radiusM: number;
   maxGpsAccuracyM: number;
   /** When false the distance is recorded but not enforced (demo/dev on a laptop). */
   geoEnforced: boolean;
@@ -70,6 +79,7 @@ export interface SchoolClass {
   grade: number;
   capacity: number;
   teacherId: string | null;
+  branchId: string | null;
 }
 
 export interface Student {

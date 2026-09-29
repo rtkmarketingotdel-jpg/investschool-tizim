@@ -9,6 +9,7 @@ import { paginate, pageQuery } from '../lib/pagination.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
+import { branchRepo } from '../repositories/branchRepo.js';
 import { classRepo } from '../repositories/classRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
@@ -30,6 +31,7 @@ const staffSchema = z.object({
   /** Optional login password on creation; generated when omitted. */
   password: z.string().min(8).max(64).optional(),
   homeroomClassId: z.string().nullable().default(null),
+  branchId: z.string().nullable().default(null),
   baseSalary: z.number().int().min(0).max(100_000_000),
   isActive: z.boolean().default(true),
 });
@@ -100,6 +102,7 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
     if (await userRepo.findByPhone(body.phone)) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
     const { password, homeroomClassId, ...data } = body;
     if (homeroomClassId && !(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
+    if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
     const finalPassword = password ?? generatePassword();
     const user = await userRepo.create({
       ...data,
@@ -134,6 +137,7 @@ staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
       if (!(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
       await classRepo.update(homeroomClassId, { teacherId: target.id });
     }
+    if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
     const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher ? data.subject : null });
     await audit(req.user!.id, 'staff.update', 'user', target.id);
     res.json({ user: toPublicUser(updated!) });
