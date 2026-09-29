@@ -8,6 +8,7 @@ export const env = {
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173',
   demoMode: process.env.DEMO_MODE === 'true',
   telegramToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
+  telegramApiUrl: process.env.TELEGRAM_API_URL || 'https://api.telegram.org',
   smsProvider: process.env.SMS_PROVIDER ?? 'demo',
   eskizEmail: process.env.ESKIZ_EMAIL ?? '',
   eskizPassword: process.env.ESKIZ_PASSWORD ?? '',

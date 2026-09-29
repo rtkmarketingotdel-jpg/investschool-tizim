@@ -207,6 +207,7 @@ export const financeApi = {
   settings: () => api.get<{ settings: Settings }>('/settings').then((r) => r.data.settings),
   saveSettings: (patch: Partial<Settings>) => api.put<{ settings: Settings }>('/settings', patch).then((r) => r.data.settings),
   testTelegram: () => api.post('/settings/telegram/test'),
+  telegramChats: () => api.get<{ items: Array<{ id: string; type: string; title: string }> }>('/settings/telegram/chats').then((r) => r.data.items),
 
   matrix: (month: string) => api.get<Matrix>('/attendance/matrix', { params: { month } }).then((r) => r.data),
   setAttendanceStatus: (id: string, status: string, note: string | null) => api.patch(`/attendance/${id}`, { status, note }).then((r) => r.data),

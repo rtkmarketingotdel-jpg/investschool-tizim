@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { settings } from '../data/mockStore.js';
@@ -9,6 +8,7 @@ import { haversineM } from '../lib/geo.js';
 import { isoWeekday, localMinutes, parseHHMM, toLocalDate } from '../lib/date.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { onLateCheckIn, syncFine } from './attendanceEffects.js';
+import { sendTelegramPhoto } from './telegram.js';
 
 export const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
 const MAX_PHOTO_BYTES = 1.5 * 1024 * 1024;
@@ -31,14 +31,6 @@ function decodeJpeg(dataUrl: string): Buffer {
   if (!isJpeg) throw new ApiError(400, 'ATTENDANCE_INVALID_PHOTO');
   if (buf.length > MAX_PHOTO_BYTES) throw new ApiError(400, 'ATTENDANCE_PHOTO_TOO_LARGE');
   return buf;
-}
-
-async function savePhoto(buf: Buffer, userId: string, date: string, kind: 'in' | 'out') {
-  const rel = path.join('attendance', date.slice(0, 7), `${userId}_${date}_${kind}.jpg`);
-  const abs = path.join(UPLOAD_DIR, rel);
-  await fs.mkdir(path.dirname(abs), { recursive: true });
-  await fs.writeFile(abs, buf);
-  return `/uploads/${rel.split(path.sep).join('/')}`;
 }
 
 /** Branches the employee may check in at: their own, or all when none is assigned. */
@@ -70,6 +62,23 @@ async function validate(input: PunchInput, now: Date, user: User) {
   return { photo, distanceM: near?.distanceM ?? null, branchId: near?.branch.id ?? user.branchId };
 }
 
+const fmtClock = (d: Date) => new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Tashkent', hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+
+/** The selfie goes straight to the director's Telegram with who/when/where; nothing is kept on our side. */
+async function reportSelfie(user: User, rec: Attendance, photo: Buffer, kind: 'in' | 'out') {
+  const at = kind === 'in' ? rec.checkInAt : rec.checkOutAt;
+  const branch = rec.branchId ? await branchRepo.findById(rec.branchId) : null;
+  const dist = kind === 'in' ? rec.checkInDistanceM : rec.checkOutDistanceM;
+  const lines = [
+    kind === 'in' ? '✅ Ishga keldi' : '🚪 Ishdan ketdi',
+    `👤 ${user.fullName}${user.position ? ` (${user.position})` : ''}`,
+    `🕒 ${at ? fmtClock(at) : ''} · ${rec.date.split('-').reverse().join('.')}`,
+    branch || dist != null ? `📍 ${[branch?.name, dist != null ? `${dist} m` : null].filter(Boolean).join(' · ')}` : '',
+    kind === 'in' ? (rec.status === 'LATE' ? `⏰ Kechikdi: ${rec.lateMinutes} daqiqa` : '👍 Vaqtida') : '',
+  ].filter(Boolean);
+  return sendTelegramPhoto(photo, lines.join('\n'));
+}
+
 export async function checkIn(user: User, input: PunchInput, userAgent: string | undefined) {
   if (user.role === 'DIRECTOR') throw new ApiError(403, 'ATTENDANCE_NOT_TRACKED');
   const now = new Date();
@@ -79,7 +88,6 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
   if (existing?.checkInAt) throw new ApiError(409, 'ATTENDANCE_ALREADY_CHECKED_IN');
 
   const { photo, distanceM, branchId } = await validate(input, now, user);
-  const photoUrl = await savePhoto(photo, user.id, date, 'in');
 
   const workStart = parseHHMM(settings.workStart);
   const minutes = localMinutes(now);
@@ -88,7 +96,8 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
     status: late ? ('LATE' as const) : ('ON_TIME' as const),
     lateMinutes: late ? minutes - workStart : 0,
     checkInAt: now,
-    checkInPhotoUrl: photoUrl,
+    checkInPhotoUrl: null,
+    selfieSent: false,
     checkInLat: input.lat,
     checkInLng: input.lng,
     checkInAccuracy: input.accuracy,
@@ -101,12 +110,14 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
     ? (await attendanceRepo.update(existing.id, data))!
     : await attendanceRepo.create({
     userId: user.id, date, note: null,
-    checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null,
+    checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null, selfieOutSent: false,
     ...data,
   });
   if (rec.status === 'LATE') await onLateCheckIn(user, rec);
   else if (existing) await syncFine(rec); // an earlier ABSENT fine no longer applies
-  return rec;
+  const selfie = await reportSelfie(user, rec, photo, 'in');
+  await attendanceRepo.update(rec.id, { selfieSent: selfie === 'sent' });
+  return { record: rec, selfie };
 }
 
 export async function checkOut(user: User, input: PunchInput) {
@@ -118,14 +129,16 @@ export async function checkOut(user: User, input: PunchInput) {
   if (rec.checkOutAt) throw new ApiError(409, 'ATTENDANCE_ALREADY_CHECKED_OUT');
 
   const { photo, distanceM } = await validate(input, now, user);
-  const photoUrl = await savePhoto(photo, user.id, date, 'out');
-  return (await attendanceRepo.update(rec.id, {
+  const updated = (await attendanceRepo.update(rec.id, {
     checkOutAt: now,
-    checkOutPhotoUrl: photoUrl,
+    checkOutPhotoUrl: null,
     checkOutLat: input.lat,
     checkOutLng: input.lng,
     checkOutDistanceM: distanceM,
   }))!;
+  const selfie = await reportSelfie(user, updated, photo, 'out');
+  await attendanceRepo.update(rec.id, { selfieOutSent: selfie === 'sent' });
+  return { record: updated, selfie };
 }
 
 export function monthStats(records: Attendance[]) {

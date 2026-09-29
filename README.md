@@ -29,6 +29,13 @@ public signing page with OTP), settings, notifications (bell, 60 s polling), Tel
 - **Live map:** Attendance → Map (Leaflet + OpenStreetMap, no API key). A dot appears on check-in and disappears on check-out.
 - Telegram uses the Bot HTTP API directly (`TELEGRAM_BOT_TOKEN` + chat id in Settings); it is a no-op when not configured.
 
+## Attendance selfies (Telegram)
+The selfie is **not stored** anywhere (no disk, no database). On every check-in/out the server sends it straight to the director's
+Telegram chat with name, position, time, branch, distance and status; Telegram is the archive. If delivery fails the check-in is still
+accepted and the record is flagged "Rasm yuborilmagan". Configure with `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` on the server
+(Railway); Settings → Telegram can also find the chat id ("Chatni aniqlash", after pressing Start in the bot).
+`TELEGRAM_API_URL` overrides the API base (used to test against a local mock).
+
 ## SMS (Eskiz)
 The SMS section (`/sms`) sends debtor reminders, holiday greetings and notices to parents/staff: templates with variables,
 audiences (all parents, classes, branch, debtors, staff, typed numbers), scheduling, history with per-message status,

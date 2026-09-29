@@ -101,6 +101,7 @@ export function AttendanceLog() {
                   <Td><PunchCell at={r.checkOutAt} photo={r.checkOutPhotoUrl} lat={r.checkOutLat} lng={r.checkOutLng} distanceM={r.checkOutDistanceM} title={`${r.user?.fullName} · ${t('attendance.left')}`} /></Td>
                   <Td>
                     <StatusBadge status={r.status} lateMinutes={r.lateMinutes} />
+                    {r.checkInAt && !r.selfieSent && <p className="mt-1 text-xs text-warning">{t('attendance.selfieMissing')}</p>}
                     {r.note && <p className="mt-1 max-w-40 truncate text-xs text-text-muted" title={r.note}>{r.note}</p>}
                   </Td>
                   <Td>

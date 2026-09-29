@@ -10,6 +10,8 @@ export interface AttendanceRecord {
   lateMinutes: number;
   note?: string | null;
   branchId?: string | null;
+  selfieSent?: boolean;
+  selfieOutSent?: boolean;
   checkInAt: string | null;
   checkInPhotoUrl: string | null;
   checkInLat: number | null;
@@ -30,6 +32,12 @@ export interface Stats {
   excused: number;
 }
 
+/** `selfie` says whether the photo reached the director on Telegram (it is never stored on our side). */
+export interface PunchResult {
+  record: AttendanceRecord;
+  selfie: 'sent' | 'failed' | 'not_configured';
+}
+
 export interface PunchPayload {
   photo: string;
   lat: number;
@@ -48,8 +56,8 @@ export const attendanceApi = {
         branches: Array<{ id: string; name: string; lat: number; lng: number; radiusM: number }>;
       }>('/attendance/today')
       .then((r) => r.data),
-  checkIn: (p: PunchPayload) => api.post('/attendance/check-in', p).then((r) => r.data.record as AttendanceRecord),
-  checkOut: (p: PunchPayload) => api.post('/attendance/check-out', p).then((r) => r.data.record as AttendanceRecord),
+  checkIn: (p: PunchPayload) => api.post<PunchResult>('/attendance/check-in', p).then((r) => r.data),
+  checkOut: (p: PunchPayload) => api.post<PunchResult>('/attendance/check-out', p).then((r) => r.data),
   day: (date: string, branchId: string) =>
     api
       .get<{

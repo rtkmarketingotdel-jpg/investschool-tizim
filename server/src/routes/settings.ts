@@ -4,8 +4,9 @@ import { settings } from '../data/mockStore.js';
 import { ApiError } from '../lib/errors.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
+import { env } from '../env.js';
 import { audit } from '../repositories/notificationRepo.js';
-import { sendTelegram } from '../services/telegram.js';
+import { findTelegramChats, sendTelegram } from '../services/telegram.js';
 
 export const settingsRouter = Router();
 settingsRouter.use(requireAuth, requireRole('DIRECTOR', 'ADMIN'));
@@ -48,6 +49,15 @@ settingsRouter.put('/', validateBody(patchSchema), async (req, res, next) => {
     Object.assign(settings, body);
     await audit(req.user!.id, 'settings.update', 'settings', 'main', { fields: Object.keys(body) });
     res.json({ settings });
+  } catch (e) {
+    next(e);
+  }
+});
+
+settingsRouter.get('/telegram/chats', requireRole('DIRECTOR'), async (_req, res, next) => {
+  try {
+    if (!env.telegramToken) throw new ApiError(400, 'TELEGRAM_NOT_CONFIGURED');
+    res.json({ items: await findTelegramChats() });
   } catch (e) {
     next(e);
   }

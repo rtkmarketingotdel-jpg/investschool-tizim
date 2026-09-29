@@ -78,7 +78,8 @@ export const settings: Setting = {
   absentFine: 100000,
   paymentDueDay: 10,
   contractPrefix: 'GS',
-  telegramChatId: null,
+  // env default: the settings live in memory (until the real database), so a chat id set in the UI is lost on restart
+  telegramChatId: process.env.TELEGRAM_CHAT_ID || null,
   smsDebtAutoEnabled: false,
   smsDebtEveryDays: 7,
   smsDebtMinOverdueDays: 3,
@@ -102,7 +103,7 @@ export const attendances: Attendance[] = [];
         id: `a${id++}`, userId: u.id, date, lateMinutes: 0,
         checkInPhotoUrl: null, checkInLat: null, checkInLng: null, checkInAccuracy: null, checkInDistanceM: null,
         checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null,
-        deviceInfo: null, note: null, branchId: u.branchId,
+        deviceInfo: null, note: null, branchId: u.branchId, selfieSent: true, selfieOutSent: true,
       };
       if (r < 0.05) {
         attendances.push({ ...base, status: 'ABSENT', checkInAt: null, checkOutAt: null });
@@ -137,7 +138,7 @@ export const attendances: Attendance[] = [];
         checkInAt: atLocal(today, hhmm), checkInPhotoUrl: null, checkInLat: lat, checkInLng: lng, checkInAccuracy: 15,
         checkInDistanceM: haversineM(lat, lng, b.lat, b.lng), checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null,
         checkOutLng: null, checkOutDistanceM: null, deviceInfo: null, note: null, branchId: b.id,
-        geoOffset: [lat - b.lat, lng - b.lng],
+        selfieSent: true, selfieOutSent: false, geoOffset: [lat - b.lat, lng - b.lng],
       });
     }
   }

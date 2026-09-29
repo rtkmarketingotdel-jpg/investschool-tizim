@@ -86,6 +86,7 @@ export function AttendanceDay() {
                   <Td>{rec ? <PunchCell at={rec.checkOutAt} photo={rec.checkOutPhotoUrl} lat={rec.checkOutLat} lng={rec.checkOutLng} distanceM={rec.checkOutDistanceM} title={`${r.user.fullName} · ${t('attendance.left')}`} /> : <span className="text-text-muted">—</span>}</Td>
                   <Td>
                     {rec ? <StatusBadge status={rec.status} lateMinutes={rec.lateMinutes} /> : <Badge>{t('attendance.day.notYet')}</Badge>}
+                    {rec?.checkInAt && !rec.selfieSent && <p className="mt-1 text-xs text-warning">{t('attendance.selfieMissing')}</p>}
                     {rec?.note && <p className="mt-1 max-w-40 truncate text-xs text-text-muted" title={rec.note}>{rec.note}</p>}
                   </Td>
                   {canEdit && (

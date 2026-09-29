@@ -105,6 +105,7 @@ export function CameraCapture({ open, submitting, onCancel, onSubmit }: Props) {
         )}
       </div>
 
+      <p className="px-6 text-center text-sm text-white/70">{t('attendance.selfieNote')}</p>
       <div className="flex justify-center gap-3 p-6">
         {error ? (
           <Button variant="secondary" onClick={() => void start()}>

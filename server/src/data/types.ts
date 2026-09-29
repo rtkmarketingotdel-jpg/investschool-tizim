@@ -88,6 +88,9 @@ export interface Attendance {
   deviceInfo: string | null;
   note: string | null;
   branchId: string | null;
+  /** Whether the selfie reached the director on Telegram (photos are never stored on our side). */
+  selfieSent: boolean;
+  selfieOutSent: boolean;
   /** Mock-only: the position is derived from the branch centre + this offset, so it follows the branch when it moves. */
   geoOffset?: [number, number];
 }

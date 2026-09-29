@@ -127,7 +127,7 @@
     "SMS_PROVIDER_ERROR": "SMS provayderi xato qaytardi"
   },
   "attendance": {
-    "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",
+    "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",
     "hello": "Salom, {{name}}!",
     "workHours": "Ish vaqti",
     "notMarked": "Hali belgilanmagan",
@@ -159,7 +159,7 @@
     "next": "Keyingi sahifa",
     "openMap": "Xaritada koʻrish",
     "logTitle": "Davomat jurnali",
-    "logSubtitle": "Kunma-kun kelish/ketish vaqti va selfilar",
+    "logSubtitle": "Kunma-kun kelish/ketish vaqtlari",
     "stats": {
       "onTime": "Vaqtida",
       "late": "Kechikkan",
@@ -222,7 +222,11 @@
       "lowAccuracy": "GPS aniqligi past (ruxsat: ±{{max}} m). Ochiq joyga chiqing.",
       "refresh": "Qayta aniqlash",
       "continue": "Davom etish"
-    }
+    },
+    "selfieNote": "Rasm tizimda saqlanmaydi: u faqat direktorga Telegram orqali yuboriladi.",
+    "selfieSent": "Rasm direktorga yuborildi",
+    "selfieNotSent": "Rasm direktorga yuborilmadi",
+    "selfieMissing": "Rasm yuborilmagan"
   },
   "students": {
     "subtitle": "Barcha oʻquvchilar · Jami: {{count}}",
@@ -618,9 +622,12 @@
     },
     "telegram": {
       "chatId": "Chat ID (direktor/admin guruhi)",
-      "hint": "Bot tokeni serverda (TELEGRAM_BOT_TOKEN) saqlanadi. Botni guruhga qoʻshing va guruh ID sini kiriting.",
+      "hint": "Bot tokeni serverda (TELEGRAM_BOT_TOKEN) saqlanadi. Xodimlarning kelish/ketish selfilari shu chatga yuboriladi. Shaxsiy chat boʻlsa, avval botni oching va Start bosing, chat ID ni @userinfobot dan oling; guruh boʻlsa botni guruhga qoʻshing.",
       "test": "Test xabar yuborish",
-      "sent": "Test xabar yuborildi"
+      "sent": "Test xabar yuborildi",
+      "find": "Chatni aniqlash",
+      "noChats": "Bot bilan chat topilmadi. Telegram'da botni oching va Start bosing (yoki botni guruhga qoʻshing va guruhga xabar yozing), keyin qayta bosing.",
+      "pick": "Shuni tanlash"
     },
     "interface": {
       "theme": "Mavzu",

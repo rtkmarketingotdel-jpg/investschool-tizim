@@ -29,8 +29,9 @@ export function AttendanceSelf() {
   const punch = useMutation({
     mutationFn: (p: Parameters<typeof attendanceApi.checkIn>[0]) =>
       mode === 'in' ? attendanceApi.checkIn(p) : attendanceApi.checkOut(p),
-    onSuccess: () => {
-      toast(t(mode === 'in' ? 'attendance.checkedInToast' : 'attendance.checkedOutToast'));
+    onSuccess: (r) => {
+      const base = t(mode === 'in' ? 'attendance.checkedInToast' : 'attendance.checkedOutToast');
+      toast(r.selfie === 'sent' ? `${base}. ${t('attendance.selfieSent')}` : `${base}. ${t('attendance.selfieNotSent')}`);
       setMode(null);
       void qc.invalidateQueries({ queryKey: ['attendance'] });
     },

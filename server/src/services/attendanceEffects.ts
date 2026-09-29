@@ -30,7 +30,6 @@ export async function syncFine(rec: Attendance) {
 export async function onLateCheckIn(user: User, rec: Attendance) {
   await syncFine(rec);
   await notifyRoles(['DIRECTOR', 'ADMIN'], 'notif.late', { name: user.fullName, minutes: rec.lateMinutes }, '/attendance');
-  await sendTelegram(`⏰ ${user.fullName}: ${rec.lateMinutes} daq kechikdi`);
 }
 
 /** Noon job: marks active employees without a check-in as ABSENT (workdays only). */
@@ -43,7 +42,7 @@ export async function markAbsentees(date = toLocalDate()): Promise<number> {
     const rec = await attendanceRepo.create({
       userId: u.id, date, status: 'ABSENT', lateMinutes: 0, checkInAt: null, checkInPhotoUrl: null, checkInLat: null, checkInLng: null,
       checkInAccuracy: null, checkInDistanceM: null, checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null,
-      checkOutDistanceM: null, deviceInfo: null, note: null, branchId: u.branchId,
+      checkOutDistanceM: null, deviceInfo: null, note: null, branchId: u.branchId, selfieSent: false, selfieOutSent: false,
     });
     await syncFine(rec);
     absent.push(u);

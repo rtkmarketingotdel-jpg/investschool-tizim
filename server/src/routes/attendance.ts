@@ -35,8 +35,8 @@ attendanceRouter.get('/today', async (req, res, next) => {
 
 attendanceRouter.post('/check-in', validateBody(punchSchema), async (req, res, next) => {
   try {
-    const record = await checkIn(req.user!, req.body as PunchInput, req.headers['user-agent']);
-    res.json({ record });
+    const { record, selfie } = await checkIn(req.user!, req.body as PunchInput, req.headers['user-agent']);
+    res.json({ record, selfie });
   } catch (e) {
     next(e);
   }
@@ -44,7 +44,8 @@ attendanceRouter.post('/check-in', validateBody(punchSchema), async (req, res, n
 
 attendanceRouter.post('/check-out', validateBody(punchSchema), async (req, res, next) => {
   try {
-    res.json({ record: await checkOut(req.user!, req.body as PunchInput) });
+    const { record, selfie } = await checkOut(req.user!, req.body as PunchInput);
+    res.json({ record, selfie });
   } catch (e) {
     next(e);
   }
