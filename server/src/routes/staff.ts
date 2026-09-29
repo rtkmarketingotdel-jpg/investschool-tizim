@@ -8,6 +8,7 @@ import { ApiError } from '../lib/errors.js';
 import { paginate, pageQuery } from '../lib/pagination.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
+import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { toPublicUser, userRepo } from '../repositories/userRepo.js';
 
@@ -62,6 +63,23 @@ staffRouter.get('/', async (req, res, next) => {
       };
     });
     res.json({ ...page, items });
+  } catch (e) {
+    next(e);
+  }
+});
+
+staffRouter.get('/:id/overview', async (req, res, next) => {
+  try {
+    const u = await userRepo.findById(req.params.id!);
+    if (!u) throw new ApiError(404, 'NOT_FOUND');
+    const month = /^\d{4}-\d{2}$/.test(String(req.query.month)) ? String(req.query.month) : toLocalDate().slice(0, 7);
+    const seesPay = req.user!.role === 'DIRECTOR';
+    const [attendance, payrolls, adjustments] = await Promise.all([
+      attendanceRepo.list({ from: `${month}-01`, to: `${month}-31`, userId: u.id }),
+      seesPay ? payrollRepo.byUser(u.id) : [],
+      seesPay ? adjustmentRepo.forUserPeriod(u.id, month) : [],
+    ]);
+    res.json({ user: toPublicUser(u), month, attendance, payrolls, adjustments, seesPay });
   } catch (e) {
     next(e);
   }

@@ -43,6 +43,12 @@ export const settings: Setting = {
   workEnd: '17:00',
   graceMinutes: 10,
   workDays: [1, 2, 3, 4, 5, 6],
+  lateFinePerMinute: 2000,
+  lateFineMax: 50000,
+  absentFine: 100000,
+  paymentDueDay: 10,
+  contractPrefix: 'GS',
+  telegramChatId: null,
 };
 
 // Deterministic mock history for the last 14 days (no photos: UI falls back to initials).

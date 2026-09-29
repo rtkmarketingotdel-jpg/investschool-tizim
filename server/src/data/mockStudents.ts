@@ -52,7 +52,9 @@ const make = (classId: string | null, grade: number, status: StudentStatus) => {
     monthlyFee: 2_000_000 + Math.floor(rnd() * 5) * 500_000,
     discountPercent: discount,
     status,
-    enrolledAt: iso(new Date(Date.UTC(2024 + Math.floor(rnd() * 2), 8, 1 + Math.floor(rnd() * 20)))),
+    enrolledAt: rnd() < 0.05
+      ? iso(new Date(Date.UTC(2026, new Date().getMonth(), 1 + Math.floor(rnd() * 20))))
+      : iso(new Date(Date.UTC(2024 + Math.floor(rnd() * 2), 8, 1 + Math.floor(rnd() * 20)))),
     leftAt: status === 'LEFT' ? iso(new Date(Date.UTC(2026, 5, 1 + Math.floor(rnd() * 25)))) : null,
     notes: null,
   });

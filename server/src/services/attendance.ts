@@ -7,6 +7,7 @@ import { ApiError } from '../lib/errors.js';
 import { haversineM } from '../lib/geo.js';
 import { isoWeekday, localMinutes, parseHHMM, toLocalDate } from '../lib/date.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
+import { onLateCheckIn, syncFine } from './attendanceEffects.js';
 
 export const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
 const MAX_PHOTO_BYTES = 1.5 * 1024 * 1024;
@@ -77,12 +78,16 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
     deviceInfo: userAgent ?? null,
   };
   // An ABSENT row (from the noon job) is overwritten by a late check-in.
-  if (existing) return (await attendanceRepo.update(existing.id, data))!;
-  return attendanceRepo.create({
+  const rec = existing
+    ? (await attendanceRepo.update(existing.id, data))!
+    : await attendanceRepo.create({
     userId: user.id, date, note: null,
     checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null,
     ...data,
   });
+  if (rec.status === 'LATE') await onLateCheckIn(user, rec);
+  else if (existing) await syncFine(rec); // an earlier ABSENT fine no longer applies
+  return rec;
 }
 
 export async function checkOut(user: User, input: PunchInput) {

@@ -8,6 +8,14 @@ import { meRouter } from './routes/me.js';
 import { classesRouter } from './routes/classes.js';
 import { staffRouter } from './routes/staff.js';
 import { studentsRouter } from './routes/students.js';
+import { contractsRouter } from './routes/contracts.js';
+import { dashboardRouter } from './routes/dashboard.js';
+import { debtorsRouter } from './routes/debtors.js';
+import { notificationsRouter } from './routes/notifications.js';
+import { paymentsRouter } from './routes/payments.js';
+import { payrollRouter } from './routes/payroll.js';
+import { publicContractsRouter } from './routes/publicContracts.js';
+import { settingsRouter } from './routes/settings.js';
 import { attendanceRouter } from './routes/attendance.js';
 import { UPLOAD_DIR } from './services/attendance.js';
 
@@ -25,6 +33,14 @@ export function createApp() {
   app.use('/api/students', studentsRouter);
   app.use('/api/classes', classesRouter);
   app.use('/api/staff', staffRouter);
+  app.use('/api/payments', paymentsRouter);
+  app.use('/api/debtors', debtorsRouter);
+  app.use('/api/payroll', payrollRouter);
+  app.use('/api/contracts', contractsRouter);
+  app.use('/api/public/contracts', publicContractsRouter);
+  app.use('/api/settings', settingsRouter);
+  app.use('/api/notifications', notificationsRouter);
+  app.use('/api/dashboard', dashboardRouter);
   app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use(notFound);

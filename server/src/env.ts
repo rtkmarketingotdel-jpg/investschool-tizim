@@ -7,4 +7,8 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET ?? 'dev-secret-change-me',
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173',
   demoMode: process.env.DEMO_MODE === 'true',
+  telegramToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
+  smsProvider: process.env.SMS_PROVIDER ?? 'demo',
+  eskizEmail: process.env.ESKIZ_EMAIL ?? '',
+  eskizPassword: process.env.ESKIZ_PASSWORD ?? '',
 };

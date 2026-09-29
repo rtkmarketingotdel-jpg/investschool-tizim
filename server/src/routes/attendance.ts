@@ -6,6 +6,8 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
+import { setStatus } from '../services/attendanceEffects.js';
+import { ApiError } from '../lib/errors.js';
 import { checkIn, checkOut, monthStats, punchSchema, type PunchInput } from '../services/attendance.js';
 
 export const attendanceRouter = Router();
@@ -93,6 +95,61 @@ attendanceRouter.get('/', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async 
       limit: q.limit,
       today: { ...monthStats(todayRecords), workers: todayRecords.filter((r) => r.checkInAt).length },
     });
+  } catch (e) {
+    next(e);
+  }
+});
+
+const patchSchema = z.object({
+  status: z.enum(['ON_TIME', 'LATE', 'ABSENT', 'EXCUSED']),
+  note: z.string().trim().max(500).nullable(),
+});
+
+attendanceRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(patchSchema), async (req, res, next) => {
+  try {
+    const rec = (await attendanceRepo.list({ from: '0000-01-01', to: '9999-12-31' })).find((r) => r.id === req.params.id);
+    if (!rec) throw new ApiError(404, 'NOT_FOUND');
+    const body = req.body as z.infer<typeof patchSchema>;
+    res.json({ record: await setStatus(rec, body.status, body.note, req.user!.id) });
+  } catch (e) {
+    next(e);
+  }
+});
+
+async function buildMatrix(month: string) {
+  const daysInMonth = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+  const days = Array.from({ length: daysInMonth }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`);
+  const records = await attendanceRepo.list({ from: `${month}-01`, to: `${month}-31` });
+  const users = (await userRepo.list()).filter((u) => u.isActive).sort((a, b) => a.fullName.localeCompare(b.fullName));
+  const rows = users.map((u) => {
+    const mine = records.filter((r) => r.userId === u.id);
+    const byDate: Record<string, string> = {};
+    for (const r of mine) byDate[r.date] = r.status;
+    return { user: { id: u.id, fullName: u.fullName, position: u.position }, days: byDate, totals: monthStats(mine) };
+  });
+  return { month, days, workDays: settings.workDays, rows };
+}
+
+attendanceRouter.get('/matrix', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+  try {
+    res.json(await buildMatrix(monthSchema.catch(toLocalDate().slice(0, 7)).parse(req.query.month)));
+  } catch (e) {
+    next(e);
+  }
+});
+
+attendanceRouter.get('/matrix/export', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+  try {
+    const m = await buildMatrix(monthSchema.catch(toLocalDate().slice(0, 7)).parse(req.query.month));
+    const code: Record<string, string> = { ON_TIME: '+', LATE: 'L', ABSENT: '-', EXCUSED: 'E' };
+    const cell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = [['Employee', ...m.days.map((d) => d.slice(8)), 'On time', 'Late', 'Absent', 'Excused'].map(cell).join(',')];
+    for (const r of m.rows) {
+      lines.push([r.user.fullName, ...m.days.map((d) => code[r.days[d] ?? ''] ?? ''), r.totals.onTime, r.totals.late, r.totals.absent, r.totals.excused].map(cell).join(','));
+    }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="attendance-${m.month}.csv"`);
+    res.send('\uFEFF' + lines.join('\r\n'));
   } catch (e) {
     next(e);
   }
