@@ -41,7 +41,7 @@ svg.lucide {
 }
 
 /* keep the OSM tiles readable in dark mode */
-.dark .leaflet-tile-pane {
+.dark .osm-tiles {
   filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
 }
 .leaflet-container {

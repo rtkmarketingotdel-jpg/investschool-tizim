@@ -177,7 +177,12 @@
       "left": "Bugun ketganlar",
       "empty": "Hozir maktabda hech kim belgilanmagan",
       "hint": "Nuqta “Keldim” bosilganda paydo boladi va “Ketdim” bosilganda oʻchadi",
-      "updated": "yangilandi {{time}}"
+      "updated": "yangilandi {{time}}",
+      "satellite": "Sputnik",
+      "street": "Xarita",
+      "layer": "Xarita turi",
+      "fullscreen": "Toʻliq ekran",
+      "exitFull": "Toʻliq ekrandan chiqish"
     },
     "location": {
       "title": "Joylashuvni aniqlash",

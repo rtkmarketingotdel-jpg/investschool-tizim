@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { uploadUrl } from '@/lib/api';
 import { fmtTime } from '@/lib/dates';
-import { createMap, DEFAULT_CENTER, L } from './leaflet';
+import { Maximize2, Minimize2 } from 'lucide-react';
+import { createMap, DEFAULT_CENTER, L, setBase, type BaseKind } from './leaflet';
 
 export interface MapBranch { id: string; name: string; lat: number; lng: number; radiusM: number }
 export interface MapPoint {
@@ -34,6 +35,38 @@ export function LiveMap({ branches, points }: Props) {
   const layer = useRef<L.LayerGroup | null>(null);
   const fitted = useRef(false);
   const [focus, setFocus] = useState('all');
+  const [base, setBaseKind] = useState<BaseKind>('satellite');
+  const wrap = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (map.current) setBase(map.current, base);
+  }, [base]);
+
+  // Full screen: the real Fullscreen API when available, otherwise a fixed overlay (e.g. iOS Safari).
+  const toggleFull = () => {
+    if (expanded) {
+      if (document.fullscreenElement) void document.exitFullscreen();
+      setExpanded(false);
+    } else {
+      setExpanded(true);
+      void wrap.current?.requestFullscreen?.().catch(() => undefined);
+    }
+  };
+  useEffect(() => {
+    const onChange = () => !document.fullscreenElement && setExpanded(false);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setExpanded(false);
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
+  useEffect(() => {
+    const id = setTimeout(() => map.current?.invalidateSize(), 150);
+    return () => clearTimeout(id);
+  }, [expanded]);
 
   useEffect(() => {
     if (!el.current) return;
@@ -112,7 +145,7 @@ export function LiveMap({ branches, points }: Props) {
   }, [focus]);
 
   return (
-    <div className="relative space-y-3">
+    <div ref={wrap} className={expanded ? 'fixed inset-0 z-[80] flex flex-col gap-3 bg-bg p-3' : 'relative space-y-3'}>
       {branches.length > 1 && (
         <div className="flex flex-wrap gap-2" role="group" aria-label={t('attendance.day.branch')}>
           {[{ id: 'all', name: t('attendance.day.allBranches') }, ...branches].map((b) => (
@@ -128,7 +161,21 @@ export function LiveMap({ branches, points }: Props) {
           ))}
         </div>
       )}
-      <div ref={el} className="h-[520px] w-full overflow-hidden rounded-2xl border border-border" role="application" aria-label={t('attendance.map.title')} />
+      {/* the map element keeps a constant className: React would otherwise wipe the classes Leaflet adds to it */}
+      <div className={expanded ? 'relative min-h-0 flex-1' : 'relative h-[520px]'}>
+      <div ref={el} className="h-full w-full overflow-hidden rounded-2xl border border-border" role="application" aria-label={t('attendance.map.title')} />
+      <div className="absolute right-3 top-3 z-[500] flex gap-2">
+        <div className="flex rounded-xl bg-surface/95 p-1 shadow" role="group" aria-label={t('attendance.map.layer')}>
+          {(['satellite', 'street'] as BaseKind[]).map((k) => (
+            <button key={k} type="button" aria-pressed={base === k} onClick={() => setBaseKind(k)} className={`rounded-lg px-3 py-1.5 text-sm ${base === k ? 'bg-primary-soft text-primary' : 'text-text-muted'}`}>
+              {t(`attendance.map.${k}`)}
+            </button>
+          ))}
+        </div>
+        <button type="button" onClick={toggleFull} aria-label={t(expanded ? 'attendance.map.exitFull' : 'attendance.map.fullscreen')} title={t(expanded ? 'attendance.map.exitFull' : 'attendance.map.fullscreen')} className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface/95 text-text shadow">
+          {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </button>
+      </div>
       <div className="pointer-events-none absolute bottom-4 left-4 z-[500] flex flex-col gap-1 rounded-xl bg-surface/95 px-3 py-2 text-sm shadow">
         <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full" style={{ background: COLOR.ON_TIME }} />{t('attendance.status.ON_TIME')}</span>
         <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full" style={{ background: COLOR.LATE }} />{t('attendance.status.LATE')}</span>
@@ -138,6 +185,7 @@ export function LiveMap({ branches, points }: Props) {
           {t('attendance.map.empty')}
         </div>
       )}
+      </div>
     </div>
   );
 }
