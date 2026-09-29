@@ -6,6 +6,10 @@ Monorepo: `client/` (React + Vite, Vercel) and `server/` (Express, Railway).
 > repositories (`server/src/repositories`). Data resets on every restart. The Postgres host (Uzbekistan)
 > will replace only the repository layer. `server/prisma/schema.prisma` is a reference schema.
 
+## Deploy
+Push to `main` on GitHub (`rtkmarketingotdel-jpg/investschool-tizim`): Vercel builds `client/` and Railway builds `server/` automatically.
+Environment variables live in the Vercel / Railway dashboards (see `.env.example` files).
+
 ## Local run
 ```bash
 cd server && cp .env.example .env && npm install && npm run dev   # :4000
