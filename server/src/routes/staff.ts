@@ -10,6 +10,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
 import { branchRepo } from '../repositories/branchRepo.js';
+import { clubRepo } from '../repositories/academicsRepo.js';
 import { classRepo } from '../repositories/classRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
@@ -27,6 +28,7 @@ const staffSchema = z.object({
   role: z.enum(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF']),
   position: z.string().trim().min(1).max(120),
   isTeacher: z.boolean().default(false),
+  isTutor: z.boolean().default(false),
   subject: z.string().trim().max(60).nullable().default(null),
   /** Optional login password on creation; generated when omitted. */
   password: z.string().min(8).max(64).optional(),
@@ -43,6 +45,7 @@ const listQuery = z.object({
   role: z.enum(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF']).optional(),
   active: z.enum(['true', 'false']).optional(),
   teacher: z.enum(['true']).optional(),
+  tutor: z.enum(['true']).optional(),
 });
 
 /** Only the director may hand out roles above STAFF/ADMIN, or touch such accounts. */
@@ -58,7 +61,7 @@ staffRouter.get('/', async (req, res, next) => {
     const term = q.q?.trim().toLowerCase();
     const digits = term?.replace(/\D/g, '');
     const rows = (await userRepo.list())
-      .filter((u) => (!q.role || u.role === q.role) && (!q.teacher || u.isTeacher) && (q.active === undefined || u.isActive === (q.active === 'true')))
+      .filter((u) => (!q.role || u.role === q.role) && (!q.teacher || u.isTeacher) && (!q.tutor || u.isTutor) && (q.active === undefined || u.isActive === (q.active === 'true')))
       .filter((u) => !term || u.fullName.toLowerCase().includes(term) || (!!digits && u.phone.includes(digits)))
       .sort((a, b) => a.fullName.localeCompare(b.fullName));
     const page = paginate(rows, q.page, q.limit);
@@ -89,7 +92,20 @@ staffRouter.get('/:id/overview', async (req, res, next) => {
       seesPay ? payrollRepo.byUser(u.id) : [],
       seesPay ? adjustmentRepo.forUserPeriod(u.id, month) : [],
     ]);
-    res.json({ user: toPublicUser(u), month, attendance, payrolls, adjustments, seesPay });
+    const branch = u.branchId ? await branchRepo.findById(u.branchId) : null;
+    const [allClasses, allClubs] = await Promise.all([classRepo.list(), clubRepo.list()]);
+    res.json({
+      user: toPublicUser(u), month, attendance, payrolls, adjustments, seesPay,
+      profile: {
+        achievements: u.achievements,
+        documents: u.documents,
+        completed: !!u.profileCompletedAt,
+        branchName: branch?.name ?? null,
+        hiredAt: u.hiredAt,
+        classesLed: allClasses.filter((c) => c.teacherId === u.id).map((c) => c.name),
+        clubsLed: allClubs.filter((c) => c.teacherId === u.id).map((c) => c.name),
+      },
+    });
   } catch (e) {
     next(e);
   }
@@ -107,7 +123,13 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
     const user = await userRepo.create({
       ...data,
       isTeacher: data.isTeacher,
-      subject: data.isTeacher ? data.subject : null,
+      isTutor: data.isTutor,
+      subject: data.isTeacher || data.isTutor ? data.subject : null,
+      photoUrl: null,
+      achievements: [],
+      documents: [],
+      // the director supervises and needs no profile; everybody else fills it in on first sign-in
+      profileCompletedAt: data.role === 'DIRECTOR' ? new Date() : null,
       passwordHash: await bcrypt.hash(finalPassword, 10),
       language: 'uz',
       hiredAt: new Date(),
@@ -138,7 +160,7 @@ staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
       await classRepo.update(homeroomClassId, { teacherId: target.id });
     }
     if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
-    const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher ? data.subject : null });
+    const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher || data.isTutor ? data.subject : null });
     await audit(req.user!.id, 'staff.update', 'user', target.id);
     res.json({ user: toPublicUser(updated!) });
   } catch (e) {

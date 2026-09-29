@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
-import { CLUBS, DISTRICTS } from '@/lib/constants';
+import { DISTRICTS } from '@/lib/constants';
 import { errorCode } from '@/lib/api';
 import { schoolApi, type Student, type StudentInput } from '@/lib/schoolApi';
 import { todayLocal } from '@/lib/dates';
@@ -74,6 +74,7 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
   const toast = useToast();
   const qc = useQueryClient();
   const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open });
+  const clubsQ = useQuery({ queryKey: ['clubs'], queryFn: schoolApi.clubs, enabled: open });
 
   const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -154,7 +155,7 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
               name="clubs"
               render={({ field }) => (
                 <div className="flex flex-wrap gap-2">
-                  {CLUBS.map((c) => {
+                  {(clubsQ.data ?? []).map((club) => club.name).concat(field.value.filter((n) => !(clubsQ.data ?? []).some((c) => c.name === n))).map((c) => {
                     const on = field.value.includes(c);
                     return (
                       <button

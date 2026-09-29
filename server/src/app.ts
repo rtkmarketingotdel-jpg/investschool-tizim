@@ -6,6 +6,8 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { meRouter } from './routes/me.js';
 import { branchesRouter } from './routes/branches.js';
+import { profileRouter } from './routes/profile.js';
+import { catalogRouter } from './routes/catalog.js';
 import { classesRouter } from './routes/classes.js';
 import { staffRouter } from './routes/staff.js';
 import { studentsRouter } from './routes/students.js';
@@ -25,7 +27,7 @@ export function createApp() {
   app.set('trust proxy', 1);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({ origin: [env.clientUrl, 'http://localhost:5173'] }));
-  app.use(express.json({ limit: '3mb' }));
+  app.use(express.json({ limit: '8mb' }));
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
   app.use('/api/auth', authRouter);
@@ -34,6 +36,8 @@ export function createApp() {
   app.use('/api/students', studentsRouter);
   app.use('/api/classes', classesRouter);
   app.use('/api/staff', staffRouter);
+  app.use('/api/catalog', catalogRouter);
+  app.use('/api/profile', profileRouter);
   app.use('/api/branches', branchesRouter);
   app.use('/api/payments', paymentsRouter);
   app.use('/api/debtors', debtorsRouter);

@@ -18,7 +18,8 @@
     "payroll": "Oyliklar",
     "contracts": "Shartnomalar",
     "settings": "Sozlamalar",
-    "me": "Mening kabinetim"
+    "me": "Mening kabinetim",
+    "academics": "Fanlar va toʻgaraklar"
   },
   "roles": {
     "DIRECTOR": "Direktor",
@@ -65,7 +66,9 @@
     "actions": "Amallar",
     "yes": "Ha",
     "no": "Yoʻq",
-    "copy": "Nusxa olish"
+    "copy": "Nusxa olish",
+    "edit": "Tahrirlash",
+    "delete": "Oʻchirish"
   },
   "errors": {
     "AUTH_INVALID_CREDENTIALS": "Telefon yoki parol notoʻgʻri",
@@ -105,7 +108,13 @@
     "BRANCH_LAST": "Oxirgi filialni oʻchirib boʻlmaydi",
     "BRANCH_HAS_DATA": "Filialga xodim yoki sinflar biriktirilgan",
     "reload": "Sahifani qayta yuklash",
-    "ATTENDANCE_NOT_TRACKED": "Direktor davomat qilmaydi"
+    "ATTENDANCE_NOT_TRACKED": "Direktor davomat qilmaydi",
+    "FILE_INVALID_TYPE": "Fayl turi notoʻgʻri (rasm yoki PDF)",
+    "FILE_TOO_LARGE": "Fayl hajmi katta",
+    "FILE_LIMIT_REACHED": "Hujjatlar soni chegaraga yetdi",
+    "PROFILE_PHOTO_REQUIRED": "Avval rasm yuklang",
+    "CATALOG_NAME_EXISTS": "Bunday nom allaqachon mavjud",
+    "CATALOG_IN_USE": "Bu fan xodimlarga biriktirilgan, oʻchirib boʻlmaydi"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",
@@ -332,7 +341,19 @@
     "passwordMin": "Kamida 8 belgi",
     "generate": "Yaratish",
     "branch": "Filial",
-    "anyBranch": "Istalgan filial"
+    "anyBranch": "Istalgan filial",
+    "addTutor": "Repetitor qoʻshish",
+    "tutorsOnly": "Faqat repetitorlar",
+    "kind": {
+      "teacher": "Oʻqituvchi",
+      "tutor": "Repetitor"
+    },
+    "profileIncomplete": "Profil toʻldirilmagan",
+    "about": "Maʼlumotlar",
+    "hiredAt": "Ishga kirgan sana",
+    "homeroomOf": "Sinf rahbari",
+    "clubsLed": "Toʻgarak rahbari",
+    "nothingYet": "Hali kiritilmagan"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",
@@ -619,5 +640,70 @@
       "enforceHint": "Oʻchiq boʻlsa, masofa yoziladi, lekin davomat rad etilmaydi (sinov uchun).",
       "accuracy": "Maksimal GPS xatoligi (metr)"
     }
+  },
+  "academics": {
+    "subtitle": "Fanlar, toʻgaraklar va repetitorlar",
+    "tabs": {
+      "subjects": "Fanlar",
+      "clubs": "Toʻgaraklar",
+      "tutors": "Repetitorlar"
+    },
+    "addSubject": "Fan qoʻshish",
+    "editSubject": "Fanni tahrirlash",
+    "addClub": "Toʻgarak qoʻshish",
+    "editClub": "Toʻgarakni tahrirlash",
+    "name": "Nomi",
+    "teachers": "Oʻqituvchilar soni",
+    "club": "Toʻgarak",
+    "leader": "Rahbar",
+    "fee": "Oylik narx",
+    "members": "Oʻquvchilar",
+    "saved": "Saqlandi",
+    "deleted": "Oʻchirildi",
+    "deleteConfirm": "“{{name}}” fanini oʻchirasizmi?",
+    "deleteClubConfirm": "“{{name}}” toʻgaragini oʻchirasizmi? Unga yozilgan {{count}} oʻquvchidan ham olib tashlanadi.",
+    "tutorsHint": "Repetitor — alohida fan boʻyicha individual dars beradigan xodim. Kartani bossangiz, batafsil maʼlumot ochiladi.",
+    "noTutors": "Repetitorlar yoʻq"
+  },
+  "profile": {
+    "title": "Mening profilim",
+    "subtitle": "Rasm, yutuqlar va hujjatlaringiz",
+    "setupTitle": "Xush kelibsiz, {{name}}!",
+    "setupHint": "Tizimdan foydalanishdan oldin profilingizni toʻldiring. Rasm majburiy, qolganini keyinroq ham qoʻshishingiz mumkin.",
+    "steps": {
+      "photo": "Rasm",
+      "achievements": "Erishgan yutuqlar",
+      "documents": "Sertifikat va diplomlar"
+    },
+    "photoHint": "Yuzingiz aniq koʻrinadigan rasm tanlang.",
+    "choosePhoto": "Rasm tanlash",
+    "takePhoto": "Kamera",
+    "photoSaved": "Rasm saqlandi",
+    "achievementsHint": "Olimpiada, tanlov, mukofot va boshqa yutuqlaringizni yozing.",
+    "achievementTitle": "Yutuq nomi",
+    "year": "Yil",
+    "description": "Qisqacha izoh",
+    "addAchievement": "Yutuq qoʻshish",
+    "saved": "Saqlandi",
+    "saveAndNext": "Saqlash va davom etish",
+    "documentsHint": "Sertifikat va diplomlarning surati (JPG, PNG) yoki PDF fayli, 5 MB gacha.",
+    "kind": "Turi",
+    "kinds": {
+      "CERTIFICATE": "Sertifikat",
+      "DIPLOMA": "Diplom",
+      "OTHER": "Boshqa hujjat"
+    },
+    "docTitle": "Hujjat nomi",
+    "issuer": "Kim bergan",
+    "chooseFile": "Fayl tanlash",
+    "fileHint": "Rasm yoki PDF",
+    "addDocument": "Hujjat qoʻshish",
+    "documentAdded": "Hujjat qoʻshildi",
+    "view": "Koʻrish",
+    "deleteDocConfirm": "“{{title}}” hujjatini oʻchirasizmi?",
+    "next": "Keyingi",
+    "skip": "Oʻtkazib yuborish",
+    "finish": "Yakunlash",
+    "done": "Profil toʻldirildi"
   }
 }

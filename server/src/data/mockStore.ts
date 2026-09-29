@@ -21,6 +21,11 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
   role,
   position,
   isTeacher: position.includes('oʻqituvchisi'),
+  isTutor: false,
+  photoUrl: null,
+  achievements: [],
+  documents: [],
+  profileCompletedAt: n >= 11 ? new Date('2025-09-05') : null,
   subject: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
   branchId: SECOND_BRANCH_USERS.has(n) ? 'b2' : 'b1',
   baseSalary,
@@ -41,7 +46,25 @@ export const users: User[] = [
   seedUser(14, 'Sobirova Mohinur Qahramonovna', 'STAFF', 'Oshpaz', 3_200_000),
   seedUser(15, 'Hamidov Ulugʻbek Sodiqovich', 'STAFF', 'Qorovul', 3_000_000),
   seedUser(16, 'Raxmatova Zulfiya Baxodirovna', 'STAFF', 'Fizika oʻqituvchisi', 5_200_000),
+  seedUser(17, 'Aliyev Bekzod Nurmatovich', 'STAFF', 'Matematika repetitori', 3_000_000),
 ];
+
+// Sample profile content so the director's detail page has something to show.
+const sample = (id: string, patch: Partial<User>) => Object.assign(users.find((u) => u.id === id)!, patch);
+sample('u17', { isTutor: true, subject: 'Matematika' });
+sample('u11', { achievements: [
+  { id: 'ac1', title: 'IELTS 8.0 sertifikati sohibi', year: 2023, description: 'Xalqaro ingliz tili imtihonidan yuqori natija.' },
+  { id: 'ac2', title: 'Viloyat “Yil oʻqituvchisi” tanlovi finalisti', year: 2024, description: '' },
+] });
+sample('u12', { achievements: [
+  { id: 'ac3', title: 'Respublika metodik konkursida 2-oʻrin', year: 2024, description: 'Boshlangʻich sinflar uchun interaktiv dars ishlanmasi.' },
+] });
+sample('u16', { achievements: [
+  { id: 'ac4', title: 'Fizika olimpiadasi gʻoliblarini tayyorlagan', year: 2025, description: '3 nafar oʻquvchi viloyat bosqichida gʻolib boʻldi.' },
+] });
+sample('u17', { achievements: [
+  { id: 'ac5', title: 'Abituriyentlarni DTM ga tayyorlash', year: 2022, description: '90+ ball olgan 12 nafar shogird.' },
+] });
 
 export const settings: Setting = {
   maxGpsAccuracyM: 100,

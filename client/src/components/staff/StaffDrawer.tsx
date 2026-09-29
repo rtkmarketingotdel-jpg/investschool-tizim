@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { Check, Copy, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { errorCode } from '@/lib/api';
-import { SUBJECTS } from '@/lib/constants';
 import { generatePassword } from '@/lib/password';
 import { maskPhone } from '@/lib/format';
 import { schoolApi, type Role, type StaffMember } from '@/lib/schoolApi';
@@ -36,7 +35,7 @@ interface Props {
   open: boolean;
   member: StaffMember | null;
   /** What "add" creates: a teacher (subject-based) or any other employee. */
-  kind: 'teacher' | 'staff';
+  kind: 'teacher' | 'tutor' | 'staff';
   onClose: () => void;
   onCreated: (creds: { name: string; phone: string; password: string }) => void;
 }
@@ -48,10 +47,14 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const qc = useQueryClient();
   const roles: Role[] = user?.role === 'DIRECTOR' ? ['STAFF', 'ADMIN', 'ACCOUNTANT', 'DIRECTOR'] : ['STAFF', 'ADMIN'];
   const isTeacher = member ? member.isTeacher : kind === 'teacher';
+  const isTutor = member ? member.isTutor : kind === 'tutor';
+  const hasSubject = isTeacher || isTutor;
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState(false);
   const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open && isTeacher });
   const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches, enabled: open });
+  const subjectsQ = useQuery({ queryKey: ['subjects'], queryFn: schoolApi.subjects, enabled: open && hasSubject });
+  const subjectNames = (subjectsQ.data ?? []).map((s) => s.name);
 
   const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: empty });
   useEffect(() => {
@@ -59,24 +62,24 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
     setCopied(false);
     setPassword(member ? '' : generatePassword());
     if (!member) return reset(empty);
-    const known = member.subject && SUBJECTS.includes(member.subject);
+    const known = member.subject && (subjectsQ.data ?? []).some((x) => x.name === member.subject);
     reset({
       fullName: member.fullName, phone: member.phone, role: member.role, position: member.position,
       subject: member.subject ? (known ? member.subject : OTHER) : '', customSubject: member.subject && !known ? member.subject : '',
       homeroomClassId: '', branchId: member.branchId ?? '', baseSalary: member.baseSalary, isActive: member.isActive,
     });
-  }, [open, member, reset]);
+  }, [open, member, reset, subjectsQ.data]);
 
   const subject = watch('subject');
   const passwordError = !member && password.length > 0 && password.length < 8;
 
   const save = useMutation({
     mutationFn: async (v: FormValues) => {
-      const subj = isTeacher ? (v.subject === OTHER ? v.customSubject.trim() : v.subject) || null : null;
+      const subj = hasSubject ? (v.subject === OTHER ? v.customSubject.trim() : v.subject) || null : null;
       const body = {
         fullName: v.fullName, phone: v.phone, role: v.role, baseSalary: v.baseSalary, isActive: v.isActive,
-        isTeacher, subject: subj,
-        position: isTeacher && subj ? `${subj} oʻqituvchisi` : v.position,
+        isTeacher, isTutor, subject: subj,
+        position: subj && isTeacher ? `${subj} oʻqituvchisi` : subj && isTutor ? `${subj} repetitori` : v.position,
         homeroomClassId: isTeacher && v.homeroomClassId ? v.homeroomClassId : null,
         branchId: v.branchId || null,
       };
@@ -95,9 +98,9 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
 
   const err = (k: keyof FormValues) => (errors[k]?.message ? t(errors[k]!.message as string) : undefined);
   const locked = !!member && user?.role !== 'DIRECTOR' && (member.role === 'DIRECTOR' || member.role === 'ACCOUNTANT');
-  const needsSubject = isTeacher && (!subject || (subject === OTHER && !watch('customSubject').trim()));
-  const needsPosition = !isTeacher && !watch('position').trim();
-  const title = member ? t('staff.edit') : t(isTeacher ? 'staff.addTeacher' : 'staff.add');
+  const needsSubject = hasSubject && (!subject || (subject === OTHER && !watch('customSubject').trim()));
+  const needsPosition = !hasSubject && !watch('position').trim();
+  const title = member ? t('staff.edit') : t(isTeacher ? 'staff.addTeacher' : isTutor ? 'staff.addTutor' : 'staff.add');
 
   return (
     <Drawer open={open} onClose={onClose} title={title}>
@@ -105,18 +108,18 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
         <Input label={t('staff.fullName')} error={err('fullName')} {...register('fullName')} />
         <Controller control={control} name="phone" render={({ field }) => <PhoneInput label={t('staff.phoneLogin')} value={field.value} onChange={field.onChange} error={err('phone')} />} />
 
-        {isTeacher ? (
+        {hasSubject ? (
           <>
             <Select label={t('staff.subject')} {...register('subject')}>
               <option value="">—</option>
-              {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+              {subjectNames.map((s) => <option key={s} value={s}>{s}</option>)}
               <option value={OTHER}>{t('staff.otherSubject')}</option>
             </Select>
             {subject === OTHER && <Input label={t('staff.customSubject')} {...register('customSubject')} />}
-            <Select label={t('staff.homeroom')} {...register('homeroomClassId')}>
+            {isTeacher && <Select label={t('staff.homeroom')} {...register('homeroomClassId')}>
               <option value="">{t('staff.noHomeroom')}</option>
               {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}{c.teacherName ? ` · ${c.teacherName}` : ''}</option>)}
-            </Select>
+            </Select>}
           </>
         ) : (
           <Input label={t('staff.position')} error={err('position')} {...register('position')} />

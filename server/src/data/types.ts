@@ -1,6 +1,36 @@
 export type Role = 'DIRECTOR' | 'ACCOUNTANT' | 'ADMIN' | 'STAFF';
 export type Lang = 'uz' | 'ru';
 
+export interface Achievement {
+  id: string;
+  title: string;
+  year: number | null;
+  description: string;
+}
+
+export type DocumentKind = 'CERTIFICATE' | 'DIPLOMA' | 'OTHER';
+export interface StaffDocument {
+  id: string;
+  kind: DocumentKind;
+  title: string;
+  issuer: string | null;
+  year: number | null;
+  fileUrl: string;
+  mime: string;
+}
+
+export interface Subject {
+  id: string;
+  name: string;
+}
+
+export interface Club {
+  id: string;
+  name: string;
+  teacherId: string | null;
+  monthlyFee: number;
+}
+
 export interface User {
   id: string;
   fullName: string;
@@ -9,7 +39,13 @@ export interface User {
   role: Role;
   position: string;
   isTeacher: boolean;
+  isTutor: boolean;
   subject: string | null;
+  photoUrl: string | null;
+  achievements: Achievement[];
+  documents: StaffDocument[];
+  /** null until the employee has completed the first-login profile (the director is exempt). */
+  profileCompletedAt: Date | null;
   /** null = may check in at any branch */
   branchId: string | null;
   baseSalary: number;
@@ -19,7 +55,7 @@ export interface User {
   createdAt: Date;
 }
 
-export type PublicUser = Omit<User, 'passwordHash'>;
+export type PublicUser = Omit<User, 'passwordHash' | 'achievements' | 'documents'>;
 
 export interface Branch {
   id: string;

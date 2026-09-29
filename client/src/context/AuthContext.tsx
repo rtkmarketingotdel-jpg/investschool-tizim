@@ -10,6 +10,8 @@ export interface AuthUser {
   role: Role;
   position: string;
   language: 'uz' | 'ru';
+  photoUrl: string | null;
+  profileCompletedAt: string | null;
 }
 
 interface AuthState {
@@ -17,6 +19,7 @@ interface AuthState {
   loading: boolean;
   login: (phone: string, password: string) => Promise<AuthUser>;
   logout: () => void;
+  refresh: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthState | null>(null);
@@ -41,6 +44,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user as AuthUser;
   }, []);
 
+  const refresh = useCallback(async () => {
+    const { data } = await api.get('/me');
+    setUser(data.user);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
@@ -51,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user && !localStorage.getItem('lang')) setLanguage(user.language);
   }, [user]);
 
-  return <Ctx.Provider value={{ user, loading, login, logout }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, loading, login, logout, refresh }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

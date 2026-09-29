@@ -2,8 +2,10 @@ import { users } from '../data/mockStore.js';
 import type { PublicUser, User } from '../data/types.js';
 
 export const toPublicUser = (user: User): PublicUser => {
-  const { passwordHash, ...rest } = user;
+  const { passwordHash, achievements, documents, ...rest } = user;
   void passwordHash;
+  void achievements;
+  void documents;
   return rest;
 };
 

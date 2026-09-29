@@ -13,6 +13,9 @@ const loaders = {
   Students: () => import('@/pages/Students'),
   StudentDetail: () => import('@/pages/StudentDetail'),
   Classes: () => import('@/pages/Classes'),
+  Academics: () => import('@/pages/Academics'),
+  Profile: () => import('@/pages/Profile'),
+  ProfileSetup: () => import('@/pages/ProfileSetup'),
   Staff: () => import('@/pages/Staff'),
   StaffDetail: () => import('@/pages/StaffDetail'),
   Attendance: () => import('@/pages/Attendance'),
@@ -30,6 +33,9 @@ const Dashboard = lazy(loaders.Dashboard);
 const Students = lazy(loaders.Students);
 const StudentDetail = lazy(loaders.StudentDetail);
 const Classes = lazy(loaders.Classes);
+const Academics = lazy(loaders.Academics);
+const Profile = lazy(loaders.Profile);
+const ProfileSetup = lazy(loaders.ProfileSetup);
 const Staff = lazy(loaders.Staff);
 const StaffDetail = lazy(loaders.StaffDetail);
 const Attendance = lazy(loaders.Attendance);
@@ -68,8 +74,10 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/c/:token" element={<PublicContract />} />
+        <Route path="/profile/setup" element={<RequireAuth><ProfileSetup /></RequireAuth>} />
         <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route path="/me" element={<Me />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/attendance" element={<Attendance />} />
           <Route element={<RoleGuard roles={[...MGMT]} />}>
             <Route path="/" element={<HomeRedirect />} />
@@ -80,6 +88,7 @@ export default function App() {
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'ADMIN']} />}>
             <Route path="/classes" element={<Classes />} />
+            <Route path="/academics" element={<Academics />} />
             <Route path="/staff" element={<Staff />} />
             <Route path="/staff/:id" element={<StaffDetail />} />
             <Route path="/settings" element={<Settings />} />

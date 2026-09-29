@@ -1,4 +1,5 @@
 import { cn } from '@/lib/cn';
+import { uploadUrl } from '@/lib/api';
 
 export const initials = (name: string) =>
   name
@@ -8,7 +9,11 @@ export const initials = (name: string) =>
     .map((p) => p[0]!.toUpperCase())
     .join('');
 
-export function Avatar({ name, size = 48, className }: { name: string; size?: number; className?: string }) {
+export function Avatar({ name, size = 48, className, src }: { name: string; size?: number; className?: string; src?: string | null }) {
+  const url = uploadUrl(src);
+  if (url) {
+    return <img src={url} alt="" style={{ width: size, height: size }} className={cn('shrink-0 rounded-full object-cover', className)} />;
+  }
   return (
     <span
       aria-hidden

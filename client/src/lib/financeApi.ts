@@ -209,7 +209,8 @@ export const financeApi = {
 
   staffOverview: (id: string, month: string) =>
     api.get<{
-      user: { id: string; fullName: string; phone: string; role: Role; position: string; baseSalary: number; isActive: boolean };
+      user: { id: string; fullName: string; phone: string; role: Role; position: string; baseSalary: number; isActive: boolean; isTeacher: boolean; isTutor: boolean; subject: string | null; photoUrl: string | null; branchId: string | null };
+      profile: { achievements: Array<{ id: string; title: string; year: number | null; description: string }>; documents: Array<{ id: string; kind: 'CERTIFICATE' | 'DIPLOMA' | 'OTHER'; title: string; issuer: string | null; year: number | null; fileUrl: string; mime: string }>; completed: boolean; branchName: string | null; hiredAt: string; classesLed: string[]; clubsLed: string[] };
       month: string;
       attendance: Array<{ id: string; date: string; status: 'ON_TIME' | 'LATE' | 'ABSENT' | 'EXCUSED'; lateMinutes: number; checkInAt: string | null; checkOutAt: string | null }>;
       payrolls: PayrollRow[];

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Globe, LogOut, Maximize, Menu, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -66,13 +67,13 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           )}
         </Dropdown>
         <NotificationsButton />
-        <div className="ml-2 hidden items-center gap-3 lg:flex">
-          <Avatar name={user.fullName} size={40} />
+        <Link to="/profile" className="ml-2 hidden items-center gap-3 rounded-xl px-1 py-1 hover:bg-surface-muted lg:flex" aria-label={t('profile.title')}>
+          <Avatar name={user.fullName} size={40} src={user.photoUrl} />
           <div className="leading-tight">
             <p className="max-w-40 truncate text-sm font-medium">{user.fullName}</p>
             <p className="text-xs text-text-muted">{t(`roles.${user.role}`)}</p>
           </div>
-        </div>
+        </Link>
         <IconButton aria-label={t('auth.logout')} onClick={logout}>
           <LogOut className="h-5 w-5" />
         </IconButton>
