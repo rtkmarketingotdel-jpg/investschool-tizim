@@ -98,8 +98,10 @@ export const attendances: Attendance[] = [];
     for (const [uid, hhmm] of arrivals) {
       const u = users.find((x) => x.id === uid)!;
       const b = branches.find((x) => x.id === u.branchId)!;
-      const lat = b.lat + (rnd() - 0.5) * 0.0009;
-      const lng = b.lng + (rnd() - 0.5) * 0.0009;
+      // keep dots 40-90 m from the branch icon so the two never overlap on the map
+      const spread = () => { const v = (rnd() - 0.5) * 0.002; return Math.abs(v) < 0.0004 ? (v < 0 ? -0.0004 : 0.0004) : v; };
+      const lat = b.lat + spread();
+      const lng = b.lng + spread();
       const [h, m] = hhmm.split(':').map(Number) as [number, number];
       const late = h * 60 + m > 8 * 60 + settings.graceMinutes;
       attendances.push({
@@ -107,6 +109,7 @@ export const attendances: Attendance[] = [];
         checkInAt: atLocal(today, hhmm), checkInPhotoUrl: null, checkInLat: lat, checkInLng: lng, checkInAccuracy: 15,
         checkInDistanceM: haversineM(lat, lng, b.lat, b.lng), checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null,
         checkOutLng: null, checkOutDistanceM: null, deviceInfo: null, note: null, branchId: b.id,
+        geoOffset: [lat - b.lat, lng - b.lng],
       });
     }
   }

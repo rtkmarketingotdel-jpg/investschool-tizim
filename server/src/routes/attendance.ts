@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { settings } from '../data/mockStore.js';
 import { addDays, isoWeekday, toLocalDate } from '../lib/date.js';
+import { haversineM } from '../lib/geo.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
@@ -198,9 +199,12 @@ attendanceRouter.get('/map', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), asy
       if (!r.checkInAt || r.checkOutAt || r.checkInLat == null || r.checkInLng == null) continue;
       const u = await userRepo.findById(r.userId);
       if (!u) continue;
+      const home = r.geoOffset ? branches.find((b) => b.id === r.branchId) : undefined;
+      const lat = home && r.geoOffset ? home.lat + r.geoOffset[0] : r.checkInLat;
+      const lng = home && r.geoOffset ? home.lng + r.geoOffset[1] : r.checkInLng;
       points.push({
-        userId: u.id, fullName: u.fullName, position: u.position, lat: r.checkInLat, lng: r.checkInLng, checkInAt: r.checkInAt,
-        status: r.status, lateMinutes: r.lateMinutes, distanceM: r.checkInDistanceM, photoUrl: r.checkInPhotoUrl,
+        userId: u.id, fullName: u.fullName, position: u.position, lat, lng, checkInAt: r.checkInAt,
+        status: r.status, lateMinutes: r.lateMinutes, distanceM: home ? haversineM(lat, lng, home.lat, home.lng) : r.checkInDistanceM, photoUrl: r.checkInPhotoUrl,
         branchName: branches.find((b) => b.id === r.branchId)?.name ?? null,
       });
     }

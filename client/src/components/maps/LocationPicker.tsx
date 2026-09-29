@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createMap, DEFAULT_CENTER, L } from './leaflet';
+import { branchIcon } from './icons';
 
 interface Props {
   lat: number;
@@ -37,7 +38,7 @@ export function LocationPicker({ lat, lng, radiusM, onPick }: Props) {
     g.clearLayers();
     if (!valid) return;
     L.circle([lat, lng], { radius: Math.max(radiusM || 0, 1), color: '#2563EB', weight: 1.5, dashArray: '4 4', fillOpacity: 0.08 }).addTo(g);
-    L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#2563EB', fillOpacity: 1 }).addTo(g);
+    L.marker([lat, lng], { icon: branchIcon() }).addTo(g);
     if (!m.getBounds().contains([lat, lng])) m.setView([lat, lng]);
   }, [lat, lng, radiusM, valid]);
 

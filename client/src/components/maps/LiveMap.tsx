@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { uploadUrl } from '@/lib/api';
 import { fmtTime } from '@/lib/dates';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { GraduationCap, Maximize2, Minimize2 } from 'lucide-react';
+import { branchIcon, staffIcon, STATUS_COLOR } from './icons';
 import { createMap, DEFAULT_CENTER, L, setBase, type BaseKind } from './leaflet';
 
 export interface MapBranch { id: string; name: string; lat: number; lng: number; radiusM: number }
@@ -19,8 +20,6 @@ export interface MapPoint {
   photoUrl: string | null;
   branchName: string | null;
 }
-
-const COLOR = { ON_TIME: '#16A34A', LATE: '#F59E0B', ABSENT: '#DC2626', EXCUSED: '#64748B' } as const;
 
 interface Props {
   branches: MapBranch[];
@@ -89,13 +88,15 @@ export function LiveMap({ branches, points }: Props) {
 
     for (const b of branches) {
       L.circle([b.lat, b.lng], { radius: b.radiusM, color: '#2563EB', weight: 1.5, dashArray: '5 5', fillOpacity: 0.06 })
-        .bindTooltip(b.name, { permanent: true, direction: 'top', className: 'leaflet-tooltip' })
+        .addTo(g);
+      L.marker([b.lat, b.lng], { icon: branchIcon(), zIndexOffset: 500 })
+        .bindTooltip(b.name, { permanent: true, direction: 'top', offset: [0, -20] })
         .addTo(g);
       bounds.push([b.lat, b.lng]);
     }
 
     for (const p of points) {
-      const dot = L.circleMarker([p.lat, p.lng], { radius: 9, color: '#fff', weight: 2, fillColor: COLOR[p.status], fillOpacity: 1 }).addTo(g);
+      const dot = L.marker([p.lat, p.lng], { icon: staffIcon(p.status), zIndexOffset: 1000 }).addTo(g);
       // Built with DOM nodes (not HTML strings) so names cannot inject markup.
       const box = document.createElement('div');
       const name = document.createElement('strong');
@@ -117,7 +118,7 @@ export function LiveMap({ branches, points }: Props) {
         box.append(img);
       }
       dot.bindPopup(box);
-      dot.bindTooltip(p.fullName);
+      dot.bindTooltip(p.fullName, { direction: 'top', offset: [0, -18] });
       bounds.push([p.lat, p.lng]);
     }
 
@@ -177,8 +178,8 @@ export function LiveMap({ branches, points }: Props) {
         </button>
       </div>
       <div className="pointer-events-none absolute bottom-4 left-4 z-[500] flex flex-col gap-1 rounded-xl bg-surface/95 px-3 py-2 text-sm shadow">
-        <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full" style={{ background: COLOR.ON_TIME }} />{t('attendance.status.ON_TIME')}</span>
-        <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full" style={{ background: COLOR.LATE }} />{t('attendance.status.LATE')}</span>
+        <span className="flex items-center gap-2"><GraduationCap className="h-4 w-4" style={{ color: STATUS_COLOR.ON_TIME }} />{t('attendance.status.ON_TIME')}</span>
+        <span className="flex items-center gap-2"><GraduationCap className="h-4 w-4" style={{ color: STATUS_COLOR.LATE }} />{t('attendance.status.LATE')}</span>
       </div>
       {points.length === 0 && (
         <div className="pointer-events-none absolute left-1/2 top-4 z-[500] -translate-x-1/2 rounded-xl bg-surface/95 px-4 py-2 text-sm text-text-muted shadow">

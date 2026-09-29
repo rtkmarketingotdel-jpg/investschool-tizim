@@ -47,3 +47,9 @@ svg.lucide {
 .leaflet-container {
   font-family: inherit;
 }
+
+/* Leaflet div icons must not get the default white box */
+.map-icon {
+  background: transparent;
+  border: 0;
+}

@@ -52,6 +52,8 @@ export interface Attendance {
   deviceInfo: string | null;
   note: string | null;
   branchId: string | null;
+  /** Mock-only: the position is derived from the branch centre + this offset, so it follows the branch when it moves. */
+  geoOffset?: [number, number];
 }
 
 export interface Setting {
