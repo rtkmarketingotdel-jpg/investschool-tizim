@@ -47,7 +47,7 @@ export function DropdownItem({ active, className, ...rest }: React.ButtonHTMLAtt
     <button
       className={cn(
         'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-muted',
-        active && 'font-semibold text-primary',
+        active && 'font-medium text-primary',
         className,
       )}
       {...rest}

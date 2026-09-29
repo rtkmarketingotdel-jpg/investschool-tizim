@@ -13,6 +13,8 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
   passwordHash: hash,
   role,
   position,
+  isTeacher: position.includes('oʻqituvchisi'),
+  subject: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
   baseSalary,
   language: 'uz',
   isActive: true,

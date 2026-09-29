@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Check, Copy, KeyRound, Pencil, Plus, Search, Users } from 'lucide-react';
+import { Check, Copy, GraduationCap, KeyRound, Pencil, Plus, Search, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { errorCode } from '@/lib/api';
 import { schoolApi, type Role, type StaffMember } from '@/lib/schoolApi';
@@ -24,14 +24,15 @@ export default function Staff() {
   const [role, setRole] = useState('');
   const [active, setActive] = useState('');
   const [page, setPage] = useState(1);
-  const [drawer, setDrawer] = useState<{ open: boolean; member: StaffMember | null }>({ open: false, member: null });
-  const [secret, setSecret] = useState<{ name: string; password: string } | null>(null);
+  const [drawer, setDrawer] = useState<{ open: boolean; member: StaffMember | null; kind: 'teacher' | 'staff' }>({ open: false, member: null, kind: 'staff' });
+  const [teacher, setTeacher] = useState('');
+  const [secret, setSecret] = useState<{ name: string; phone: string; password: string } | null>(null);
   const [resetTarget, setResetTarget] = useState<StaffMember | null>(null);
   const [copied, setCopied] = useState(false);
 
   const list = useQuery({
-    queryKey: ['staff', q, role, active, page],
-    queryFn: () => schoolApi.staff({ q, role, active, page, limit: LIMIT }),
+    queryKey: ['staff', q, role, active, teacher, page],
+    queryFn: () => schoolApi.staff({ q, role, active, teacher, page, limit: LIMIT }),
     placeholderData: keepPreviousData,
   });
 
@@ -39,14 +40,14 @@ export default function Staff() {
     mutationFn: (m: StaffMember) => schoolApi.resetPassword(m.id),
     onSuccess: (r, m) => {
       setResetTarget(null);
-      setSecret({ name: m.fullName, password: r.tempPassword });
+      setSecret({ name: m.fullName, phone: m.phone, password: r.tempPassword });
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
   });
 
   const copy = async () => {
     if (!secret) return;
-    await navigator.clipboard.writeText(secret.password);
+    await navigator.clipboard.writeText(`${t('staff.login')}: ${secret.phone}\n${t('staff.password')}: ${secret.password}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -58,7 +59,12 @@ export default function Staff() {
       <PageHeader
         title={t('nav.staffList')}
         subtitle={t('staff.subtitle', { count: list.data?.total ?? 0 })}
-        action={<Button onClick={() => setDrawer({ open: true, member: null })}><Plus className="h-5 w-5" /> {t('staff.add')}</Button>}
+        action={
+          <div className="flex flex-wrap gap-3">
+            <Button variant="secondary" onClick={() => setDrawer({ open: true, member: null, kind: 'staff' })}><Plus className="h-5 w-5" /> {t('staff.add')}</Button>
+            <Button onClick={() => setDrawer({ open: true, member: null, kind: 'teacher' })}><GraduationCap className="h-5 w-5" /> {t('staff.addTeacher')}</Button>
+          </div>
+        }
       />
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="min-w-64 flex-1">
@@ -68,6 +74,12 @@ export default function Staff() {
           <Select aria-label={t('staff.role')} value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allRoles')}</option>
             {(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+          </Select>
+        </div>
+        <div className="w-44">
+          <Select aria-label={t('staff.type')} value={teacher} onChange={(e) => { setTeacher(e.target.value); setPage(1); }}>
+            <option value="">{t('staff.allTypes')}</option>
+            <option value="true">{t('staff.teachersOnly')}</option>
           </Select>
         </div>
         <div className="w-44">
@@ -125,7 +137,7 @@ export default function Staff() {
                   <Td>
                     {canManage(m) && (
                       <div className="flex gap-1">
-                        <button aria-label={t('staff.edit')} onClick={() => setDrawer({ open: true, member: m })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
+                        <button aria-label={t('staff.edit')} onClick={() => setDrawer({ open: true, member: m, kind: m.isTeacher ? 'teacher' : 'staff' })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
                         <button aria-label={t('staff.resetPassword')} onClick={() => setResetTarget(m)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><KeyRound className="h-4 w-4" /></button>
                       </div>
                     )}
@@ -138,7 +150,7 @@ export default function Staff() {
         </>
       )}
 
-      <StaffDrawer open={drawer.open} member={drawer.member} onClose={() => setDrawer({ open: false, member: null })} onCreated={(name, password) => setSecret({ name, password })} />
+      <StaffDrawer open={drawer.open} member={drawer.member} kind={drawer.kind} onClose={() => setDrawer((d) => ({ ...d, open: false }))} onCreated={setSecret} />
 
       <Modal open={!!resetTarget} onClose={() => setResetTarget(null)} title={t('staff.resetPassword')}>
         <p className="text-text-muted">{t('staff.resetConfirm', { name: resetTarget?.fullName })}</p>
@@ -150,8 +162,11 @@ export default function Staff() {
 
       <Modal open={!!secret} onClose={() => setSecret(null)} title={t('staff.tempPasswordTitle')}>
         <p className="text-text-muted">{t('staff.tempPasswordText', { name: secret?.name })}</p>
-        <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-surface-muted p-3">
-          <code className="flex-1 select-all text-lg font-semibold tracking-wider">{secret?.password}</code>
+        <dl className="mt-4 space-y-1 text-sm">
+          <div className="flex gap-2"><dt className="w-16 text-text-muted">{t('staff.login')}</dt><dd className="select-all">{secret?.phone}</dd></div>
+        </dl>
+        <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-surface-muted p-3">
+          <code className="flex-1 select-all text-lg tracking-wider">{secret?.password}</code>
           <Button variant="secondary" className="px-3 py-2" onClick={copy} aria-label={t('common.copy')}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </Button>

@@ -8,6 +8,8 @@ export interface User {
   passwordHash: string;
   role: Role;
   position: string;
+  isTeacher: boolean;
+  subject: string | null;
   baseSalary: number;
   language: Lang;
   isActive: boolean;

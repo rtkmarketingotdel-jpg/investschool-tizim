@@ -6,7 +6,7 @@ export default function Me() {
   const { t } = useTranslation();
   return (
     <div className="space-y-8">
-      <h1 className="text-[28px] font-semibold">{t('nav.me')}</h1>
+      <h1 className="text-[28px] font-medium">{t('nav.me')}</h1>
       <AttendanceSelf />
       <MyPayslips />
     </div>

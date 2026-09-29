@@ -46,10 +46,10 @@ export default function Login() {
         <form onSubmit={submit} className="w-full max-w-md space-y-5">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             <img src={brand.logo} alt="" className="h-10 w-10 rounded-xl" />
-            <span className="text-lg font-semibold">{brand.name}</span>
+            <span className="text-lg font-medium">{brand.name}</span>
           </div>
           <div>
-            <h1 className="text-[28px] font-semibold">{t('auth.loginTitle')}</h1>
+            <h1 className="text-[28px] font-medium">{t('auth.loginTitle')}</h1>
             <p className="mt-1 text-text-muted">{t('auth.loginSubtitle')}</p>
           </div>
           <Input
@@ -80,7 +80,7 @@ export default function Login() {
 
           {import.meta.env.VITE_DEMO_MODE === 'true' && (
             <div className="border-t border-border pt-5">
-              <p className="mb-2 text-sm font-medium text-text-muted">{t('auth.demoAccounts')}</p>
+              <p className="mb-2 text-sm text-text-muted">{t('auth.demoAccounts')}</p>
               <div className="grid grid-cols-2 gap-2">
                 {DEMO.map((d) => (
                   <button
@@ -103,7 +103,7 @@ export default function Login() {
       </div>
       <div className="hidden flex-col items-center justify-center gap-6 bg-primary p-12 text-white lg:flex">
         <img src={brand.logo} alt="" className="h-24 w-24 rounded-3xl shadow-xl" />
-        <h2 className="text-4xl font-semibold">{brand.name}</h2>
+        <h2 className="text-4xl font-medium">{brand.name}</h2>
         <p className="text-lg text-white/80">{t('brand.slogan')}</p>
       </div>
     </div>

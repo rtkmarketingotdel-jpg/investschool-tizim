@@ -13,7 +13,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(function Select(
 ) {
   return (
     <label className="block">
-      {label && <span className="mb-1.5 block text-sm font-medium">{label}</span>}
+      {label && <span className="mb-1.5 block text-sm">{label}</span>}
       <span className="relative block">
         <select
           ref={ref}

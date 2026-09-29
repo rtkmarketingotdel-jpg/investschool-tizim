@@ -14,7 +14,7 @@ export default function Attendance() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-[28px] font-semibold">{t('nav.attendance')}</h1>
+        <h1 className="text-[28px] font-medium">{t('nav.attendance')}</h1>
         <p className="mt-1 text-text-muted">{t('attendance.subtitle')}</p>
       </div>
       <AttendanceSelf />

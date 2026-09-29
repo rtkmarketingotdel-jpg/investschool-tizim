@@ -9,7 +9,7 @@ export function Field({ children, className }: { children: ReactNode; className?
 export function FormSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <fieldset className="space-y-4">
-      <legend className="mb-1 text-sm font-semibold uppercase tracking-wider text-text-muted">{title}</legend>
+      <legend className="mb-1 text-sm font-medium uppercase tracking-wider text-text-muted">{title}</legend>
       {children}
     </fieldset>
   );
@@ -19,7 +19,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   function Textarea({ label, className, ...rest }, ref) {
     return (
       <label className="block">
-        {label && <span className="mb-1.5 block text-sm font-medium">{label}</span>}
+        {label && <span className="mb-1.5 block text-sm">{label}</span>}
         <textarea
           ref={ref}
           rows={3}
@@ -35,7 +35,7 @@ export function Checkbox({ label, checked, onChange }: { label: string; checked:
   return (
     <label className="flex cursor-pointer items-center gap-3">
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-5 w-5 rounded accent-[rgb(var(--primary))]" />
-      <span className="font-medium">{label}</span>
+      <span>{label}</span>
     </label>
   );
 }

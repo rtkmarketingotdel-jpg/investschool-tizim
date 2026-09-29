@@ -61,9 +61,9 @@ export default function Payroll() {
         }
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Card><p className="text-text-muted">{t('finance.payroll.total')}</p><p className="mt-1 text-2xl font-semibold tabular-nums">{money(list.data?.summary.total ?? 0)}</p></Card>
-        <Card><p className="text-text-muted">{t('finance.payroll.bonus')}</p><p className="mt-1 text-2xl font-semibold tabular-nums text-green-600">{money(list.data?.summary.bonus ?? 0)}</p></Card>
-        <Card><p className="text-text-muted">{t('finance.payroll.fine')}</p><p className="mt-1 text-2xl font-semibold tabular-nums text-red-600">{money(list.data?.summary.fine ?? 0)}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.payroll.total')}</p><p className="mt-1 text-2xl font-medium tabular-nums">{money(list.data?.summary.total ?? 0)}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.payroll.bonus')}</p><p className="mt-1 text-2xl font-medium tabular-nums text-green-600">{money(list.data?.summary.bonus ?? 0)}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.payroll.fine')}</p><p className="mt-1 text-2xl font-medium tabular-nums text-red-600">{money(list.data?.summary.fine ?? 0)}</p></Card>
       </div>
 
       {list.isLoading ? (
@@ -97,7 +97,7 @@ export default function Payroll() {
                 <Td numeric>{money(r.baseSalary)}</Td>
                 <Td numeric className="text-green-600">{r.bonusTotal ? `+${money(r.bonusTotal)}` : '—'}</Td>
                 <Td numeric className="text-red-600">{r.fineTotal ? `−${money(r.fineTotal)}` : '—'}</Td>
-                <Td numeric className="font-semibold">{money(r.total)}</Td>
+                <Td numeric className="font-medium">{money(r.total)}</Td>
                 <Td><Badge tone={payrollTone[r.status]}>{t(`finance.payroll.statuses.${r.status}`)}</Badge></Td>
                 <Td><div className="flex justify-end gap-2">{actions(r)}</div></Td>
               </Tr>
@@ -109,15 +109,15 @@ export default function Payroll() {
       <Drawer open={!!detailId} onClose={() => setDetailId(null)} title={dr?.fullName ?? t('finance.payroll.details')}>
         {!dr ? <Skeleton className="h-40" /> : (
           <div className="space-y-6">
-            <div className="flex items-center gap-3"><Avatar name={dr.fullName} size={48} /><div><p className="font-semibold">{dr.fullName}</p><p className="text-sm text-text-muted">{dr.position} · {dr.period}</p></div><Badge tone={payrollTone[dr.status]}>{t(`finance.payroll.statuses.${dr.status}`)}</Badge></div>
+            <div className="flex items-center gap-3"><Avatar name={dr.fullName} size={48} /><div><p className="font-medium">{dr.fullName}</p><p className="text-sm text-text-muted">{dr.position} · {dr.period}</p></div><Badge tone={payrollTone[dr.status]}>{t(`finance.payroll.statuses.${dr.status}`)}</Badge></div>
             <dl className="grid grid-cols-2 gap-4 rounded-xl border border-border p-4">
               {([['base', money(dr.baseSalary)], ['bonus', money(dr.bonusTotal)], ['fine', money(dr.fineTotal)], ['totalCol', money(dr.total)], ['worked', String(dr.workedDays)], ['late', String(dr.lateCount)], ['absent', String(dr.absentCount)]] as const).map(([k, v]) => (
-                <div key={k}><dt className="text-sm text-text-muted">{t(k === 'worked' ? 'finance.payroll.workedDays' : k === 'late' ? 'finance.payroll.lateCount' : k === 'absent' ? 'finance.payroll.absentCount' : `finance.payroll.${k}`)}</dt><dd className="font-semibold tabular-nums">{v}</dd></div>
+                <div key={k}><dt className="text-sm text-text-muted">{t(k === 'worked' ? 'finance.payroll.workedDays' : k === 'late' ? 'finance.payroll.lateCount' : k === 'absent' ? 'finance.payroll.absentCount' : `finance.payroll.${k}`)}</dt><dd className="font-medium tabular-nums">{v}</dd></div>
               ))}
             </dl>
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <h3 className="font-semibold">{t('finance.payroll.adjustments')}</h3>
+                <h3 className="font-medium">{t('finance.payroll.adjustments')}</h3>
                 <Button variant="secondary" className="px-3 py-1.5 text-sm" disabled={locked} onClick={() => setAdjust({ userId: dr.userId, name: dr.fullName })}><Plus className="h-4 w-4" /> {t('finance.payroll.addAdjustment')}</Button>
               </div>
               {locked && <p className="mb-2 text-sm text-text-muted">{t('finance.payroll.lockedHint')}</p>}
@@ -126,7 +126,7 @@ export default function Payroll() {
                   {dr.adjustments.map((a) => (
                     <li key={a.id} className="flex items-start justify-between gap-3 p-3">
                       <div><p className="text-sm font-medium">{reasonText(a)}</p><p className="text-xs text-text-muted">{fmtDay(a.createdAt.slice(0, 10), i18n.language, 'd MMM')} · {t(a.source === 'ATTENDANCE' ? 'finance.payroll.sourceAuto' : 'finance.payroll.sourceManual')}</p></div>
-                      <span className={a.type === 'BONUS' ? 'font-semibold tabular-nums text-green-600' : 'font-semibold tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{money(a.amount)}</span>
+                      <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{money(a.amount)}</span>
                     </li>
                   ))}
                 </ul>

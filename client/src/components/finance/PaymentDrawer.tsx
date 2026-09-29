@@ -76,7 +76,7 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
       {done ? (
         <div className="flex flex-col items-center gap-4 py-10 text-center">
           <CheckCircle2 className="h-14 w-14 text-green-600" />
-          <h3 className="text-xl font-semibold">{t('finance.payments.created')}</h3>
+          <h3 className="text-xl font-medium">{t('finance.payments.created')}</h3>
           <p className="text-text-muted">{done.studentName} · {formatMoney(done.amount, cur)}</p>
           <div className="flex w-full gap-3 pt-4">
             <Button variant="secondary" className="flex-1" onClick={onClose}>{t('common.close')}</Button>
@@ -103,7 +103,7 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
               </div>
               <div className="text-right">
                 <p className="text-xs text-text-muted">{t('finance.payments.currentDebt')}</p>
-                <p className={chosen.debt > 0 ? 'font-semibold tabular-nums text-red-600' : 'font-semibold tabular-nums'}>{formatMoney(chosen.debt, cur)}</p>
+                <p className={chosen.debt > 0 ? 'font-medium tabular-nums text-red-600' : 'font-medium tabular-nums'}>{formatMoney(chosen.debt, cur)}</p>
               </div>
               {!student && (
                 <Button type="button" variant="ghost" className="px-3 py-2 text-sm" onClick={() => { setChosen(null); setAmount(''); }}>

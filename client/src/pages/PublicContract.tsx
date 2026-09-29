@@ -61,20 +61,20 @@ export default function PublicContract() {
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <img src={brand.logo} alt="" className="h-9 w-9 rounded-lg" />
-          <span className="flex-1 font-semibold">{c.school}</span>
+          <span className="flex-1 font-medium">{c.school}</span>
           {c.demoMode && <Badge tone="warning">{x.demo}</Badge>}
         </div>
       </header>
       <main className="mx-auto max-w-2xl space-y-4 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-xl font-semibold">{x.title} № {c.number}</h1>
+          <h1 className="text-xl font-medium">{x.title} № {c.number}</h1>
           <Button variant="secondary" className="px-4 py-2" onClick={() => void downloadPdf()}><Download className="h-4 w-4" /> {x.download}</Button>
         </div>
 
         <Card className="space-y-4 p-5 text-[15px] leading-relaxed">
           {c.blocks.map((b, i) => (
             <section key={i}>
-              {b.heading && <h2 className="mb-1 font-semibold">{b.heading}</h2>}
+              {b.heading && <h2 className="mb-1 font-medium">{b.heading}</h2>}
               {b.paragraphs.map((p, j) => <p key={j} className="mb-1.5">{p}</p>)}
             </section>
           ))}
@@ -84,7 +84,7 @@ export default function PublicContract() {
           <Card className="flex items-center gap-3 border-green-600/40 bg-[#DCFCE7] text-[#15803D] dark:bg-green-500/15 dark:text-green-400">
             <ShieldCheck className="h-6 w-6 shrink-0" />
             <div>
-              <p className="font-semibold">{x.signed}</p>
+              <p className="font-medium">{x.signed}</p>
               {c.signedAt && <p className="text-sm">{x.signedAt}: {new Intl.DateTimeFormat(lang === 'ru' ? 'ru-RU' : 'uz-UZ', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Tashkent' }).format(new Date(c.signedAt))}</p>}
               {signedNow && <p className="text-sm">✓</p>}
             </div>

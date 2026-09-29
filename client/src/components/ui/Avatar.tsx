@@ -14,7 +14,7 @@ export function Avatar({ name, size = 48, className }: { name: string; size?: nu
       aria-hidden
       style={{ width: size, height: size, fontSize: size * 0.36 }}
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft font-bold text-primary',
+        'inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft font-medium text-primary',
         className,
       )}
     >

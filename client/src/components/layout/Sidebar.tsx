@@ -34,7 +34,7 @@ export function Sidebar({ collapsed, mobileOpen, onNavigate }: Props) {
       >
         <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border px-4">
           <img src={brand.logo} alt="" className="h-10 w-10 shrink-0 rounded-xl" />
-          <span className={cn('truncate text-lg font-semibold', collapsed && 'md:hidden')}>{brand.name}</span>
+          <span className={cn('truncate text-lg font-medium', collapsed && 'md:hidden')}>{brand.name}</span>
         </div>
         <nav className="flex-1 space-y-6 overflow-y-auto p-4">
           <NavItemLink
@@ -46,7 +46,7 @@ export function Sidebar({ collapsed, mobileOpen, onNavigate }: Props) {
           />
           {groups.map((g) => (
             <div key={g.titleKey}>
-              <p className={cn('mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-muted', collapsed && 'md:hidden')}>
+              <p className={cn('mb-2 px-3 text-xs uppercase tracking-wider text-text-muted', collapsed && 'md:hidden')}>
                 {t(g.titleKey)}
               </p>
               <div className="space-y-1">

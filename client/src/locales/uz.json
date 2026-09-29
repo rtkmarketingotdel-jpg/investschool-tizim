@@ -267,10 +267,25 @@
     "resetPassword": "Parolni tiklash",
     "resetConfirm": "{{name}} uchun yangi vaqtinchalik parol yaratilsinmi? Eski parol ishlamay qoladi.",
     "tempPasswordTitle": "Vaqtinchalik parol",
-    "tempPasswordText": "{{name}} uchun parol:",
+    "tempPasswordText": "{{name}} uchun kirish maʼlumotlari:",
     "tempPasswordWarning": "Bu parol faqat hozir koʻrsatiladi. Xodimga yetkazing va u keyin oʻzgartirsin.",
     "calendar": "Davomat kalendari",
-    "payrollHistory": "Oyliklar tarixi"
+    "payrollHistory": "Oyliklar tarixi",
+    "addTeacher": "Oʻqituvchi qoʻshish",
+    "phoneLogin": "Telefon (login)",
+    "subject": "Fan",
+    "otherSubject": "Boshqa fan…",
+    "customSubject": "Fan nomi",
+    "homeroom": "Sinf rahbari boʻladi",
+    "noHomeroom": "Sinf rahbari emas",
+    "type": "Turi",
+    "allTypes": "Barcha xodimlar",
+    "teachersOnly": "Faqat oʻqituvchilar",
+    "credentialsHint": "Xodim shu login va parol bilan tizimga kiradi. Parolni oʻzingiz yozishingiz yoki avtomatik yaratishingiz mumkin (kamida 8 belgi).",
+    "login": "Login",
+    "password": "Parol",
+    "passwordMin": "Kamida 8 belgi",
+    "generate": "Yaratish"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",
@@ -395,7 +410,16 @@
       "cancelled": "Shartnoma bekor qilindi",
       "sentCopied": "Yuborildi. Havola nusxalandi",
       "linkCopied": "Havola nusxalandi",
-      "demoCode": "Demo kod"
+      "demoCode": "Demo kod",
+      "subtitleClasses": "Shartnomalar sinflar boʻyicha",
+      "tabs": {
+        "classes": "Sinflar",
+        "all": "Barcha shartnomalar"
+      },
+      "students": "{{count}} oʻquvchi",
+      "noContract": "Shartnoma yoʻq",
+      "classSubtitle": "Imzolangan: {{signed}} / {{total}} oʻquvchi",
+      "activeCodes": "Faol tasdiqlash kodlari (demo rejim). Kodni ota-onaga ayting:"
     },
     "payroll": {
       "subtitle": "Xodimlar oyliklari va jarima/bonuslar",
@@ -496,7 +520,18 @@
       "samplePdf": "Namuna PDF",
       "delete": "Oʻchirish",
       "deleteConfirm": "Shablonni oʻchirasizmi?",
-      "deleted": "Shablon oʻchirildi"
+      "deleted": "Shablon oʻchirildi",
+      "writeHint": "Matnni shu yerda qoʻlda yozing",
+      "or": "yoki",
+      "upload": "Fayldan yuklash (.docx, .txt)",
+      "imported": "Fayl yuklandi. Matnni tekshirib, saqlang",
+      "importErrors": {
+        "too-large": "Fayl 2 MB dan katta",
+        "unsupported": "Faqat .docx, .txt yoki .md fayllar",
+        "empty": "Faylda matn topilmadi",
+        "failed": "Faylni oʻqib boʻlmadi"
+      },
+      "unknown": "Nomaʼlum maydonlar (boʻsh chiqadi): {{list}}"
     },
     "telegram": {
       "chatId": "Chat ID (direktor/admin guruhi)",

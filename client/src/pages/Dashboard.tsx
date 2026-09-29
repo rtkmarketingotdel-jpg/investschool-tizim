@@ -21,7 +21,7 @@ function Kpi({ icon: Icon, title, value, sub, children }: { icon: LucideIcon; ti
         </span>
         <p className="text-text-muted">{title}</p>
       </div>
-      <p className="mt-4 whitespace-nowrap text-xl font-semibold tabular-nums 2xl:text-2xl">{value}</p>
+      <p className="mt-4 whitespace-nowrap text-xl font-medium tabular-nums 2xl:text-2xl">{value}</p>
       {sub && <div className="mt-1 text-sm text-text-muted">{sub}</div>}
       {children}
     </Card>
@@ -96,7 +96,7 @@ export default function Dashboard() {
       <div className="grid gap-4 xl:grid-cols-2">
         {data.chart && (
           <Card>
-            <h2 className="mb-4 text-lg font-semibold">{t('dashboard.revenueChart')}</h2>
+            <h2 className="mb-4 text-lg font-medium">{t('dashboard.revenueChart')}</h2>
             <div className="h-72" role="img" aria-label={t('dashboard.revenueChart')}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.chart.map((c) => ({ ...c, name: monthLabel(c.period) }))} margin={{ left: 0, right: 8 }}>
@@ -120,7 +120,7 @@ export default function Dashboard() {
         )}
         <Card>
           <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="text-lg font-semibold">{t('dashboard.classFill')}</h2>
+            <h2 className="text-lg font-medium">{t('dashboard.classFill')}</h2>
             <span className="text-sm font-medium text-green-600 dark:text-green-400">{t('dashboard.freeSeats', { count: data.classFill.freeSeats })}</span>
           </div>
           <ul className="space-y-3">
@@ -146,7 +146,7 @@ export default function Dashboard() {
         <div className="grid gap-4 xl:grid-cols-2">
           {data.attendance && (
             <Card>
-              <h2 className="mb-4 text-lg font-semibold">{t('dashboard.problems')}</h2>
+              <h2 className="mb-4 text-lg font-medium">{t('dashboard.problems')}</h2>
               {data.attendance.problems.length === 0 ? (
                 <p className="py-8 text-center text-text-muted">{t('dashboard.allPresent')}</p>
               ) : (
@@ -169,7 +169,7 @@ export default function Dashboard() {
           )}
           {data.topDebtors && (
             <Card>
-              <h2 className="mb-4 text-lg font-semibold">{t('dashboard.topDebtors')}</h2>
+              <h2 className="mb-4 text-lg font-medium">{t('dashboard.topDebtors')}</h2>
               {data.topDebtors.length === 0 ? (
                 <p className="py-8 text-center text-text-muted">{t('dashboard.noDebtors')}</p>
               ) : (
@@ -181,7 +181,7 @@ export default function Dashboard() {
                         <Link to={`/students/${d.studentId}`} className="block truncate font-medium hover:text-primary">{d.name}</Link>
                         <p className="text-[13px] text-text-muted">{d.className ?? '—'} · {t('dashboard.days', { count: d.overdueDays })}</p>
                       </div>
-                      <span className="font-semibold tabular-nums text-red-600">{formatMoney(d.debt, cur)}</span>
+                      <span className="font-medium tabular-nums text-red-600">{formatMoney(d.debt, cur)}</span>
                     </li>
                   ))}
                 </ul>

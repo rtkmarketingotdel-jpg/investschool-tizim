@@ -19,7 +19,7 @@ export function UsersTab() {
 
   const update = useMutation({
     mutationFn: ({ m, patch }: { m: StaffMember; patch: Partial<StaffMember> }) =>
-      schoolApi.updateStaff(m.id, { fullName: m.fullName, phone: m.phone, role: m.role, position: m.position, baseSalary: m.baseSalary, isActive: m.isActive, ...patch }),
+      schoolApi.updateStaff(m.id, { fullName: m.fullName, phone: m.phone, role: m.role, position: m.position, baseSalary: m.baseSalary, isActive: m.isActive, isTeacher: m.isTeacher, subject: m.subject, ...patch }),
     onSuccess: () => { toast(t('staff.updated')); void qc.invalidateQueries({ queryKey: ['staff'] }); },
     onError: fail,
   });
@@ -59,7 +59,7 @@ export function UsersTab() {
       <Modal open={!!secret} onClose={() => setSecret(null)} title={t('staff.tempPasswordTitle')}>
         <p className="text-text-muted">{t('staff.tempPasswordText', { name: secret?.name })}</p>
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-surface-muted p-3">
-          <code className="flex-1 select-all text-lg font-semibold tracking-wider">{secret?.password}</code>
+          <code className="flex-1 select-all text-lg font-medium tracking-wider">{secret?.password}</code>
           <Button variant="secondary" className="px-3 py-2" aria-label={t('common.copy')} onClick={async () => { await navigator.clipboard.writeText(secret!.password); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </Button>

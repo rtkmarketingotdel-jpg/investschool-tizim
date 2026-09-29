@@ -50,8 +50,8 @@ export default function Debtors() {
     <div>
       <PageHeader title={t('nav.debtors')} subtitle={t('finance.debtors.subtitle')} />
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
-        <Card><p className="text-text-muted">{t('finance.debtors.totalDebt')}</p><p className="mt-1 text-3xl font-semibold tabular-nums text-red-600">{formatMoney(list.data?.summary.totalDebt ?? 0, cur)}</p></Card>
-        <Card><p className="text-text-muted">{t('finance.debtors.count')}</p><p className="mt-1 text-3xl font-semibold tabular-nums">{list.data?.summary.count ?? 0}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.debtors.totalDebt')}</p><p className="mt-1 text-3xl font-medium tabular-nums text-red-600">{formatMoney(list.data?.summary.totalDebt ?? 0, cur)}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.debtors.count')}</p><p className="mt-1 text-3xl font-medium tabular-nums">{list.data?.summary.count ?? 0}</p></Card>
       </div>
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="min-w-64 flex-1"><Input aria-label={t('common.search')} placeholder={t('students.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} icon={<Search className="h-4 w-4" />} /></div>
@@ -89,7 +89,7 @@ export default function Debtors() {
                   <Td><Link to={`/students/${d.studentId}`} className="font-medium hover:text-primary">{d.studentName}</Link><p className="text-[13px] text-text-muted">{d.parentName}</p></Td>
                   <Td>{d.className ?? '—'}</Td>
                   <Td>{d.parentPhone}</Td>
-                  <Td numeric className="font-semibold text-red-600">{formatMoney(d.debt, cur)}</Td>
+                  <Td numeric className="font-medium text-red-600">{formatMoney(d.debt, cur)}</Td>
                   <Td><Badge tone={d.overdueDays > 30 ? 'danger' : 'warning'}>{t('dashboard.days', { count: d.overdueDays })}</Badge></Td>
                   <Td className="text-text-muted">{d.lastPaymentAt ? fmtDay(d.lastPaymentAt.slice(0, 10), i18n.language, 'd MMM yyyy') : '—'}</Td>
                   <Td>

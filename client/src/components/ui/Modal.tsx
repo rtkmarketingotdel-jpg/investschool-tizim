@@ -23,7 +23,7 @@ export function Modal({ open, onClose, title, children }: Props) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div role="dialog" aria-modal="true" aria-label={title} className="relative w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">{title}</h2>
+          <h2 className="text-xl font-medium">{title}</h2>
           <button aria-label={t('common.close')} onClick={onClose} className="rounded-lg p-2 hover:bg-surface-muted">
             <X className="h-5 w-5" />
           </button>

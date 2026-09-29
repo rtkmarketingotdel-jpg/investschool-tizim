@@ -26,7 +26,7 @@ export function ClassDrawer({ open, cls, onClose }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const staff = useQuery({ queryKey: ['staff', 'all'], queryFn: () => schoolApi.staff({ active: 'true', page: 1, limit: 100 }), enabled: open });
+  const staff = useQuery({ queryKey: ['staff', 'all'], queryFn: () => schoolApi.staff({ active: 'true', teacher: 'true', page: 1, limit: 100 }), enabled: open });
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: '', grade: 1, capacity: 15, teacherId: '' },

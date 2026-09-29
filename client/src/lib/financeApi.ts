@@ -187,6 +187,13 @@ export const financeApi = {
     api.post<ContractRow>('/contracts', d).then((r) => r.data),
   sendContract: (id: string) => api.post<ContractRow>(`/contracts/${id}/send`).then((r) => r.data),
   cancelContract: (id: string) => api.post<ContractRow>(`/contracts/${id}/cancel`).then((r) => r.data),
+  contractClasses: () =>
+    api.get<{ items: Array<{ id: string; name: string; studentCount: number; signed: number; sent: number; draft: number; none: number }> }>('/contracts/classes').then((r) => r.data.items),
+  contractClass: (id: string) =>
+    api.get<{
+      class: { id: string; name: string };
+      items: Array<{ student: { id: string; fullName: string; parentName: string; parentPhone: string; monthlyFee: number }; contract: ContractRow | null }>;
+    }>(`/contracts/classes/${id}`).then((r) => r.data),
   templates: () => api.get<{ items: Template[] }>('/contracts/templates').then((r) => r.data.items),
   saveTemplate: (id: string | null, d: Omit<Template, 'id'>) =>
     (id ? api.put<Template>(`/contracts/templates/${id}`, d) : api.post<Template>('/contracts/templates', d)).then((r) => r.data),

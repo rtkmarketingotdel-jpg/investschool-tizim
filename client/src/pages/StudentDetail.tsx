@@ -60,7 +60,7 @@ export default function StudentDetail() {
         <div className="flex items-center gap-4">
           <Avatar name={`${s.firstName} ${s.lastName}`} size={72} />
           <div>
-            <h1 className="text-2xl font-semibold">{s.fullName}</h1>
+            <h1 className="text-2xl font-medium">{s.fullName}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge tone={statusTone[s.status]}>{t(`students.statuses.${s.status}`)}</Badge>
               {s.className && <Badge>{s.className}</Badge>}
@@ -115,7 +115,7 @@ export default function StudentDetail() {
           <div className="space-y-4">
             <Card className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-text-muted">{t('students.balance')}</span>
-              <span className={finance.data.debt > 0 ? 'text-2xl font-semibold tabular-nums text-red-600' : 'text-2xl font-semibold tabular-nums text-green-600'}>
+              <span className={finance.data.debt > 0 ? 'text-2xl font-medium tabular-nums text-red-600' : 'text-2xl font-medium tabular-nums text-green-600'}>
                 {finance.data.debt > 0 ? `−${formatMoney(finance.data.debt, t('common.currency'))}` : formatMoney(-finance.data.balance, t('common.currency'))}
               </span>
             </Card>
@@ -130,7 +130,7 @@ export default function StudentDetail() {
                       <span className="flex-1">
                         {e.kind === 'CHARGE' ? t('students.chargeFor', { period: e.period }) : `${t('finance.payments.title')}${e.method ? ` · ${t(`finance.methods.${e.method}`)}` : ''}`}
                       </span>
-                      <span className={e.kind === 'PAYMENT' ? 'font-semibold tabular-nums text-green-600' : 'font-semibold tabular-nums'}>
+                      <span className={e.kind === 'PAYMENT' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums'}>
                         {e.kind === 'PAYMENT' ? '+' : '−'}{formatMoney(e.amount, t('common.currency'))}
                       </span>
                       {e.kind === 'PAYMENT' && (

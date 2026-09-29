@@ -75,7 +75,7 @@ export function AttendanceSelf() {
       <Card className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-text-muted">{t('attendance.hello', { name: user?.fullName.split(' ')[1] ?? user?.fullName })}</p>
-          <p className="mt-1 text-xl font-semibold">{fmtDay(todayLocal(), i18n.language, 'd MMMM, EEEE')}</p>
+          <p className="mt-1 text-xl font-medium">{fmtDay(todayLocal(), i18n.language, 'd MMMM, EEEE')}</p>
           {st && <p className="mt-1 text-text-muted">{t('attendance.workHours')}: {st.workStart}–{st.workEnd}</p>}
           <div className="mt-4">
             {today.isLoading ? (
@@ -125,13 +125,13 @@ export function AttendanceSelf() {
         {(['onTime', 'late', 'absent'] as const).map((k) => (
           <Card key={k} className="p-4 md:p-6">
             <p className="text-sm text-text-muted">{t(`attendance.stats.${k}`)}</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums md:text-3xl">{mine.data?.stats[k] ?? '–'}</p>
+            <p className="mt-1 text-2xl font-medium tabular-nums md:text-3xl">{mine.data?.stats[k] ?? '–'}</p>
           </Card>
         ))}
       </div>
 
       <div>
-        <h2 className="mb-3 text-xl font-semibold">{t('attendance.myHistory')}</h2>
+        <h2 className="mb-3 text-xl font-medium">{t('attendance.myHistory')}</h2>
         {mine.isLoading ? (
           <Skeleton className="h-40" />
         ) : mine.data && mine.data.records.length > 0 ? (

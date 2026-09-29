@@ -33,7 +33,7 @@ export function NotificationsButton() {
       <IconButton aria-label={t('topbar.notifications')} onClick={() => setOpen(true)}>
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs text-white">
             {unread}
           </span>
         )}

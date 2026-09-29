@@ -69,7 +69,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         <div className="ml-2 hidden items-center gap-3 lg:flex">
           <Avatar name={user.fullName} size={40} />
           <div className="leading-tight">
-            <p className="max-w-40 truncate text-sm font-semibold">{user.fullName}</p>
+            <p className="max-w-40 truncate text-sm font-medium">{user.fullName}</p>
             <p className="text-xs text-text-muted">{t(`roles.${user.role}`)}</p>
           </div>
         </div>

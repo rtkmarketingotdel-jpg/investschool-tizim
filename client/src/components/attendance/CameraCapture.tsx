@@ -89,7 +89,7 @@ export function CameraCapture({ open, submitting, onCancel, onSubmit }: Props) {
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-black">
       <div className="flex items-center justify-between p-4 text-white">
-        <span className="font-semibold">{t('attendance.selfieTitle')}</span>
+        <span className="font-medium">{t('attendance.selfieTitle')}</span>
         <button aria-label={t('common.close')} onClick={onCancel} className="rounded-full p-2 hover:bg-white/10">
           <X className="h-6 w-6" />
         </button>

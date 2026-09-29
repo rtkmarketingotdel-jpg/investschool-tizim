@@ -38,7 +38,7 @@ export default function StaffDetail() {
       <Card className="flex flex-wrap items-center gap-4">
         <Avatar name={user.fullName} size={72} />
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{user.fullName}</h1>
+          <h1 className="text-2xl font-medium">{user.fullName}</h1>
           <p className="text-text-muted">{user.position} · {user.phone}</p>
           <div className="mt-2 flex gap-2"><Badge>{t(`roles.${user.role}`)}</Badge><Badge tone={user.isActive ? 'success' : 'danger'}>{t(user.isActive ? 'staff.active' : 'staff.inactive')}</Badge></div>
         </div>
@@ -47,7 +47,7 @@ export default function StaffDetail() {
 
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
-          <h2 className="mb-4 text-lg font-semibold">{t('staff.calendar')}</h2>
+          <h2 className="mb-4 text-lg font-medium">{t('staff.calendar')}</h2>
           <div className="grid grid-cols-7 gap-1 text-center text-xs text-text-muted">
             {weekdays.map((d) => <span key={d} className="py-1">{t(`settings.work.day.${d}`)}</span>)}
             {Array.from({ length: offset }, (_, i) => <span key={`o${i}`} />)}
@@ -64,7 +64,7 @@ export default function StaffDetail() {
           </div>
         </Card>
         <Card>
-          <h2 className="mb-4 text-lg font-semibold">{t('attendance.logTitle')}</h2>
+          <h2 className="mb-4 text-lg font-medium">{t('attendance.logTitle')}</h2>
           {attendance.length === 0 ? <p className="py-8 text-center text-text-muted">{t('common.empty')}</p> : (
             <ul className="max-h-80 divide-y divide-border overflow-y-auto">
               {attendance.map((a) => (
@@ -82,27 +82,27 @@ export default function StaffDetail() {
       {data.seesPay && (
         <div className="grid gap-4 xl:grid-cols-2">
           <Card>
-            <h2 className="mb-4 text-lg font-semibold">{t('staff.payrollHistory')}</h2>
+            <h2 className="mb-4 text-lg font-medium">{t('staff.payrollHistory')}</h2>
             {payrolls.length === 0 ? <p className="py-8 text-center text-text-muted">{t('common.empty')}</p> : (
               <ul className="divide-y divide-border">
                 {payrolls.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 py-3">
                     <span className="flex-1 font-medium">{fmtDay(`${p.period}-01`, i18n.language, 'LLLL yyyy')}</span>
                     <Badge tone={payrollTone[p.status]}>{t(`finance.payroll.statuses.${p.status}`)}</Badge>
-                    <span className="w-32 text-right font-semibold tabular-nums">{formatMoney(p.total, cur)}</span>
+                    <span className="w-32 text-right font-medium tabular-nums">{formatMoney(p.total, cur)}</span>
                   </li>
                 ))}
               </ul>
             )}
           </Card>
           <Card>
-            <h2 className="mb-4 text-lg font-semibold">{t('finance.payroll.adjustments')}</h2>
+            <h2 className="mb-4 text-lg font-medium">{t('finance.payroll.adjustments')}</h2>
             {adjustments.length === 0 ? <p className="py-8 text-center text-text-muted">{t('common.empty')}</p> : (
               <ul className="divide-y divide-border">
                 {adjustments.map((a) => (
                   <li key={a.id} className="flex justify-between gap-3 py-3 text-sm">
                     <span>{reasonText(a)}</span>
-                    <span className={a.type === 'BONUS' ? 'font-semibold tabular-nums text-green-600' : 'font-semibold tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{formatMoney(a.amount, cur)}</span>
+                    <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{formatMoney(a.amount, cur)}</span>
                   </li>
                 ))}
               </ul>

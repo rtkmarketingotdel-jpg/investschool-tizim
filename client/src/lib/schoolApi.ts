@@ -68,12 +68,17 @@ export interface StaffMember {
   phone: string;
   role: Role;
   position: string;
+  isTeacher: boolean;
+  subject: string | null;
   baseSalary: number;
   isActive: boolean;
   lateCount: number;
   absentCount: number;
 }
-export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive'>;
+export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive' | 'isTeacher' | 'subject'> & {
+  password?: string;
+  homeroomClassId?: string | null;
+};
 
 const clean = <T extends object>(o: T) =>
   Object.fromEntries(Object.entries(o).filter(([, v]) => v !== '' && v !== undefined));
@@ -90,10 +95,10 @@ export const schoolApi = {
   createClass: (d: ClassInput) => api.post<SchoolClass>('/classes', d).then((r) => r.data),
   updateClass: (id: string, d: ClassInput) => api.patch<SchoolClass>(`/classes/${id}`, d).then((r) => r.data),
 
-  staff: (p: { q?: string; role?: string; active?: string; page: number; limit: number }) =>
+  staff: (p: { q?: string; role?: string; active?: string; teacher?: string; page: number; limit: number }) =>
     api.get<Paged<StaffMember>>('/staff', { params: clean(p) }).then((r) => r.data),
   createStaff: (d: StaffInput) =>
-    api.post<{ user: StaffMember; tempPassword: string }>('/staff', d).then((r) => r.data),
+    api.post<{ user: StaffMember; tempPassword: string; generated: boolean }>('/staff', d).then((r) => r.data),
   updateStaff: (id: string, d: StaffInput) => api.patch(`/staff/${id}`, d).then((r) => r.data),
   resetPassword: (id: string) =>
     api.post<{ tempPassword: string }>(`/staff/${id}/reset-password`).then((r) => r.data),

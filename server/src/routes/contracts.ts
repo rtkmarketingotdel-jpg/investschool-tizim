@@ -48,6 +48,57 @@ contractsRouter.get('/', async (req, res, next) => {
   }
 });
 
+// ---- classes (contracts grouped by class) ----
+const latestByStudent = async () => {
+  const map = new Map<string, Contract>();
+  for (const c of await contractRepo.all()) {
+    if (c.status === 'CANCELLED') continue;
+    const cur = map.get(c.studentId);
+    if (!cur || c.createdAt > cur.createdAt) map.set(c.studentId, c);
+  }
+  return map;
+};
+
+contractsRouter.get('/classes', async (_req, res, next) => {
+  try {
+    const [classes, latest] = await Promise.all([classRepo.list(), latestByStudent()]);
+    const items = [];
+    for (const c of classes) {
+      const list = (await studentRepo.list({ classId: c.id })).filter((s) => s.status !== 'LEFT');
+      const count = (st: string) => list.filter((s) => latest.get(s.id)?.status === st).length;
+      items.push({
+        id: c.id, name: c.name, studentCount: list.length,
+        signed: count('SIGNED'), sent: count('SENT'), draft: count('DRAFT'),
+        none: list.filter((s) => !latest.has(s.id)).length,
+      });
+    }
+    res.json({ items });
+  } catch (e) {
+    next(e);
+  }
+});
+
+contractsRouter.get('/classes/:classId', async (req, res, next) => {
+  try {
+    const cls = await classRepo.findById(req.params.classId!);
+    if (!cls) throw new ApiError(404, 'NOT_FOUND');
+    const latest = await latestByStudent();
+    const students = (await studentRepo.list({ classId: cls.id })).filter((s) => s.status !== 'LEFT');
+    const items = await Promise.all(
+      students.map(async (s) => {
+        const c = latest.get(s.id);
+        return {
+          student: { id: s.id, fullName: fullName(s), parentName: s.parentName, parentPhone: s.parentPhone, monthlyFee: s.monthlyFee },
+          contract: c ? await present(c) : null,
+        };
+      }),
+    );
+    res.json({ class: { id: cls.id, name: cls.name }, items });
+  } catch (e) {
+    next(e);
+  }
+});
+
 // ---- templates (declared before /:id) ----
 const templateSchema = z.object({
   name: z.string().trim().min(1).max(120),

@@ -37,11 +37,11 @@ export default function Classes() {
             return (
               <Card key={c.id} className="relative transition hover:bg-surface-muted/60">
                 <Link to={`/students?classId=${c.id}`} className="block after:absolute after:inset-0 after:content-['']">
-                  <h2 className="text-xl font-semibold">{c.name}</h2>
+                  <h2 className="text-xl font-medium">{c.name}</h2>
                   <p className="mt-1 text-sm text-text-muted">{c.teacherName ?? t('classes.noTeacher')}</p>
                 </Link>
                 <div className="mt-5 flex items-baseline justify-between">
-                  <span className="text-2xl font-semibold tabular-nums">{c.studentCount}/{c.capacity}</span>
+                  <span className="text-2xl font-medium tabular-nums">{c.studentCount}/{c.capacity}</span>
                   <span className={c.freeSeats > 0 ? 'text-sm font-medium text-green-600 dark:text-green-400' : 'text-sm font-medium text-red-600'}>
                     {c.freeSeats > 0 ? t('classes.free', { count: c.freeSeats }) : t('classes.full')}
                   </span>

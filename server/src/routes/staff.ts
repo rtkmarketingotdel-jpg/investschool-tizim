@@ -9,6 +9,8 @@ import { paginate, pageQuery } from '../lib/pagination.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
+import { classRepo } from '../repositories/classRepo.js';
+import { audit } from '../repositories/notificationRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { toPublicUser, userRepo } from '../repositories/userRepo.js';
 
@@ -23,6 +25,11 @@ const staffSchema = z.object({
   phone: z.string().regex(/^\+998\d{9}$/),
   role: z.enum(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF']),
   position: z.string().trim().min(1).max(120),
+  isTeacher: z.boolean().default(false),
+  subject: z.string().trim().max(60).nullable().default(null),
+  /** Optional login password on creation; generated when omitted. */
+  password: z.string().min(8).max(64).optional(),
+  homeroomClassId: z.string().nullable().default(null),
   baseSalary: z.number().int().min(0).max(100_000_000),
   isActive: z.boolean().default(true),
 });
@@ -33,6 +40,7 @@ const listQuery = z.object({
   q: z.string().optional(),
   role: z.enum(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF']).optional(),
   active: z.enum(['true', 'false']).optional(),
+  teacher: z.enum(['true']).optional(),
 });
 
 /** Only the director may hand out roles above STAFF/ADMIN, or touch such accounts. */
@@ -48,7 +56,7 @@ staffRouter.get('/', async (req, res, next) => {
     const term = q.q?.trim().toLowerCase();
     const digits = term?.replace(/\D/g, '');
     const rows = (await userRepo.list())
-      .filter((u) => (!q.role || u.role === q.role) && (q.active === undefined || u.isActive === (q.active === 'true')))
+      .filter((u) => (!q.role || u.role === q.role) && (!q.teacher || u.isTeacher) && (q.active === undefined || u.isActive === (q.active === 'true')))
       .filter((u) => !term || u.fullName.toLowerCase().includes(term) || (!!digits && u.phone.includes(digits)))
       .sort((a, b) => a.fullName.localeCompare(b.fullName));
     const page = paginate(rows, q.page, q.limit);
@@ -90,14 +98,20 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
     const body = req.body as StaffInput;
     assertCanManage(req.user!.role, body.role, body.role);
     if (await userRepo.findByPhone(body.phone)) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
-    const tempPassword = generatePassword();
+    const { password, homeroomClassId, ...data } = body;
+    if (homeroomClassId && !(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
+    const finalPassword = password ?? generatePassword();
     const user = await userRepo.create({
-      ...body,
-      passwordHash: await bcrypt.hash(tempPassword, 10),
+      ...data,
+      isTeacher: data.isTeacher,
+      subject: data.isTeacher ? data.subject : null,
+      passwordHash: await bcrypt.hash(finalPassword, 10),
       language: 'uz',
       hiredAt: new Date(),
     });
-    res.status(201).json({ user: toPublicUser(user), tempPassword });
+    if (homeroomClassId) await classRepo.update(homeroomClassId, { teacherId: user.id });
+    await audit(req.user!.id, 'staff.create', 'user', user.id, { role: user.role, isTeacher: user.isTeacher });
+    res.status(201).json({ user: toPublicUser(user), tempPassword: finalPassword, generated: !password });
   } catch (e) {
     next(e);
   }
@@ -114,7 +128,15 @@ staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
     }
     const clash = await userRepo.findByPhone(body.phone);
     if (clash && clash.id !== target.id) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
-    res.json({ user: toPublicUser((await userRepo.update(target.id, body))!) });
+    const { password: _ignored, homeroomClassId, ...data } = body;
+    void _ignored;
+    if (homeroomClassId) {
+      if (!(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
+      await classRepo.update(homeroomClassId, { teacherId: target.id });
+    }
+    const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher ? data.subject : null });
+    await audit(req.user!.id, 'staff.update', 'user', target.id);
+    res.json({ user: toPublicUser(updated!) });
   } catch (e) {
     next(e);
   }
@@ -127,6 +149,7 @@ staffRouter.post('/:id/reset-password', async (req, res, next) => {
     assertCanManage(req.user!.role, target.role);
     const tempPassword = generatePassword();
     await userRepo.update(target.id, { passwordHash: await bcrypt.hash(tempPassword, 10) });
+    await audit(req.user!.id, 'staff.resetPassword', 'user', target.id);
     res.json({ tempPassword });
   } catch (e) {
     next(e);

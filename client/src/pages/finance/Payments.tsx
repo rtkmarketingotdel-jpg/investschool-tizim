@@ -58,7 +58,7 @@ export default function Payments() {
       <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_2fr]">
         <Card>
           <p className="text-text-muted">{t('finance.payments.total')}</p>
-          <p className="mt-1 text-3xl font-semibold tabular-nums">{formatMoney(list.data?.summary.total ?? 0, cur)}</p>
+          <p className="mt-1 text-3xl font-medium tabular-nums">{formatMoney(list.data?.summary.total ?? 0, cur)}</p>
           <p className="mt-1 text-sm text-text-muted">{t('finance.payments.count', { count: list.data?.summary.count ?? 0 })}</p>
         </Card>
         <Card>
@@ -134,7 +134,7 @@ export default function Payments() {
                   <Td className="whitespace-nowrap">{fmtDay(p.paidAt.slice(0, 10), i18n.language, 'd MMM yyyy')}</Td>
                   <Td className="font-medium">{p.studentName}</Td>
                   <Td>{p.className ?? '—'}</Td>
-                  <Td numeric className="font-semibold">{formatMoney(p.amount, cur)}</Td>
+                  <Td numeric className="font-medium">{formatMoney(p.amount, cur)}</Td>
                   <Td>{t(`finance.methods.${p.method}`)}</Td>
                   <Td className="text-text-muted">{p.receivedByName ?? '—'}</Td>
                   <Td className="max-w-48 truncate text-text-muted">{p.note ?? '—'}</Td>

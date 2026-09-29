@@ -38,7 +38,7 @@ export function AttendanceLog() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">{t('attendance.logTitle')}</h2>
+        <h2 className="text-xl font-medium">{t('attendance.logTitle')}</h2>
         <p className="text-text-muted">{t('attendance.logSubtitle')}</p>
       </div>
 
@@ -48,7 +48,7 @@ export function AttendanceLog() {
           : cards.map((c) => (
               <Card key={c.label} className="p-5">
                 <p className="text-sm text-text-muted">{t('attendance.today')} · {c.label}</p>
-                <p className="mt-1 text-3xl font-semibold tabular-nums">{c.value}</p>
+                <p className="mt-1 text-3xl font-medium tabular-nums">{c.value}</p>
               </Card>
             ))}
       </div>

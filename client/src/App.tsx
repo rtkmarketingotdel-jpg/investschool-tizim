@@ -20,6 +20,7 @@ const Payments = lazy(() => import('@/pages/finance/Payments'));
 const Debtors = lazy(() => import('@/pages/finance/Debtors'));
 const Payroll = lazy(() => import('@/pages/finance/Payroll'));
 const Contracts = lazy(() => import('@/pages/finance/Contracts'));
+const ContractClass = lazy(() => import('@/pages/finance/ContractClass'));
 const PublicContract = lazy(() => import('@/pages/PublicContract'));
 
 const MGMT = ['DIRECTOR', 'ACCOUNTANT', 'ADMIN'] as const;
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/students" element={<Students />} />
             <Route path="/students/:id" element={<StudentDetail />} />
             <Route path="/finance/contracts" element={<Contracts />} />
+            <Route path="/finance/contracts/class/:classId" element={<ContractClass />} />
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'ADMIN']} />}>
             <Route path="/classes" element={<Classes />} />

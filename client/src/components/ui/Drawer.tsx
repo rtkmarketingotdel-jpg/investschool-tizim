@@ -38,7 +38,7 @@ export function Drawer({ open, onClose, title, children, width = 560 }: Props) {
         )}
       >
         <header className="flex items-center justify-between border-b border-border px-6 py-5">
-          <h2 className="text-xl font-semibold">{title}</h2>
+          <h2 className="text-xl font-medium">{title}</h2>
           <button aria-label={t('common.close')} onClick={onClose} className="rounded-lg p-2 hover:bg-surface-muted">
             <X className="h-5 w-5" />
           </button>

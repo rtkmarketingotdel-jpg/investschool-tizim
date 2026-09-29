@@ -13,7 +13,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
 ) {
   return (
     <label className="block" htmlFor={id}>
-      {label && <span className="mb-1.5 block text-sm font-medium">{label}</span>}
+      {label && <span className="mb-1.5 block text-sm">{label}</span>}
       <span className="relative block">
         <input
           ref={ref}
