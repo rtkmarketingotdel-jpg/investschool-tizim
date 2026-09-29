@@ -93,7 +93,7 @@ export function AchievementsSection({ saveLabel, onSaved }: { saveLabel?: string
           </div>
           <div className="flex gap-2">
             <Input aria-label={t('profile.description')} placeholder={t('profile.description')} value={r.description} onChange={(e) => update(r.key, { description: e.target.value })} />
-            <button type="button" aria-label={t('common.delete')} onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))} className="shrink-0 rounded-xl border border-border px-3 text-red-600 hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
+            <button type="button" aria-label={t('common.delete')} onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))} className="shrink-0 rounded-xl border border-border px-3 text-danger hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
           </div>
         </div>
       ))}
@@ -154,7 +154,7 @@ export function DocumentsSection() {
                 <p className="truncate text-xs text-text-muted">{t(`profile.kinds.${d.kind}`)}{d.issuer ? ` · ${d.issuer}` : ''}{d.year ? ` · ${d.year}` : ''}</p>
                 <a href={uploadUrl(d.fileUrl) ?? '#'} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">{t('profile.view')}</a>
               </div>
-              <button type="button" aria-label={t('common.delete')} onClick={() => window.confirm(t('profile.deleteDocConfirm', { title: d.title })) && remove.mutate(d.id)} className="rounded-lg p-2 text-red-600 hover:bg-surface-muted"><X className="h-4 w-4" /></button>
+              <button type="button" aria-label={t('common.delete')} onClick={() => window.confirm(t('profile.deleteDocConfirm', { title: d.title })) && remove.mutate(d.id)} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><X className="h-4 w-4" /></button>
             </li>
           ))}
         </ul>

@@ -14,7 +14,7 @@ export const Thead = (p: HTMLAttributes<HTMLTableSectionElement>) => (
 );
 
 export const Th = ({ className, numeric, ...rest }: ThHTMLAttributes<HTMLTableCellElement> & { numeric?: boolean }) => (
-  <th className={cn('px-6 py-4 font-normal', numeric && 'whitespace-nowrap text-right', className)} {...rest} />
+  <th className={cn('px-4 py-4 font-normal', numeric && 'whitespace-nowrap text-right', className)} {...rest} />
 );
 
 export const Tr = ({ className, ...rest }: HTMLAttributes<HTMLTableRowElement>) => (
@@ -22,5 +22,5 @@ export const Tr = ({ className, ...rest }: HTMLAttributes<HTMLTableRowElement>) 
 );
 
 export const Td = ({ className, numeric, ...rest }: TdHTMLAttributes<HTMLTableCellElement> & { numeric?: boolean }) => (
-  <td className={cn('px-6 py-5', numeric && 'whitespace-nowrap text-right tabular-nums', className)} {...rest} />
+  <td className={cn('px-4 py-5', numeric && 'whitespace-nowrap text-right tabular-nums', className)} {...rest} />
 );

@@ -61,8 +61,8 @@ export function AttendanceMatrix() {
                     );
                   })}
                   <td className="px-3 text-center tabular-nums">{r.totals.onTime}</td>
-                  <td className="px-3 text-center tabular-nums text-amber-600">{r.totals.late}</td>
-                  <td className="px-3 text-center tabular-nums text-red-600">{r.totals.absent}</td>
+                  <td className="px-3 text-center tabular-nums text-warning">{r.totals.late}</td>
+                  <td className="px-3 text-center tabular-nums text-danger">{r.totals.absent}</td>
                 </tr>
               ))}
             </tbody>

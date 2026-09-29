@@ -25,8 +25,8 @@ export function AttendanceDay() {
   const chips = data
     ? [
         [t('attendance.stats.came'), data.summary.came, ''],
-        [t('attendance.status.LATE'), data.summary.late, 'text-amber-600'],
-        [t('attendance.stats.absent'), data.summary.absent, 'text-red-600'],
+        [t('attendance.status.LATE'), data.summary.late, 'text-warning'],
+        [t('attendance.stats.absent'), data.summary.absent, 'text-danger'],
         [t('attendance.status.EXCUSED'), data.summary.excused, ''],
         [t('attendance.day.notYet'), data.summary.notYet, 'text-text-muted'],
         [t('attendance.day.left'), data.summary.left, ''],

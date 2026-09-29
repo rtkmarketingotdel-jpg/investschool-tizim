@@ -58,10 +58,10 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           {(close) => (
             <>
               <DropdownItem active={i18n.language === 'uz'} onClick={() => { changeLang('uz'); close(); }}>
-                🌐 Oʻzbekcha
+                <Globe className="h-4 w-4" /> Oʻzbekcha
               </DropdownItem>
               <DropdownItem active={i18n.language === 'ru'} onClick={() => { changeLang('ru'); close(); }}>
-                🌐 Русский
+                <Globe className="h-4 w-4" /> Русский
               </DropdownItem>
             </>
           )}

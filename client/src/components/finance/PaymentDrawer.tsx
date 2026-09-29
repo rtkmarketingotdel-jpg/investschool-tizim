@@ -75,7 +75,7 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
     <Drawer open={open} onClose={onClose} title={t('finance.payments.receive')}>
       {done ? (
         <div className="flex flex-col items-center gap-4 py-10 text-center">
-          <CheckCircle2 className="h-14 w-14 text-green-600" />
+          <CheckCircle2 className="h-14 w-14 text-success" />
           <h3 className="text-xl font-medium">{t('finance.payments.created')}</h3>
           <p className="text-text-muted">{done.studentName} · {formatMoney(done.amount, cur)}</p>
           <div className="flex w-full gap-3 pt-4">
@@ -103,7 +103,7 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
               </div>
               <div className="text-right">
                 <p className="text-xs text-text-muted">{t('finance.payments.currentDebt')}</p>
-                <p className={chosen.debt > 0 ? 'font-medium tabular-nums text-red-600' : 'font-medium tabular-nums'}>{formatMoney(chosen.debt, cur)}</p>
+                <p className={chosen.debt > 0 ? 'font-medium tabular-nums text-danger' : 'font-medium tabular-nums'}>{formatMoney(chosen.debt, cur)}</p>
               </div>
               {!student && (
                 <Button type="button" variant="ghost" className="px-3 py-2 text-sm" onClick={() => { setChosen(null); setAmount(''); }}>
@@ -143,7 +143,7 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
           </Select>
           <Input type="month" label={t('finance.payments.period')} value={period} onChange={(e) => setPeriod(e.target.value)} />
           <Textarea label={t('finance.payments.note')} value={note} onChange={(e) => setNote(e.target.value)} />
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-danger">{error}</p>}
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>{t('common.cancel')}</Button>
             <Button type="submit" className="flex-1" loading={pay.isPending} disabled={!valid}>{t('finance.payments.receive')}</Button>

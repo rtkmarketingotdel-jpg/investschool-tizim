@@ -115,12 +115,12 @@ export function TemplatesTab() {
             <span className="mb-1.5 block text-sm">{t('settings.templates.body')}</span>
             <textarea ref={area} rows={18} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className="w-full rounded-xl border border-border bg-surface-muted p-4 font-mono text-sm" />
             <span className="mt-1 block text-xs text-text-muted">{t('settings.templates.hint')}</span>
-            {unknown.length > 0 && <span role="alert" className="mt-1 block text-xs text-amber-700 dark:text-amber-400">{t('settings.templates.unknown', { list: unknown.map((k) => `{{${k}}}`).join(', ') })}</span>}
+            {unknown.length > 0 && <span role="alert" className="mt-1 block text-xs text-warning">{t('settings.templates.unknown', { list: unknown.map((k) => `{{${k}}}`).join(', ') })}</span>}
           </label>
           <div className="flex flex-wrap gap-3">
             <Button disabled={!valid} loading={save.isPending} onClick={() => save.mutate()}>{t('common.save')}</Button>
             <Button variant="secondary" disabled={!valid} onClick={() => void openPdf('/contracts/templates/sample-pdf', 'post', { body: form.body, language: form.language }).catch(fail)}>{t('settings.templates.samplePdf')}</Button>
-            {selected !== 'new' && <Button variant="ghost" className="text-red-600" loading={del.isPending} onClick={() => window.confirm(t('settings.templates.deleteConfirm')) && del.mutate()}><Trash2 className="h-4 w-4" /> {t('settings.templates.delete')}</Button>}
+            {selected !== 'new' && <Button variant="ghost" className="text-danger" loading={del.isPending} onClick={() => window.confirm(t('settings.templates.deleteConfirm')) && del.mutate()}><Trash2 className="h-4 w-4" /> {t('settings.templates.delete')}</Button>}
           </div>
         </Card>
       )}

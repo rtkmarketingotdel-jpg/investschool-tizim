@@ -62,7 +62,7 @@ export function LocationStep({ open, branches, geoEnforced, maxAccuracyM, onCanc
       {(phase === 'denied' || phase === 'failed') && (
         <div className="space-y-4">
           <div className="flex flex-col items-center gap-2 text-center">
-            <MapPinOff className="h-10 w-10 text-red-600" />
+            <MapPinOff className="h-10 w-10 text-danger" />
             <p role="alert">{t(phase === 'denied' ? 'attendance.location.denied' : 'attendance.location.failed')}</p>
           </div>
           {phase === 'denied' && (
@@ -82,14 +82,14 @@ export function LocationStep({ open, branches, geoEnforced, maxAccuracyM, onCanc
       {phase === 'done' && fix && (
         <div className="space-y-4">
           <div className="flex items-start gap-3 rounded-xl border border-border p-4">
-            {canContinue ? <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-green-600" /> : <TriangleAlert className="mt-0.5 h-6 w-6 shrink-0 text-amber-600" />}
+            {canContinue ? <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" /> : <TriangleAlert className="mt-0.5 h-6 w-6 shrink-0 text-warning" />}
             <div className="min-w-0 flex-1 space-y-1 text-sm">
               <p className="text-base">{canContinue ? t('attendance.location.detected') : t('attendance.location.problem')}</p>
               <p className="text-text-muted">{t('attendance.location.accuracy', { m: Math.round(fix.accuracy) })}</p>
               {near && <p>{t('attendance.location.nearest', { name: near.branch.name, distance: near.distanceM })}</p>}
-              {near && geoEnforced && !outOfRange && <p className="text-green-600">{t('attendance.location.inRange', { radius: near.branch.radiusM })}</p>}
-              {outOfRange && near && <p role="alert" className="text-red-600">{t('attendance.location.outOfRange', { distance: near.distanceM, radius: near.branch.radiusM })}</p>}
-              {lowAccuracy && <p role="alert" className="text-amber-700 dark:text-amber-400">{t('attendance.location.lowAccuracy', { max: maxAccuracyM })}</p>}
+              {near && geoEnforced && !outOfRange && <p className="text-success">{t('attendance.location.inRange', { radius: near.branch.radiusM })}</p>}
+              {outOfRange && near && <p role="alert" className="text-danger">{t('attendance.location.outOfRange', { distance: near.distanceM, radius: near.branch.radiusM })}</p>}
+              {lowAccuracy && <p role="alert" className="text-warning">{t('attendance.location.lowAccuracy', { max: maxAccuracyM })}</p>}
               <a className="inline-flex items-center gap-1 text-primary hover:underline" href={`https://www.google.com/maps?q=${fix.lat},${fix.lng}`} target="_blank" rel="noreferrer">
                 <ExternalLink className="h-3.5 w-3.5" /> {fix.lat.toFixed(5)}, {fix.lng.toFixed(5)}
               </a>

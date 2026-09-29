@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Moon, Sun } from 'lucide-react';
+import { Globe, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { setLanguage } from '@/i18n';
 import { api } from '@/lib/api';
@@ -16,8 +16,8 @@ export function InterfaceTab() {
       <div>
         <p className="mb-2 font-medium">{t('topbar.language')}</p>
         <div className="flex gap-3">
-          <button aria-pressed={i18n.language === 'uz'} className={chip(i18n.language === 'uz')} onClick={() => pick('uz')}>🌐 Oʻzbekcha</button>
-          <button aria-pressed={i18n.language === 'ru'} className={chip(i18n.language === 'ru')} onClick={() => pick('ru')}>🌐 Русский</button>
+          <button aria-pressed={i18n.language === 'uz'} className={chip(i18n.language === 'uz')} onClick={() => pick('uz')}><Globe className="h-5 w-5" /> Oʻzbekcha</button>
+          <button aria-pressed={i18n.language === 'ru'} className={chip(i18n.language === 'ru')} onClick={() => pick('ru')}><Globe className="h-5 w-5" /> Русский</button>
         </div>
       </div>
       <div>

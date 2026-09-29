@@ -187,7 +187,7 @@ export default function Students() {
                       {s.discountPercent > 0 && <p className="text-[13px] text-text-muted">−{s.discountPercent}%</p>}
                     </Td>
                     {seesFinance && (
-                      <Td numeric className={s.debt ? 'font-medium text-red-600' : 'text-text-muted'}>{s.debt ? formatMoney(s.debt, t('common.currency')) : '—'}</Td>
+                      <Td numeric className={s.debt ? 'font-medium text-danger' : 'text-text-muted'}>{s.debt ? formatMoney(s.debt, t('common.currency')) : '—'}</Td>
                     )}
                     <Td className="whitespace-nowrap text-text-muted">{fmtDay(s.enrolledAt, i18n.language, 'd MMM yyyy')}</Td>
                     <Td>
@@ -217,7 +217,7 @@ export default function Students() {
                     {s.isBoarding && <BedDouble className="h-4 w-4 text-primary" />}
                   </div>
                   <p className="mt-3 font-medium tabular-nums">{formatMoney(s.monthlyFee, t('common.currency'))}</p>
-                  {s.debt ? <p className="text-sm font-medium text-red-600">{t('students.debt')}: {formatMoney(s.debt, t('common.currency'))}</p> : null}
+                  {s.debt ? <p className="text-sm font-medium text-danger">{t('students.debt')}: {formatMoney(s.debt, t('common.currency'))}</p> : null}
                 </Card>
               </Link>
             ))}

@@ -6,6 +6,7 @@ import { AlertCircle, CalendarCheck, GraduationCap, LayoutDashboard, Wallet } fr
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { themeColor } from '@/lib/theme';
 import { financeApi } from '@/lib/financeApi';
 import { formatMoney } from '@/lib/format';
 import { fmtDay } from '@/lib/dates';
@@ -48,8 +49,13 @@ export default function Dashboard() {
   }
   if (isError || !data) return <EmptyState icon={LayoutDashboard} title={t('errors.INTERNAL_ERROR')} />;
 
-  const axis = theme === 'dark' ? '#94A3B8' : '#64748B';
-  const grid = theme === 'dark' ? '#1F2937' : '#E5E7EB';
+  // theme is read so the chart re-colours when the theme is switched
+  void theme;
+  const axis = themeColor('--text-muted');
+  const grid = themeColor('--border');
+  const surface = themeColor('--surface');
+  const primary = themeColor('--primary');
+  const planFill = themeColor('--text-muted', 0.35);
   const monthLabel = (p: string) => fmtDay(`${p}-01`, i18n.language, 'LLL');
   const pct = data.revenue && data.revenue.plan > 0 ? Math.min(100, Math.round((data.revenue.fact / data.revenue.plan) * 100)) : 0;
 
@@ -76,7 +82,7 @@ export default function Dashboard() {
               <>
                 <p>{t('dashboard.ofPlan', { plan: formatMoney(data.revenue.plan, cur) })}</p>
                 {data.revenue.changePct !== null && (
-                  <p className={data.revenue.changePct >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  <p className={data.revenue.changePct >= 0 ? 'text-success' : 'text-danger'}>
                     {data.revenue.changePct >= 0 ? '+' : ''}{data.revenue.changePct}% {t('dashboard.vsLastMonth')}
                   </p>
                 )}
@@ -105,23 +111,23 @@ export default function Dashboard() {
                   <YAxis stroke={axis} tickLine={false} axisLine={false} width={60} tickFormatter={(v: number) => `${Math.round(v / 1_000_000)}M`} />
                   <Tooltip
                     formatter={(v: number, name: string) => [formatMoney(v, cur), t(`dashboard.${name}`)]}
-                    contentStyle={{ background: theme === 'dark' ? '#111827' : '#fff', border: `1px solid ${grid}`, borderRadius: 12 }}
+                    contentStyle={{ background: surface, color: themeColor('--text'), border: `1px solid ${grid}`, borderRadius: 12 }}
                   />
-                  <Bar dataKey="plan" isAnimationActive={false} fill={theme === 'dark' ? '#475569' : '#CBD5E1'} radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="fact" isAnimationActive={false} fill="#2563EB" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="plan" isAnimationActive={false} fill={planFill} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="fact" isAnimationActive={false} fill={primary} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <div className="mt-2 flex gap-4 text-sm text-text-muted">
-              <span className="flex items-center gap-2"><i className="h-3 w-3 rounded bg-[#CBD5E1] dark:bg-slate-600" />{t('dashboard.plan')}</span>
-              <span className="flex items-center gap-2"><i className="h-3 w-3 rounded bg-[#2563EB]" />{t('dashboard.fact')}</span>
+              <span className="flex items-center gap-2"><i className="h-3 w-3 rounded bg-text-muted/35" />{t('dashboard.plan')}</span>
+              <span className="flex items-center gap-2"><i className="h-3 w-3 rounded bg-primary" />{t('dashboard.fact')}</span>
             </div>
           </Card>
         )}
         <Card>
           <div className="mb-4 flex items-baseline justify-between">
             <h2 className="text-lg font-medium">{t('dashboard.classFill')}</h2>
-            <span className="text-sm font-medium text-green-600 dark:text-green-400">{t('dashboard.freeSeats', { count: data.classFill.freeSeats })}</span>
+            <span className="text-sm font-medium text-success">{t('dashboard.freeSeats', { count: data.classFill.freeSeats })}</span>
           </div>
           <ul className="space-y-3">
             {data.classFill.items.map((c) => {
@@ -130,7 +136,7 @@ export default function Dashboard() {
                 <li key={c.id}>
                   <div className="flex justify-between text-sm">
                     <Link to={`/students?classId=${c.id}`} className="font-medium hover:text-primary">{c.name} · {c.count}/{c.capacity}</Link>
-                    {c.capacity - c.count > 0 && <span className="text-green-600 dark:text-green-400">+{c.capacity - c.count}</span>}
+                    {c.capacity - c.count > 0 && <span className="text-success">+{c.capacity - c.count}</span>}
                   </div>
                   <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div className={pctC >= 100 ? 'h-full bg-red-500' : 'h-full bg-primary'} style={{ width: `${Math.min(100, pctC)}%` }} />
@@ -181,7 +187,7 @@ export default function Dashboard() {
                         <Link to={`/students/${d.studentId}`} className="block truncate font-medium hover:text-primary">{d.name}</Link>
                         <p className="text-[13px] text-text-muted">{d.className ?? '—'} · {t('dashboard.days', { count: d.overdueDays })}</p>
                       </div>
-                      <span className="font-medium tabular-nums text-red-600">{formatMoney(d.debt, cur)}</span>
+                      <span className="font-medium tabular-nums text-danger">{formatMoney(d.debt, cur)}</span>
                     </li>
                   ))}
                 </ul>

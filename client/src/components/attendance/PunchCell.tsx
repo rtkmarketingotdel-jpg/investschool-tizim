@@ -18,7 +18,7 @@ export function PunchCell({ at, photo, lat, lng, distanceM, title }: Props) {
     <div className="flex items-center gap-3">
       <PhotoThumb url={photo} title={title} lat={lat} lng={lng} />
       <div className="leading-tight">
-        <p className="text-lg font-medium tabular-nums text-green-700 dark:text-green-400">{fmtTime(at)}</p>
+        <p className="text-lg font-medium tabular-nums text-success">{fmtTime(at)}</p>
         {distanceM != null && <p className="text-xs text-text-muted tabular-nums">{distanceM} m</p>}
       </div>
     </div>

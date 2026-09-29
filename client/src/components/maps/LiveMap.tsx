@@ -4,6 +4,7 @@ import { uploadUrl } from '@/lib/api';
 import { fmtTime } from '@/lib/dates';
 import { GraduationCap, Maximize2, Minimize2 } from 'lucide-react';
 import { branchIcon, staffIcon, STATUS_COLOR } from './icons';
+import { themeColor } from '@/lib/theme';
 import { createMap, DEFAULT_CENTER, L, setBase, type BaseKind } from './leaflet';
 
 export interface MapBranch { id: string; name: string; lat: number; lng: number; radiusM: number }
@@ -87,7 +88,7 @@ export function LiveMap({ branches, points }: Props) {
     const bounds: L.LatLngExpression[] = [];
 
     for (const b of branches) {
-      L.circle([b.lat, b.lng], { radius: b.radiusM, color: '#2563EB', weight: 1.5, dashArray: '5 5', fillOpacity: 0.06 })
+      L.circle([b.lat, b.lng], { radius: b.radiusM, color: themeColor('--primary'), weight: 1.5, dashArray: '5 5', fillOpacity: 0.06 })
         .addTo(g);
       L.marker([b.lat, b.lng], { icon: branchIcon(), zIndexOffset: 500 })
         .bindTooltip(b.name, { permanent: true, direction: 'top', offset: [0, -20] })
@@ -117,7 +118,7 @@ export function LiveMap({ branches, points }: Props) {
         img.style.cssText = 'width:96px;height:96px;object-fit:cover;border-radius:8px;margin-top:6px';
         box.append(img);
       }
-      dot.bindPopup(box);
+      dot.bindPopup(box, { autoPanPaddingTopLeft: [20, 70], autoPanPaddingBottomRight: [20, 20] });
       dot.bindTooltip(p.fullName, { direction: 'top', offset: [0, -18] });
       bounds.push([p.lat, p.lng]);
     }

@@ -115,7 +115,7 @@ export default function StudentDetail() {
           <div className="space-y-4">
             <Card className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-text-muted">{t('students.balance')}</span>
-              <span className={finance.data.debt > 0 ? 'text-2xl font-medium tabular-nums text-red-600' : 'text-2xl font-medium tabular-nums text-green-600'}>
+              <span className={finance.data.debt > 0 ? 'text-2xl font-medium tabular-nums text-danger' : 'text-2xl font-medium tabular-nums text-success'}>
                 {finance.data.debt > 0 ? `−${formatMoney(finance.data.debt, t('common.currency'))}` : formatMoney(-finance.data.balance, t('common.currency'))}
               </span>
             </Card>
@@ -130,7 +130,7 @@ export default function StudentDetail() {
                       <span className="flex-1">
                         {e.kind === 'CHARGE' ? t('students.chargeFor', { period: e.period }) : `${t('finance.payments.title')}${e.method ? ` · ${t(`finance.methods.${e.method}`)}` : ''}`}
                       </span>
-                      <span className={e.kind === 'PAYMENT' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums'}>
+                      <span className={e.kind === 'PAYMENT' ? 'font-medium tabular-nums text-success' : 'font-medium tabular-nums'}>
                         {e.kind === 'PAYMENT' ? '+' : '−'}{formatMoney(e.amount, t('common.currency'))}
                       </span>
                       {e.kind === 'PAYMENT' && (

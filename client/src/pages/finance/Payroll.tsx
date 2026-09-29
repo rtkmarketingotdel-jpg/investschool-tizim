@@ -62,8 +62,8 @@ export default function Payroll() {
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card><p className="text-text-muted">{t('finance.payroll.total')}</p><p className="mt-1 text-2xl font-medium tabular-nums">{money(list.data?.summary.total ?? 0)}</p></Card>
-        <Card><p className="text-text-muted">{t('finance.payroll.bonus')}</p><p className="mt-1 text-2xl font-medium tabular-nums text-green-600">{money(list.data?.summary.bonus ?? 0)}</p></Card>
-        <Card><p className="text-text-muted">{t('finance.payroll.fine')}</p><p className="mt-1 text-2xl font-medium tabular-nums text-red-600">{money(list.data?.summary.fine ?? 0)}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.payroll.bonus')}</p><p className="mt-1 text-2xl font-medium tabular-nums text-success">{money(list.data?.summary.bonus ?? 0)}</p></Card>
+        <Card><p className="text-text-muted">{t('finance.payroll.fine')}</p><p className="mt-1 text-2xl font-medium tabular-nums text-danger">{money(list.data?.summary.fine ?? 0)}</p></Card>
       </div>
 
       {list.isLoading ? (
@@ -95,8 +95,8 @@ export default function Payroll() {
                   </div>
                 </Td>
                 <Td numeric>{money(r.baseSalary)}</Td>
-                <Td numeric className="text-green-600">{r.bonusTotal ? `+${money(r.bonusTotal)}` : '—'}</Td>
-                <Td numeric className="text-red-600">{r.fineTotal ? `−${money(r.fineTotal)}` : '—'}</Td>
+                <Td numeric className="text-success">{r.bonusTotal ? `+${money(r.bonusTotal)}` : '—'}</Td>
+                <Td numeric className="text-danger">{r.fineTotal ? `−${money(r.fineTotal)}` : '—'}</Td>
                 <Td numeric className="font-medium">{money(r.total)}</Td>
                 <Td><Badge tone={payrollTone[r.status]}>{t(`finance.payroll.statuses.${r.status}`)}</Badge></Td>
                 <Td><div className="flex justify-end gap-2">{actions(r)}</div></Td>
@@ -126,7 +126,7 @@ export default function Payroll() {
                   {dr.adjustments.map((a) => (
                     <li key={a.id} className="flex items-start justify-between gap-3 p-3">
                       <div><p className="text-sm font-medium">{reasonText(a)}</p><p className="text-xs text-text-muted">{fmtDay(a.createdAt.slice(0, 10), i18n.language, 'd MMM')} · {t(a.source === 'ATTENDANCE' ? 'finance.payroll.sourceAuto' : 'finance.payroll.sourceManual')}</p></div>
-                      <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{money(a.amount)}</span>
+                      <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-success' : 'font-medium tabular-nums text-danger'}>{a.type === 'BONUS' ? '+' : '−'}{money(a.amount)}</span>
                     </li>
                   ))}
                 </ul>

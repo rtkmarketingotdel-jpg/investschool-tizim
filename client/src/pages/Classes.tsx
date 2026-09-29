@@ -44,7 +44,7 @@ export default function Classes() {
                 </Link>
                 <div className="mt-5 flex items-baseline justify-between">
                   <span className="text-2xl font-medium tabular-nums">{c.studentCount}/{c.capacity}</span>
-                  <span className={c.freeSeats > 0 ? 'text-sm font-medium text-green-600 dark:text-green-400' : 'text-sm font-medium text-red-600'}>
+                  <span className={c.freeSeats > 0 ? 'text-sm font-medium text-success' : 'text-sm font-medium text-danger'}>
                     {c.freeSeats > 0 ? t('classes.free', { count: c.freeSeats }) : t('classes.full')}
                   </span>
                 </div>

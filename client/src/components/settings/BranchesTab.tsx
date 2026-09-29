@@ -71,7 +71,7 @@ export function BranchesTab({ settings }: { settings: Settings }) {
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <button aria-label={t('settings.branches.edit')} onClick={() => setDrawer({ open: true, branch: b })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
-                  <button aria-label={t('settings.branches.delete')} onClick={() => { setRemoving(b); setMoveTo(''); }} className="rounded-lg p-2 text-red-600 hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
+                  <button aria-label={t('settings.branches.delete')} onClick={() => { setRemoving(b); setMoveTo(''); }} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
               <a className="inline-flex items-center gap-1 text-sm text-primary hover:underline" href={`https://www.google.com/maps?q=${b.lat},${b.lng}`} target="_blank" rel="noreferrer">
@@ -94,7 +94,7 @@ export function BranchesTab({ settings }: { settings: Settings }) {
         {removing && (
           <div className="space-y-4">
             {branches.length <= 1 ? (
-              <p role="alert" className="text-red-600">{t('errors.BRANCH_LAST')}</p>
+              <p role="alert" className="text-danger">{t('errors.BRANCH_LAST')}</p>
             ) : (
               <>
                 <p className="text-text-muted">{t('settings.branches.deleteConfirm', { name: removing.name })}</p>

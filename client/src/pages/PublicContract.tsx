@@ -100,13 +100,13 @@ export default function PublicContract() {
             ) : (
               <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); setError(''); if (code.length === 6) sign.mutate(); }}>
                 <p className="text-sm text-text-muted">{x.codeSent}</p>
-                {c.demoMode && <p className="text-sm text-amber-700 dark:text-amber-400">{x.demoHint}</p>}
+                {c.demoMode && <p className="text-sm text-warning">{x.demoHint}</p>}
                 <Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder={x.code} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} className="text-center text-2xl tracking-[0.5em]" aria-label={x.code} />
                 <Button type="submit" className="w-full" disabled={code.length !== 6} loading={sign.isPending}>{x.confirm}</Button>
                 <button type="button" onClick={() => { setSent(false); setCode(''); }} className="w-full text-sm text-text-muted hover:text-text">{x.getCode}</button>
               </form>
             )}
-            {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+            {error && <p role="alert" className="text-sm text-danger">{error}</p>}
           </Card>
         )}
       </main>

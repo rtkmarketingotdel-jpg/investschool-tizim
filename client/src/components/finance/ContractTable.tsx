@@ -32,7 +32,7 @@ export function ContractActions({ c }: { c: ContractRow }) {
       <button aria-label={t('finance.contracts.viewPdf')} title={t('finance.contracts.viewPdf')} onClick={() => void openPdf(`/contracts/${c.id}/pdf`).catch(fail)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Eye className="h-4 w-4" /></button>
       {c.status === 'DRAFT' && <button aria-label={t('finance.contracts.send')} title={t('finance.contracts.send')} onClick={() => send.mutate(c.id)} className="rounded-lg p-2 text-primary hover:bg-surface-muted"><Send className="h-4 w-4" /></button>}
       {(c.status === 'SENT' || c.status === 'SIGNED') && <button aria-label={t('finance.contracts.copyLink')} title={t('finance.contracts.copyLink')} onClick={() => void copyLink(c.publicToken)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Copy className="h-4 w-4" /></button>}
-      {c.status !== 'CANCELLED' && <button aria-label={t('finance.contracts.cancel')} title={t('finance.contracts.cancel')} onClick={() => window.confirm(t('finance.contracts.cancelConfirm', { number: c.number })) && cancel.mutate(c.id)} className="rounded-lg p-2 text-red-600 hover:bg-surface-muted"><Ban className="h-4 w-4" /></button>}
+      {c.status !== 'CANCELLED' && <button aria-label={t('finance.contracts.cancel')} title={t('finance.contracts.cancel')} onClick={() => window.confirm(t('finance.contracts.cancelConfirm', { number: c.number })) && cancel.mutate(c.id)} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><Ban className="h-4 w-4" /></button>}
     </div>
   );
 }

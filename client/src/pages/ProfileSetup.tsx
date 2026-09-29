@@ -62,7 +62,7 @@ export default function ProfileSetup() {
           ))}
         </ol>
 
-        <h2 className="text-lg">{t(`profile.steps.${STEPS[step]!}`)}{step === 0 && <span className="text-red-600"> *</span>}</h2>
+        <h2 className="text-lg">{t(`profile.steps.${STEPS[step]!}`)}{step === 0 && <span className="text-danger"> *</span>}</h2>
         {step === 0 && <PhotoSection />}
         {step === 1 && <AchievementsSection saveLabel={t('profile.saveAndNext')} onSaved={() => setStep(2)} />}
         {step === 2 && <DocumentsSection />}

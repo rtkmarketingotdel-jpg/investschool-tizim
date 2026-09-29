@@ -145,9 +145,9 @@ export default function Staff() {
                   <Td><Badge>{t(`roles.${m.role}`)}</Badge></Td>
                   <Td numeric>{formatMoney(m.baseSalary, t('common.currency'))}</Td>
                   <Td className="whitespace-nowrap text-sm">
-                    <span className="text-amber-600 dark:text-amber-400">{t('staff.lateShort', { count: m.lateCount })}</span>
+                    <span className="text-warning">{t('staff.lateShort', { count: m.lateCount })}</span>
                     {' · '}
-                    <span className="text-red-600">{t('staff.absentShort', { count: m.absentCount })}</span>
+                    <span className="text-danger">{t('staff.absentShort', { count: m.absentCount })}</span>
                   </Td>
                   <Td><Badge tone={m.isActive ? 'success' : 'danger'}>{t(m.isActive ? 'staff.active' : 'staff.inactive')}</Badge></Td>
                   <Td>

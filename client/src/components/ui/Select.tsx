@@ -28,7 +28,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(function Select(
         </select>
         <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
       </span>
-      {error && <span className="mt-1 block text-sm text-red-600">{error}</span>}
+      {error && <span className="mt-1 block text-sm text-danger">{error}</span>}
     </label>
   );
 });

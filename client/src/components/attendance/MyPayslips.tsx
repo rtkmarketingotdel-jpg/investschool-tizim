@@ -39,15 +39,15 @@ export function MyPayslips() {
                   <div className={cn('space-y-3 border-t border-border p-5')}>
                     <dl className="grid grid-cols-3 gap-3 text-sm">
                       <div><dt className="text-text-muted">{t('finance.payroll.base')}</dt><dd className="font-medium tabular-nums">{money(p.baseSalary)}</dd></div>
-                      <div><dt className="text-text-muted">{t('finance.payroll.bonus')}</dt><dd className="font-medium tabular-nums text-green-600">{money(p.bonusTotal)}</dd></div>
-                      <div><dt className="text-text-muted">{t('finance.payroll.fine')}</dt><dd className="font-medium tabular-nums text-red-600">{money(p.fineTotal)}</dd></div>
+                      <div><dt className="text-text-muted">{t('finance.payroll.bonus')}</dt><dd className="font-medium tabular-nums text-success">{money(p.bonusTotal)}</dd></div>
+                      <div><dt className="text-text-muted">{t('finance.payroll.fine')}</dt><dd className="font-medium tabular-nums text-danger">{money(p.fineTotal)}</dd></div>
                     </dl>
                     {p.adjustments.length > 0 && (
                       <ul className="divide-y divide-border rounded-xl border border-border">
                         {p.adjustments.map((a) => (
                           <li key={a.id} className="flex justify-between gap-3 p-3 text-sm">
                             <span>{reasonText(a)}</span>
-                            <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{money(a.amount)}</span>
+                            <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-success' : 'font-medium tabular-nums text-danger'}>{a.type === 'BONUS' ? '+' : '−'}{money(a.amount)}</span>
                           </li>
                         ))}
                       </ul>

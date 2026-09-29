@@ -156,7 +156,7 @@ export default function StaffDetail() {
                 {adjustments.map((a) => (
                   <li key={a.id} className="flex justify-between gap-3 py-3 text-sm">
                     <span>{reasonText(a)}</span>
-                    <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-green-600' : 'font-medium tabular-nums text-red-600'}>{a.type === 'BONUS' ? '+' : '−'}{formatMoney(a.amount, cur)}</span>
+                    <span className={a.type === 'BONUS' ? 'font-medium tabular-nums text-success' : 'font-medium tabular-nums text-danger'}>{a.type === 'BONUS' ? '+' : '−'}{formatMoney(a.amount, cur)}</span>
                   </li>
                 ))}
               </ul>

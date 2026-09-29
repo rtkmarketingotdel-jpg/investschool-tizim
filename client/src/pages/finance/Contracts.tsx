@@ -59,10 +59,10 @@ function ClassesView() {
                 <div className="h-full bg-green-500" style={{ width: `${pct}%` }} />
               </div>
               <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-                <dt className="text-text-muted">{t('finance.contracts.statuses.SIGNED')}</dt><dd className="text-right tabular-nums text-green-600">{c.signed}</dd>
-                <dt className="text-text-muted">{t('finance.contracts.statuses.SENT')}</dt><dd className="text-right tabular-nums text-amber-600">{c.sent}</dd>
+                <dt className="text-text-muted">{t('finance.contracts.statuses.SIGNED')}</dt><dd className="text-right tabular-nums text-success">{c.signed}</dd>
+                <dt className="text-text-muted">{t('finance.contracts.statuses.SENT')}</dt><dd className="text-right tabular-nums text-warning">{c.sent}</dd>
                 <dt className="text-text-muted">{t('finance.contracts.statuses.DRAFT')}</dt><dd className="text-right tabular-nums">{c.draft}</dd>
-                <dt className="text-text-muted">{t('finance.contracts.noContract')}</dt><dd className="text-right tabular-nums text-red-600">{c.none}</dd>
+                <dt className="text-text-muted">{t('finance.contracts.noContract')}</dt><dd className="text-right tabular-nums text-danger">{c.none}</dd>
               </dl>
             </Card>
           </Link>

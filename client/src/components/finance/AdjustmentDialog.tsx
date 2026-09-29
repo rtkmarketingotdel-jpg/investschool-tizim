@@ -37,7 +37,7 @@ export function AdjustmentDialog({ target, period, onClose, onDone }: Props) {
         </Select>
         <Input type="number" min={1000} step={1000} label={`${t('finance.payments.amount')} (${t('common.currency')})`} value={amount} onChange={(e) => setAmount(e.target.value)} />
         <Input label={t('finance.payroll.reason')} value={reason} onChange={(e) => setReason(e.target.value)} />
-        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <div className="flex gap-3">
           <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>{t('common.cancel')}</Button>
           <Button type="submit" className="flex-1" disabled={!valid} loading={save.isPending}>{t('common.save')}</Button>

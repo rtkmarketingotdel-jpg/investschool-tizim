@@ -42,7 +42,7 @@ function SubjectsTab() {
                 <Td>
                   <div className="flex gap-1">
                     <button aria-label={t('common.edit')} onClick={() => setEdit({ id: s.id, name: s.name })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
-                    <button aria-label={t('common.delete')} onClick={() => window.confirm(t('academics.deleteConfirm', { name: s.name })) && del.mutate(s)} className="rounded-lg p-2 text-red-600 hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
+                    <button aria-label={t('common.delete')} onClick={() => window.confirm(t('academics.deleteConfirm', { name: s.name })) && del.mutate(s)} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </Td>
               </Tr>
@@ -95,7 +95,7 @@ function ClubsTab() {
                 <Td>
                   <div className="flex gap-1">
                     <button aria-label={t('common.edit')} onClick={() => setEdit({ id: c.id, name: c.name, teacherId: c.teacherId ?? '', fee: String(c.monthlyFee) })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
-                    <button aria-label={t('common.delete')} onClick={() => window.confirm(t('academics.deleteClubConfirm', { name: c.name, count: c.members })) && del.mutate(c)} className="rounded-lg p-2 text-red-600 hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
+                    <button aria-label={t('common.delete')} onClick={() => window.confirm(t('academics.deleteClubConfirm', { name: c.name, count: c.members })) && del.mutate(c)} className="rounded-lg p-2 text-danger hover:bg-surface-muted"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </Td>
               </Tr>

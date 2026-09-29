@@ -11,6 +11,10 @@
   --text-muted: 100 116 139;
   --primary: 37 99 235;
   --primary-soft: 239 244 255;
+  --success: 22 163 74;
+  --warning: 217 119 6;
+  --danger: 220 38 38;
+  color-scheme: light;
 }
 .dark {
   --bg: 11 18 32;
@@ -21,6 +25,10 @@
   --text-muted: 148 163 184;
   --primary: 59 130 246;
   --primary-soft: 30 41 59;
+  --success: 74 222 128;
+  --warning: 251 191 36;
+  --danger: 248 113 113;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -52,4 +60,34 @@ svg.lucide {
 .map-icon {
   background: transparent;
   border: 0;
+}
+
+/* Leaflet controls, popups and tooltips follow the app theme.
+   (.leaflet-container prefix: leaflet.css is loaded after this file and would otherwise win) */
+.leaflet-container .leaflet-popup-content-wrapper,
+.leaflet-container .leaflet-popup-tip,
+.leaflet-container .leaflet-tooltip,
+.leaflet-container .leaflet-bar a {
+  background: rgb(var(--surface));
+  color: rgb(var(--text));
+  border-color: rgb(var(--border));
+}
+.leaflet-container .leaflet-bar a:hover {
+  background: rgb(var(--surface-muted));
+}
+.leaflet-container .leaflet-tooltip-top::before {
+  border-top-color: rgb(var(--surface));
+}
+.leaflet-container .leaflet-tooltip-bottom::before {
+  border-bottom-color: rgb(var(--surface));
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: rgb(var(--text-muted));
+}
+.leaflet-container .leaflet-control-attribution {
+  background: rgb(var(--surface) / 0.85);
+  color: rgb(var(--text-muted));
+}
+.leaflet-container .leaflet-control-attribution a {
+  color: rgb(var(--primary));
 }

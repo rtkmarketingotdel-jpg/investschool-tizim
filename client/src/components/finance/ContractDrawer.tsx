@@ -92,7 +92,7 @@ export function ContractDrawer({ open, onClose, student }: Props) {
           <Input type="date" label={t('finance.contracts.start')} value={start} onChange={(e) => setStart(e.target.value)} />
           <Input type="date" label={t('finance.contracts.end')} value={end} onChange={(e) => setEnd(e.target.value)} />
         </div>
-        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <div className="flex gap-3 pt-2">
           <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>{t('common.cancel')}</Button>
           <Button type="submit" className="flex-1" loading={create.isPending} disabled={!valid}>{t('finance.contracts.createDraft')}</Button>
