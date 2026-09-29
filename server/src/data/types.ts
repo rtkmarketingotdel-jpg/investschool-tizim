@@ -52,3 +52,37 @@ export interface Setting {
   graceMinutes: number;
   workDays: number[]; // 1=Mon ... 7=Sun
 }
+
+export type StudentStatus = 'ACTIVE' | 'TRIAL' | 'LEFT';
+export type Gender = 'MALE' | 'FEMALE';
+
+export interface SchoolClass {
+  id: string;
+  name: string;
+  grade: number;
+  capacity: number;
+  teacherId: string | null;
+}
+
+export interface Student {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  birthDate: string | null; // YYYY-MM-DD
+  gender: Gender;
+  classId: string | null;
+  parentName: string;
+  parentPhone: string;
+  parentPhone2: string | null;
+  address: string | null;
+  district: string | null;
+  isBoarding: boolean;
+  clubs: string[];
+  monthlyFee: number;
+  discountPercent: number;
+  status: StudentStatus;
+  enrolledAt: string; // YYYY-MM-DD
+  leftAt: string | null;
+  notes: string | null;
+}

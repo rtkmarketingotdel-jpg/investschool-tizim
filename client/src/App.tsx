@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui';
 const Login = lazy(() => import('@/pages/Login'));
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const Students = lazy(() => import('@/pages/Students'));
+const StudentDetail = lazy(() => import('@/pages/StudentDetail'));
 const Classes = lazy(() => import('@/pages/Classes'));
 const Staff = lazy(() => import('@/pages/Staff'));
 const Attendance = lazy(() => import('@/pages/Attendance'));
@@ -43,12 +44,13 @@ export default function App() {
           <Route path="/attendance" element={<Attendance />} />
           <Route element={<RoleGuard roles={[...MGMT]} />}>
             <Route path="/" element={<HomeRedirect />} />
-            <Route path="/students/*" element={<Students />} />
+            <Route path="/students" element={<Students />} />
+            <Route path="/students/:id" element={<StudentDetail />} />
             <Route path="/finance/contracts" element={<Contracts />} />
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'ADMIN']} />}>
             <Route path="/classes" element={<Classes />} />
-            <Route path="/staff/*" element={<Staff />} />
+            <Route path="/staff" element={<Staff />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'ACCOUNTANT']} />}>

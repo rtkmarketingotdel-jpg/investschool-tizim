@@ -1,0 +1,62 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { ApiError } from '../lib/errors.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
+import { validateBody } from '../middleware/validate.js';
+import { classRepo } from '../repositories/classRepo.js';
+import { studentRepo } from '../repositories/studentRepo.js';
+import { userRepo } from '../repositories/userRepo.js';
+
+export const classesRouter = Router();
+classesRouter.use(requireAuth, requireRole('DIRECTOR', 'ACCOUNTANT', 'ADMIN'));
+
+const classSchema = z.object({
+  name: z.string().trim().min(1).max(20),
+  grade: z.number().int().min(1).max(11),
+  capacity: z.number().int().min(1).max(100),
+  teacherId: z.string().nullable(),
+});
+
+async function withStats(c: Awaited<ReturnType<typeof classRepo.list>>[number]) {
+  const occ = await studentRepo.occupancy();
+  const teacher = c.teacherId ? await userRepo.findById(c.teacherId) : null;
+  const taken = occ.get(c.id) ?? 0;
+  return { ...c, studentCount: taken, freeSeats: Math.max(0, c.capacity - taken), teacherName: teacher?.fullName ?? null };
+}
+
+classesRouter.get('/', async (_req, res, next) => {
+  try {
+    res.json({ items: await Promise.all((await classRepo.list()).map(withStats)) });
+  } catch (e) {
+    next(e);
+  }
+});
+
+async function assertTeacher(teacherId: string | null) {
+  if (teacherId && !(await userRepo.findById(teacherId))) throw new ApiError(400, 'VALIDATION_ERROR');
+}
+
+classesRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(classSchema), async (req, res, next) => {
+  try {
+    const body = req.body as z.infer<typeof classSchema>;
+    if (await classRepo.findByName(body.name)) throw new ApiError(409, 'CLASS_NAME_EXISTS');
+    await assertTeacher(body.teacherId);
+    res.status(201).json(await withStats(await classRepo.create(body)));
+  } catch (e) {
+    next(e);
+  }
+});
+
+classesRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(classSchema), async (req, res, next) => {
+  try {
+    const body = req.body as z.infer<typeof classSchema>;
+    const clash = await classRepo.findByName(body.name);
+    if (clash && clash.id !== req.params.id) throw new ApiError(409, 'CLASS_NAME_EXISTS');
+    await assertTeacher(body.teacherId);
+    const rec = await classRepo.update(req.params.id!, body);
+    if (!rec) throw new ApiError(404, 'NOT_FOUND');
+    res.json(await withStats(rec));
+  } catch (e) {
+    next(e);
+  }
+});
