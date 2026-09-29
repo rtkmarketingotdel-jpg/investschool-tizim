@@ -26,3 +26,11 @@ api.interceptors.response.use(
 
 export const errorCode = (e: unknown): string =>
   axios.isAxiosError(e) ? (e.response?.data?.error ?? 'NETWORK_ERROR') : 'INTERNAL_ERROR';
+
+/** Resolves an API-relative upload path (e.g. /uploads/...) to a full URL. */
+export function uploadUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  const base = import.meta.env.VITE_API_URL as string | undefined;
+  if (base?.startsWith('http')) return new URL(path, base).toString();
+  return path;
+}

@@ -34,7 +34,7 @@ export const navGroups: NavGroup[] = [
     titleKey: 'nav.staff',
     items: [
       { to: '/staff', labelKey: 'nav.staffList', icon: Users, roles: ['DIRECTOR', 'ADMIN'] },
-      { to: '/attendance', labelKey: 'nav.attendance', icon: CalendarCheck, roles: ALL_MGMT },
+      { to: '/attendance', labelKey: 'nav.attendance', icon: CalendarCheck, roles: [...ALL_MGMT, 'STAFF'] },
     ],
   },
   {

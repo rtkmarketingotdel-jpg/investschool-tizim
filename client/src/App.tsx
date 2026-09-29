@@ -40,10 +40,10 @@ export default function App() {
         <Route path="/c/:token" element={<PublicContract />} />
         <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route path="/me" element={<Me />} />
+          <Route path="/attendance" element={<Attendance />} />
           <Route element={<RoleGuard roles={[...MGMT]} />}>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/students/*" element={<Students />} />
-            <Route path="/attendance" element={<Attendance />} />
             <Route path="/finance/contracts" element={<Contracts />} />
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'ADMIN']} />}>

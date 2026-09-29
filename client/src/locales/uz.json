@@ -1,26 +1,63 @@
 {
-  "brand": { "slogan": "Maktab boshqaruvi bir joyda" },
-  "nav": {
-    "main": "Asosiy", "students": "Oʻquvchilar", "staff": "Xodimlar", "finance": "Moliya", "management": "Boshqaruv",
-    "dashboard": "Bosh sahifa", "studentsList": "Oʻquvchilar", "classes": "Sinflar", "staffList": "Xodimlar",
-    "attendance": "Davomat", "payments": "Tushumlar", "debtors": "Qarzdorlar", "payroll": "Oyliklar",
-    "contracts": "Shartnomalar", "settings": "Sozlamalar", "me": "Mening kabinetim"
+  "brand": {
+    "slogan": "Maktab boshqaruvi bir joyda"
   },
-  "roles": { "DIRECTOR": "Direktor", "ACCOUNTANT": "Buxgalter", "ADMIN": "Administrator", "STAFF": "Xodim" },
+  "nav": {
+    "main": "Asosiy",
+    "students": "Oʻquvchilar",
+    "staff": "Xodimlar",
+    "finance": "Moliya",
+    "management": "Boshqaruv",
+    "dashboard": "Bosh sahifa",
+    "studentsList": "Oʻquvchilar",
+    "classes": "Sinflar",
+    "staffList": "Xodimlar",
+    "attendance": "Davomat",
+    "payments": "Tushumlar",
+    "debtors": "Qarzdorlar",
+    "payroll": "Oyliklar",
+    "contracts": "Shartnomalar",
+    "settings": "Sozlamalar",
+    "me": "Mening kabinetim"
+  },
+  "roles": {
+    "DIRECTOR": "Direktor",
+    "ACCOUNTANT": "Buxgalter",
+    "ADMIN": "Administrator",
+    "STAFF": "Xodim"
+  },
   "auth": {
-    "loginTitle": "Tizimga kirish", "loginSubtitle": "Telefon raqam va parolingizni kiriting",
-    "phone": "Telefon raqam", "password": "Parol", "submit": "Kirish", "demoAccounts": "Demo hisoblar",
+    "loginTitle": "Tizimga kirish",
+    "loginSubtitle": "Telefon raqam va parolingizni kiriting",
+    "phone": "Telefon raqam",
+    "password": "Parol",
+    "submit": "Kirish",
+    "demoAccounts": "Demo hisoblar",
     "logout": "Chiqish"
   },
   "topbar": {
-    "search": "Oʻquvchi yoki xodim qidirish...", "toggleSidebar": "Menyuni ochish/yopish", "fullscreen": "Toʻliq ekran",
-    "theme": "Mavzuni almashtirish", "language": "Til", "notifications": "Bildirishnomalar", "markAllRead": "Barchasini oʻqilgan qilish",
+    "search": "Oʻquvchi yoki xodim qidirish...",
+    "toggleSidebar": "Menyuni ochish/yopish",
+    "fullscreen": "Toʻliq ekran",
+    "theme": "Mavzuni almashtirish",
+    "language": "Til",
+    "notifications": "Bildirishnomalar",
+    "markAllRead": "Barchasini oʻqilgan qilish",
     "noNotifications": "Bildirishnomalar yoʻq"
   },
-  "placeholder": { "title": "Tez orada", "text": "Bu boʻlim keyingi bosqichlarda qoʻshiladi." },
+  "placeholder": {
+    "title": "Tez orada",
+    "text": "Bu boʻlim keyingi bosqichlarda qoʻshiladi."
+  },
   "common": {
-    "save": "Saqlash", "cancel": "Bekor qilish", "close": "Yopish", "loading": "Yuklanmoqda...", "search": "Qidirish",
-    "empty": "Maʼlumot topilmadi", "currency": "soʻm", "back": "Ortga"
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "close": "Yopish",
+    "loading": "Yuklanmoqda...",
+    "search": "Qidirish",
+    "empty": "Maʼlumot topilmadi",
+    "currency": "soʻm",
+    "back": "Ortga"
   },
   "errors": {
     "AUTH_INVALID_CREDENTIALS": "Telefon yoki parol notoʻgʻri",
@@ -32,6 +69,66 @@
     "VALIDATION_ERROR": "Kiritilgan maʼlumotlar notoʻgʻri",
     "NETWORK_ERROR": "Server bilan aloqa yoʻq",
     "INTERNAL_ERROR": "Xatolik yuz berdi",
-    "NOT_FOUND": "Topilmadi"
+    "NOT_FOUND": "Topilmadi",
+    "GEO_DENIED": "Joylashuvga ruxsat bering: brauzer sozlamalarida (manzil satridagi qulf) joylashuvni yoqing",
+    "GEO_FAILED": "Joylashuvni aniqlab boʻlmadi. Ochiq joyga chiqib qayta urinib koʻring",
+    "GEO_UNSUPPORTED": "Brauzer joylashuvni qoʻllab-quvvatlamaydi",
+    "ATTENDANCE_ALREADY_CHECKED_IN": "Bugun allaqachon keldingiz",
+    "ATTENDANCE_ALREADY_CHECKED_OUT": "Bugun allaqachon ketdingiz",
+    "ATTENDANCE_NOT_CHECKED_IN": "Avval “Keldim” tugmasini bosing",
+    "ATTENDANCE_NOT_WORKDAY": "Bugun ish kuni emas",
+    "ATTENDANCE_LOW_ACCURACY": "Joylashuv aniqligi past. Ochiq joyga chiqib qayta urinib koʻring",
+    "ATTENDANCE_OUT_OF_RADIUS": "Siz maktabdan {{distance}} m uzoqdasiz",
+    "ATTENDANCE_BAD_TIMESTAMP": "Qurilma vaqti notoʻgʻri. Vaqtni tekshirib qayta urinib koʻring",
+    "ATTENDANCE_INVALID_PHOTO": "Rasm notoʻgʻri, qayta oling",
+    "ATTENDANCE_PHOTO_TOO_LARGE": "Rasm hajmi katta"
+  },
+  "attendance": {
+    "subtitle": "Xodimlar kelish-ketish vaqti, selfi va joylashuv bilan",
+    "hello": "Salom, {{name}}!",
+    "workHours": "Ish vaqti",
+    "notMarked": "Hali belgilanmagan",
+    "cameAt": "Keldingiz {{time}}",
+    "leftAt": "Ketdingiz {{time}}",
+    "checkIn": "Keldim",
+    "checkOut": "Ketdim",
+    "selfieTitle": "Selfi oling",
+    "capture": "Suratga olish",
+    "retake": "Qayta olish",
+    "send": "Yuborish",
+    "retry": "Qayta urinish",
+    "cameraDenied": "Kameraga ruxsat bering. Brauzer manzil satridagi qulf belgisi orqali kameraga ruxsat berib, qayta urinib koʻring.",
+    "checkedInToast": "Kelganingiz belgilandi",
+    "checkedOutToast": "Ketganingiz belgilandi",
+    "myHistory": "Mening davomatim (shu oy)",
+    "date": "Sana",
+    "came": "Keldi",
+    "left": "Ketdi",
+    "statusCol": "Holat",
+    "employee": "Xodim",
+    "min": "daq",
+    "today": "Bugun",
+    "from": "Boshlanish sanasi",
+    "to": "Tugash sanasi",
+    "reset": "Tozalash",
+    "total": "Jami: {{count}}",
+    "prev": "Oldingi sahifa",
+    "next": "Keyingi sahifa",
+    "openMap": "Xaritada koʻrish",
+    "logTitle": "Davomat jurnali",
+    "logSubtitle": "Kunma-kun kelish/ketish vaqti va selfilar",
+    "stats": {
+      "onTime": "Vaqtida",
+      "late": "Kechikkan",
+      "absent": "Kelmagan",
+      "came": "Keldi",
+      "excused": "Sababli"
+    },
+    "status": {
+      "ON_TIME": "Vaqtida",
+      "LATE": "Kechikdi",
+      "ABSENT": "Kelmadi",
+      "EXCUSED": "Sababli"
+    }
   }
 }
