@@ -4,6 +4,11 @@ import { z } from 'zod';
 import { ApiError } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
+import { clubRepo } from '../repositories/academicsRepo.js';
+import { branchRepo } from '../repositories/branchRepo.js';
+import { classRepo } from '../repositories/classRepo.js';
+import { contractRepo } from '../repositories/contractRepo.js';
+import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import { toPublicUser, userRepo } from '../repositories/userRepo.js';
 
 export const meRouter = Router();
@@ -35,6 +40,50 @@ meRouter.post('/password', validateBody(passwordSchema), async (req, res, next) 
     }
     await userRepo.update(req.user!.id, { passwordHash: await bcrypt.hash(newPassword, 10) });
     res.json({ ok: true });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * Everything a teacher needs about their own work: the class(es) they lead with the full roster and parent contacts,
+ * the clubs they lead and who joined. No money fields (fees/debts) are exposed here.
+ */
+meRouter.get('/teaching', async (req, res, next) => {
+  try {
+    const me = req.user!;
+    const contracts = new Map<string, { status: string; number: string }>();
+    for (const c of await contractRepo.all()) {
+      if (c.status === 'CANCELLED') continue;
+      const cur = contracts.get(c.studentId);
+      if (!cur || c.number > cur.number) contracts.set(c.studentId, { status: c.status, number: c.number });
+    }
+    const occ = await studentRepo.occupancy();
+    const classes = [];
+    for (const c of (await classRepo.list()).filter((x) => x.teacherId === me.id)) {
+      const branch = c.branchId ? await branchRepo.findById(c.branchId) : null;
+      const roster = (await studentRepo.list({ classId: c.id, sort: 'name' })).filter((s) => s.status !== 'LEFT');
+      const taken = occ.get(c.id) ?? roster.length;
+      classes.push({
+        id: c.id, name: c.name, grade: c.grade, capacity: c.capacity, studentCount: taken, freeSeats: Math.max(0, c.capacity - taken),
+        branchName: branch?.name ?? null, boys: roster.filter((s) => s.gender === 'MALE').length, girls: roster.filter((s) => s.gender === 'FEMALE').length,
+        students: roster.map((s) => ({
+          id: s.id, fullName: fullName(s), firstName: s.firstName, lastName: s.lastName, gender: s.gender, birthDate: s.birthDate, status: s.status,
+          parentName: s.parentName, parentPhone: s.parentPhone, parentPhone2: s.parentPhone2, district: s.district, address: s.address,
+          isBoarding: s.isBoarding, clubs: s.clubs, enrolledAt: s.enrolledAt, contract: contracts.get(s.id)?.status ?? 'NONE',
+        })),
+      });
+    }
+    const classNames = new Map((await classRepo.list()).map((c) => [c.id, c.name]));
+    const clubs = [];
+    for (const c of (await clubRepo.list()).filter((x) => x.teacherId === me.id)) {
+      const members = (await studentRepo.list({ club: c.name, sort: 'name' })).filter((s) => s.status !== 'LEFT');
+      clubs.push({
+        id: c.id, name: c.name, monthlyFee: c.monthlyFee,
+        members: members.map((s) => ({ id: s.id, fullName: fullName(s), className: s.classId ? (classNames.get(s.classId) ?? null) : null, parentName: s.parentName, parentPhone: s.parentPhone })),
+      });
+    }
+    res.json({ subject: me.subject, isTeacher: me.isTeacher, isTutor: me.isTutor, position: me.position, classes, clubs });
   } catch (e) {
     next(e);
   }

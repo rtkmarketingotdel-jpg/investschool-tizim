@@ -90,6 +90,23 @@ export interface Adjustment {
   reason: string;
   createdAt: string;
 }
+/** Live estimate for the current month (base + bonuses - fines), even before the accountant calculates it. */
+export interface PayrollCurrent {
+  period: string;
+  status: PayrollStatus | 'ESTIMATE';
+  baseSalary: number;
+  bonusTotal: number;
+  fineTotal: number;
+  total: number;
+  workedDays: number;
+  lateCount: number;
+  absentCount: number;
+  adjustments: Adjustment[];
+}
+export interface PayrollMine {
+  items: Array<PayrollRow & { adjustments: Adjustment[] }>;
+  current: PayrollCurrent;
+}
 export type ContractStatus = 'DRAFT' | 'SENT' | 'SIGNED' | 'CANCELLED';
 export interface ContractRow {
   id: string;
@@ -173,7 +190,7 @@ export const financeApi = {
   payroll: (period: string) =>
     api.get<{ period: string; items: PayrollRow[]; summary: { total: number; bonus: number; fine: number } }>('/payroll', { params: { period } }).then((r) => r.data),
   payrollDetail: (id: string) => api.get<PayrollRow & { adjustments: Adjustment[] }>(`/payroll/${id}`).then((r) => r.data),
-  payrollMine: () => api.get<{ items: Array<PayrollRow & { adjustments: Adjustment[] }> }>('/payroll/mine').then((r) => r.data.items),
+  payrollMine: () => api.get<PayrollMine>('/payroll/mine').then((r) => r.data),
   calculatePayroll: (period: string) => api.post<{ calculated: number; skipped: number }>('/payroll/calculate', { period }).then((r) => r.data),
   addAdjustment: (d: { userId: string; period: string; type: 'BONUS' | 'FINE'; amount: number; reason: string }) =>
     api.post('/payroll/adjustments', d).then((r) => r.data),

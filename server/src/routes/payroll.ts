@@ -7,7 +7,7 @@ import { validateBody } from '../middleware/validate.js';
 import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
 import { audit, notifyRoles } from '../repositories/notificationRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
-import { calculatePeriod, isLocked, refreshDraft } from '../services/payroll.js';
+import { calculatePeriod, isLocked, previewPayroll, refreshDraft } from '../services/payroll.js';
 
 export const payrollRouter = Router();
 payrollRouter.use(requireAuth);
@@ -20,7 +20,8 @@ payrollRouter.get('/mine', async (req, res, next) => {
   try {
     const rows = await payrollRepo.byUser(req.user!.id);
     const withAdj = await Promise.all(rows.map(async (p) => ({ ...p, adjustments: await adjustmentRepo.forUserPeriod(p.userId, p.period) })));
-    res.json({ items: withAdj });
+    const current = await previewPayroll(req.user!.id, req.user!.baseSalary, toLocalDate().slice(0, 7));
+    res.json({ items: withAdj, current });
   } catch (e) {
     next(e);
   }

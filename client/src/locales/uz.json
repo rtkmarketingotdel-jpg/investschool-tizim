@@ -933,5 +933,44 @@
       "testSent": "Sinov SMS yuborildi",
       "testSimulated": "Demo rejim: SMS haqiqatda yuborilmadi"
     }
+  },
+  "me": {
+    "tabs": {
+      "attendance": "Davomat",
+      "class": "Mening sinfim",
+      "classes": "Sinflarim ({{count}})",
+      "clubs": "Toʻgaraklarim",
+      "salary": "Oylik"
+    },
+    "class": {
+      "none": "Sizga sinf biriktirilmagan",
+      "noneHint": "Sinf rahbari etib tayinlanganingizda, sinf tarkibi shu yerda koʻrinadi. Maktab maʼmuriyatiga murojaat qiling.",
+      "switch": "Sinfni tanlash",
+      "students": "oʻquvchi",
+      "fill": "Toʻlganlik",
+      "contracts": "Imzolangan shartnomalar",
+      "unsigned": "Shartnomasi imzolanmagan",
+      "search": "Oʻquvchi, ota-ona yoki telefon boʻyicha...",
+      "allContracts": "Barcha shartnomalar",
+      "onlyUnsigned": "Imzolanmaganlar",
+      "copyPhones": "Telefonlarni nusxalash",
+      "boy": "Oʻgʻil bola",
+      "girl": "Qiz bola",
+      "age": "{{count}} yosh"
+    },
+    "clubs": {
+      "none": "Siz toʻgarak rahbari emassiz",
+      "noneHint": "Toʻgarak rahbari etib tayinlansangiz, yozilgan oʻquvchilar shu yerda koʻrinadi.",
+      "members": "{{count}} oʻquvchi"
+    },
+    "salary": {
+      "thisMonth": "Joriy oy",
+      "estimate": "Taxminiy",
+      "toReceive": "Qoʻlingizga tegadigan summa",
+      "estimateNote": "Oylik hali yakuniy hisoblanmagan: summa bugungi jarima va bonuslar boʻyicha taxminiy.",
+      "adjustments": "Jarima va bonuslar (joriy oy)",
+      "noAdjustments": "Bu oy jarima ham, bonus ham yoʻq",
+      "history": "Oldingi oylar"
+    }
   }
 }

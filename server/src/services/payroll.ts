@@ -12,6 +12,18 @@ async function figures(userId: string, period: string, baseSalary: number) {
   return computePayroll(baseSalary, adj, att);
 }
 
+/**
+ * Live estimate for one employee and month (base + bonuses - fines from attendance and manual entries).
+ * Used by "my salary" before the accountant has calculated the month; locked rows are reported as they are.
+ */
+export async function previewPayroll(userId: string, baseSalary: number, period: string) {
+  const row = await payrollRepo.find(userId, period);
+  const adjustments = await adjustmentRepo.forUserPeriod(userId, period);
+  if (row && row.status !== 'DRAFT') return { period, status: row.status, baseSalary: row.baseSalary, bonusTotal: row.bonusTotal, fineTotal: row.fineTotal, total: row.total, workedDays: row.workedDays, lateCount: row.lateCount, absentCount: row.absentCount, adjustments };
+  const f = await figures(userId, period, baseSalary);
+  return { period, status: row ? row.status : ('ESTIMATE' as const), baseSalary, ...f, adjustments };
+}
+
 /** Recomputes a DRAFT payroll row after an adjustment changed (locked rows stay untouched). */
 export async function refreshDraft(userId: string, period: string) {
   const row = await payrollRepo.find(userId, period);
