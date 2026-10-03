@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
@@ -21,7 +22,8 @@ export function Drawer({ open, onClose, title, children, width = 560 }: Props) {
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  return (
+  // Rendered on <body>: a fixed overlay must never be positioned/clipped by the scrolling layout around it.
+  return createPortal(
     <div className={cn('fixed inset-0 z-50', !open && 'pointer-events-none')} aria-hidden={!open}>
       <div
         className={cn('absolute inset-0 bg-black/40 transition-opacity', open ? 'opacity-100' : 'opacity-0')}
@@ -45,6 +47,7 @@ export function Drawer({ open, onClose, title, children, width = 560 }: Props) {
         </header>
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }

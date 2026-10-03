@@ -21,7 +21,7 @@ export function AppLayout() {
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
-    <div className="h-[100dvh] bg-canvas">
+    <div className="h-[100dvh] overflow-hidden bg-canvas">
     <div className="relative flex h-full overflow-hidden">
       <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onNavigate={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
