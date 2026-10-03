@@ -46,8 +46,10 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const toast = useToast();
   const qc = useQueryClient();
   const roles: Role[] = user?.role === 'DIRECTOR' ? ['STAFF', 'ADMIN', 'ACCOUNTANT', 'DIRECTOR'] : ['STAFF', 'ADMIN'];
-  const isTeacher = member ? member.isTeacher : kind === 'teacher';
-  const isTutor = member ? member.isTutor : kind === 'tutor';
+  // The employee type can be changed at any time (e.g. a plain employee becomes a teacher): the cabinet follows it.
+  const [type, setType] = useState<'teacher' | 'tutor' | 'staff'>(kind);
+  const isTeacher = type === 'teacher';
+  const isTutor = type === 'tutor';
   const hasSubject = isTeacher || isTutor;
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState(false);
@@ -60,6 +62,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   useEffect(() => {
     if (!open) return;
     setCopied(false);
+    setType(member ? (member.isTeacher ? 'teacher' : member.isTutor ? 'tutor' : 'staff') : kind);
     setPassword(member ? '' : generatePassword());
     if (!member) return reset(empty);
     const known = member.subject && (subjectsQ.data ?? []).some((x) => x.name === member.subject);
@@ -68,7 +71,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
       subject: member.subject ? (known ? member.subject : OTHER) : '', customSubject: member.subject && !known ? member.subject : '',
       homeroomClassId: '', branchId: member.branchId ?? '', baseSalary: member.baseSalary, isActive: member.isActive,
     });
-  }, [open, member, reset, subjectsQ.data]);
+  }, [open, member, kind, reset, subjectsQ.data]);
 
   const subject = watch('subject');
   const passwordError = !member && password.length > 0 && password.length < 8;
@@ -107,6 +110,12 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
       <form onSubmit={handleSubmit((v) => !passwordError && save.mutate(v))} className="space-y-4" noValidate>
         <Input label={t('staff.fullName')} error={err('fullName')} {...register('fullName')} />
         <Controller control={control} name="phone" render={({ field }) => <PhoneInput label={t('staff.phoneLogin')} value={field.value} onChange={field.onChange} error={err('phone')} />} />
+
+        <Select label={t('staff.employeeType')} value={type} onChange={(e) => setType(e.target.value as typeof type)}>
+          <option value="staff">{t('staff.types.staff')}</option>
+          <option value="teacher">{t('staff.types.teacher')}</option>
+          <option value="tutor">{t('staff.types.tutor')}</option>
+        </Select>
 
         {hasSubject ? (
           <>

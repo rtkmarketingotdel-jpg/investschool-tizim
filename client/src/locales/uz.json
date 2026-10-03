@@ -405,7 +405,13 @@
     "hiredAt": "Ishga kirgan sana",
     "homeroomOf": "Sinf rahbari",
     "clubsLed": "Toʻgarak rahbari",
-    "nothingYet": "Hali kiritilmagan"
+    "nothingYet": "Hali kiritilmagan",
+    "employeeType": "Xodim turi",
+    "types": {
+      "staff": "Oddiy xodim",
+      "teacher": "Oʻqituvchi",
+      "tutor": "Repetitor"
+    }
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",
