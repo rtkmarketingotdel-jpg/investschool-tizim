@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronsLeft, UserCircle } from 'lucide-react';
 import { brand } from '@/brand.config';
@@ -9,32 +9,41 @@ import { navGroups } from '@/nav';
 import { cn } from '@/lib/cn';
 
 const KEY = 'sidebar-open';
+const XL = '(min-width: 1280px)';
 const initialOpen = () => {
   try {
     const v = localStorage.getItem(KEY);
     if (v !== null) return v === '1';
   } catch { /* storage may be blocked */ }
-  return window.matchMedia('(min-width: 1280px)').matches;
+  return true;
 };
 
+function useDesktop() {
+  const [xl, setXl] = useState(() => window.matchMedia(XL).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(XL);
+    const h = () => setXl(mq.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
+  return xl;
+}
+
 /**
- * Collapsible navigation. Open: icons with page names. Closed: an icon rail, the name pops out beside the icon on hover.
- * Below md the open sidebar floats over the page instead of pushing it.
+ * Desktop (>= 1280px): collapsible. Open shows page names, closed is an icon rail with a hover tooltip.
+ * Phones and tablets: hidden; the topbar menu button slides it in over the page.
  */
-export function Sidebar() {
+export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boolean; onMobileClose: () => void }) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { pathname } = useLocation();
-  const [open, setOpen] = useState(initialOpen);
+  const desktop = useDesktop();
+  const [pinned, setPinned] = useState(initialOpen);
 
-  const toggle = () => setOpen((o) => {
+  const toggle = () => setPinned((o) => {
     try { localStorage.setItem(KEY, o ? '0' : '1'); } catch { /* ignore */ }
     return !o;
   });
-  // on phones the open sidebar covers the page: close it after navigating
-  useEffect(() => {
-    if (window.matchMedia('(max-width: 767px)').matches) setOpen(false);
-  }, [pathname]);
+  const open = desktop ? pinned : true; // labels are always shown while the drawer is visible
 
   if (!user) return null;
   const groups = navGroups
@@ -43,19 +52,21 @@ export function Sidebar() {
 
   return (
     <>
-      {open && <div className="fixed inset-0 z-30 bg-black/30 md:hidden" onClick={toggle} />}
-      <div className={cn('relative z-40 w-[68px] shrink-0 transition-[width] duration-300 ease-out', open ? 'md:w-[248px]' : 'md:w-[76px]')}>
-        <aside
-          className={cn(
-            'absolute inset-y-0 left-0 flex flex-col overflow-hidden border-r border-border/70 bg-surface transition-[width] duration-300 ease-out',
-            open ? 'w-[248px]' : 'w-[68px] md:w-[76px]',
-          )}
-        >
-          <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border/70 px-3 md:px-4">
+      {!desktop && mobileOpen && <div className="fixed inset-0 z-30 bg-black/40" onClick={onMobileClose} />}
+      <div
+        className={cn(
+          'z-40 shrink-0',
+          desktop
+            ? cn('relative transition-[width] duration-300 ease-out', pinned ? 'w-[248px]' : 'w-[76px]')
+            : cn('fixed inset-y-0 left-0 w-[272px] transition-transform duration-300 ease-out', mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'),
+        )}
+      >
+        <aside className={cn('absolute inset-y-0 left-0 flex flex-col overflow-hidden border-r border-border/70 bg-surface transition-[width] duration-300 ease-out', desktop ? (pinned ? 'w-[248px]' : 'w-[76px]') : 'w-[272px]')}>
+          <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border/70 px-4">
             <img src={brand.logo} alt="" className="h-11 w-11 shrink-0 rounded-full" />
             <span className={cn('truncate text-lg transition-opacity duration-200', open ? 'opacity-100 delay-100' : 'pointer-events-none opacity-0')}>{brand.name}</span>
           </div>
-          <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 md:px-4">
+          <nav className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4">
             {user.role !== 'DIRECTOR' && (
               <div className="mb-3 border-b border-border/70 pb-3">
                 <RailLink to="/me" label={t('nav.me')} icon={UserCircle} open={open} />
@@ -71,15 +82,17 @@ export function Sidebar() {
             ))}
           </nav>
         </aside>
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={t('topbar.toggleSidebar')}
-          aria-expanded={open}
-          className="absolute -right-3.5 top-[58px] z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface text-text-muted shadow-sm transition hover:border-primary hover:bg-primary hover:text-white"
-        >
-          <ChevronsLeft className={cn('h-4 w-4 transition-transform duration-300', !open && 'rotate-180')} />
-        </button>
+        {desktop && (
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={t('topbar.toggleSidebar')}
+            aria-expanded={pinned}
+            className="absolute -right-3.5 top-[58px] z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface text-text-muted shadow-sm transition hover:border-primary hover:bg-primary hover:text-white"
+          >
+            <ChevronsLeft className={cn('h-4 w-4 transition-transform duration-300', !pinned && 'rotate-180')} />
+          </button>
+        )}
       </div>
     </>
   );
@@ -108,7 +121,7 @@ function RailLink({ to, label, icon: Icon, end, open }: { to: string; label: str
           cn(
             'relative flex h-11 items-center gap-3 rounded-xl px-3 transition duration-200',
             isActive
-              ? 'bg-primary-soft text-primary before:absolute before:-left-3 before:top-2.5 before:bottom-2.5 before:w-1 before:rounded-r-full before:bg-primary md:before:-left-4'
+              ? 'bg-primary-soft text-primary before:absolute before:-left-4 before:top-2.5 before:bottom-2.5 before:w-1 before:rounded-r-full before:bg-primary'
               : 'text-text-muted hover:bg-surface-muted hover:text-text',
           )
         }

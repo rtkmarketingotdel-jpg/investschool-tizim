@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, LogOut, Maximize, Moon, Sun } from 'lucide-react';
+import { Globe, LogOut, Maximize, Menu, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { setLanguage } from '@/i18n';
@@ -11,7 +11,7 @@ import { GlobalSearch } from './GlobalSearch';
 import { InstallButton } from '../InstallApp';
 import { NotificationsButton } from './NotificationsPanel';
 
-export function Topbar() {
+export function Topbar({ onMenu }: { onMenu: () => void }) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
@@ -32,6 +32,9 @@ export function Topbar() {
   return (
     <header className="flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-border/70 bg-surface px-4 md:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-3">
+        <IconButton aria-label={t('topbar.toggleSidebar')} className="xl:hidden" onClick={onMenu}>
+          <Menu className="h-5 w-5" />
+        </IconButton>
         {user.role !== 'TEACHER' && <GlobalSearch />}
       </div>
 
