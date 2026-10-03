@@ -7,6 +7,7 @@ import { validateBody } from '../middleware/validate.js';
 import { env } from '../env.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { findTelegramChats, sendTelegram } from '../services/telegram.js';
+import { testMessage } from '../services/telegramText.js';
 
 export const settingsRouter = Router();
 settingsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
@@ -61,7 +62,7 @@ settingsRouter.get('/telegram/chats', requireRole('DIRECTOR'), async (_req, res,
 
 settingsRouter.post('/telegram/test', requireRole('DIRECTOR'), async (_req, res, next) => {
   try {
-    const ok = await sendTelegram('✅ Test xabar / Тестовое сообщение');
+    const ok = await sendTelegram(testMessage());
     if (!ok) throw new ApiError(400, 'TELEGRAM_NOT_CONFIGURED');
     res.json({ ok: true });
   } catch (e) {

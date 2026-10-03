@@ -9,6 +9,7 @@ import { isoWeekday, localMinutes, parseHHMM, toLocalDate } from '../lib/date.js
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { onLateCheckIn, syncFine } from './attendanceEffects.js';
 import { sendTelegramPhoto } from './telegram.js';
+import { punchCaption } from './telegramText.js';
 
 export const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
 const MAX_PHOTO_BYTES = 1.5 * 1024 * 1024;
@@ -69,14 +70,12 @@ async function reportSelfie(user: User, rec: Attendance, photo: Buffer, kind: 'i
   const at = kind === 'in' ? rec.checkInAt : rec.checkOutAt;
   const branch = rec.branchId ? await branchRepo.findById(rec.branchId) : null;
   const dist = kind === 'in' ? rec.checkInDistanceM : rec.checkOutDistanceM;
-  const lines = [
-    kind === 'in' ? '✅ Ishga keldi' : '🚪 Ishdan ketdi',
-    `👤 ${user.fullName}${user.position ? ` (${user.position})` : ''}`,
-    `🕒 ${at ? fmtClock(at) : ''} · ${rec.date.split('-').reverse().join('.')}`,
-    branch || dist != null ? `📍 ${[branch?.name, dist != null ? `${dist} m` : null].filter(Boolean).join(' · ')}` : '',
-    kind === 'in' ? (rec.status === 'LATE' ? `⏰ Kechikdi: ${rec.lateMinutes} daqiqa` : '👍 Vaqtida') : '',
-  ].filter(Boolean);
-  return sendTelegramPhoto(photo, lines.join('\n'));
+  const place = [branch?.name, dist != null ? `${dist} m` : null].filter(Boolean).join(' · ');
+  const caption = punchCaption({
+    kind, name: user.fullName, position: user.position, time: at ? fmtClock(at) : '', date: rec.date, place,
+    late: rec.status === 'LATE' ? rec.lateMinutes : null,
+  });
+  return sendTelegramPhoto(photo, caption);
 }
 
 export async function checkIn(user: User, input: PunchInput, userAgent: string | undefined) {

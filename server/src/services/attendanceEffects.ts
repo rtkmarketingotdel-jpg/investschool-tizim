@@ -8,6 +8,7 @@ import { userRepo } from '../repositories/userRepo.js';
 import { lateFine } from './payrollCalc.js';
 import { refreshDraft } from './payroll.js';
 import { sendTelegram } from './telegram.js';
+import { absentMessage, dailyMessage } from './telegramText.js';
 
 /** Replaces any ATTENDANCE fine linked to the record with the one matching its current status. */
 export async function syncFine(rec: Attendance) {
@@ -49,7 +50,7 @@ export async function markAbsentees(date = toLocalDate()): Promise<number> {
   }
   if (absent.length) {
     await notifyRoles(['DIRECTOR', 'MANAGER'], 'notif.absent', { count: absent.length, names: absent.map((a) => a.fullName).slice(0, 3).join(', ') }, '/attendance');
-    await sendTelegram(`❌ Kelmadi (${absent.length}): ${absent.map((a) => a.fullName).join(', ')}`);
+    await sendTelegram(absentMessage(date, absent.map((a) => ({ name: a.fullName, position: a.position }))));
   }
   return absent.length;
 }
@@ -59,7 +60,7 @@ export async function dailyReport(date = toLocalDate()) {
   const came = recs.filter((r) => r.checkInAt).length;
   const late = recs.filter((r) => r.status === 'LATE').length;
   const absent = recs.filter((r) => r.status === 'ABSENT').length;
-  await sendTelegram(`📊 Bugun: ${came} keldi, ${late} kechikdi, ${absent} kelmadi`);
+  await sendTelegram(dailyMessage(date, { came, late, absent }));
 }
 
 export async function setStatus(rec: Attendance, status: Attendance['status'], note: string | null, actorId: string) {
