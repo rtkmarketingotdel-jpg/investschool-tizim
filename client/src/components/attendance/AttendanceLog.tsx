@@ -48,16 +48,16 @@ export function AttendanceLog() {
           : cards.map((c) => (
               <Card key={c.label} className="p-5">
                 <p className="text-sm text-text-muted">{t('attendance.today')} · {c.label}</p>
-                <p className="mt-1 text-3xl font-medium tabular-nums">{c.value}</p>
+                <p className="mt-1 text-2xl font-medium tabular-nums">{c.value}</p>
               </Card>
             ))}
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Input type="date" label={t('attendance.from')} value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
         </div>
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Input type="date" label={t('attendance.to')} value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
         </div>
         {(from || to) && (

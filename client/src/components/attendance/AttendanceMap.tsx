@@ -13,8 +13,8 @@ export function AttendanceMap() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="p-4"><p className="text-sm text-text-muted">{t('attendance.map.onSite')}</p><p className="mt-1 text-3xl tabular-nums">{data.counts.onSite}</p></Card>
-        <Card className="p-4"><p className="text-sm text-text-muted">{t('attendance.map.left')}</p><p className="mt-1 text-3xl tabular-nums">{data.counts.left}</p></Card>
+        <Card className="p-4"><p className="text-sm text-text-muted">{t('attendance.map.onSite')}</p><p className="mt-1 text-2xl tabular-nums">{data.counts.onSite}</p></Card>
+        <Card className="p-4"><p className="text-sm text-text-muted">{t('attendance.map.left')}</p><p className="mt-1 text-2xl tabular-nums">{data.counts.left}</p></Card>
       </div>
       <LiveMap branches={data.branches} points={data.points} />
       <p className="text-xs text-text-muted">

@@ -103,7 +103,7 @@ export function TeacherClass({ classes }: { classes: TeachingClass[] }) {
           <span className={cn('flex h-20 w-20 items-center justify-center rounded-3xl text-3xl tracking-tight', levelTone[levelOf(c.grade)].chip)}>{c.name}</span>
           <Ring value={c.studentCount} total={c.capacity} fill={fill} size={96}><span className="text-2xl tabular-nums">{c.studentCount}</span></Ring>
           <div className="min-w-48 flex-1 space-y-3">
-            <p className="tabular-nums"><span className="text-3xl">{c.studentCount}</span><span className="text-text-muted"> / {c.capacity} {t('me.class.students')}</span></p>
+            <p className="tabular-nums"><span className="text-2xl">{c.studentCount}</span><span className="text-text-muted"> / {c.capacity} {t('me.class.students')}</span></p>
             <div className="space-y-1.5">
               <SplitBar boys={c.boys} girls={c.girls} />
               <p className="flex justify-between text-xs text-text-muted"><span>{t('classes.boys', { count: c.boys })}</span><span>{t('classes.girls', { count: c.girls })}</span></p>
@@ -120,7 +120,7 @@ export function TeacherClass({ classes }: { classes: TeachingClass[] }) {
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-56 flex-1 sm:max-w-sm"><Input aria-label={t('common.search')} placeholder={t('me.class.search')} value={q} onChange={(e) => setQ(e.target.value)} icon={<Search className="h-4 w-4" />} /></div>
-        <div className="w-52">
+        <div className="w-[calc(50%-0.375rem)] sm:w-52">
           <Select aria-label={t('me.class.contracts')} value={contract} onChange={(e) => setContract(e.target.value)}>
             <option value="">{t('me.class.allContracts')}</option>
             <option value="UNSIGNED">{t('me.class.onlyUnsigned')}</option>

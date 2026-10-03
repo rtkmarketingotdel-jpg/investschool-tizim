@@ -68,7 +68,7 @@ function CampaignDrawer({ id, onClose }: { id: string | null; onClose: () => voi
           </div>
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-lg">{t('sms.history.messages')}</h3>
-            <div className="w-44">
+            <div className="w-[calc(50%-0.375rem)] sm:w-44">
               <Select aria-label={t('attendance.statusCol')} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
                 <option value="">{t('students.allStatuses')}</option>
                 {(['SENT', 'SIMULATED', 'FAILED', 'QUEUED'] as const).map((s) => <option key={s} value={s}>{t(`sms.messageStatus.${s}`)}</option>)}

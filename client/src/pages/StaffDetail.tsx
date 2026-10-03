@@ -49,7 +49,7 @@ export default function StaffDetail() {
             {!profile.completed && <Badge tone="warning">{t('staff.profileIncomplete')}</Badge>}
           </div>
         </div>
-        <div className="w-52"><Input type="month" aria-label={t('finance.payments.period')} value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></div>
+        <div className="w-[calc(50%-0.375rem)] sm:w-52"><Input type="month" aria-label={t('finance.payments.period')} value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></div>
       </Card>
 
       <div className="grid gap-4 xl:grid-cols-3">

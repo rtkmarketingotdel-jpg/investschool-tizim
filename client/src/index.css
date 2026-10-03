@@ -39,11 +39,18 @@
 }
 
 @layer base {
+  html {
+    font-size: 15px;
+  }
   body {
     @apply bg-bg font-sans font-normal text-text antialiased;
   }
   h1, h2, h3 {
     @apply font-medium;
+  }
+  /* grid children may shrink below their content width (long names must truncate, not widen the page) */
+  .grid > * {
+    min-width: 0;
   }
   :focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-canvas;

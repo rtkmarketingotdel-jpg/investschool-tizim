@@ -49,7 +49,7 @@ function CurrentMonth({ c }: { c: PayrollCurrent }) {
       </div>
       <div>
         <p className="text-sm text-text-muted">{t('me.salary.toReceive')}</p>
-        <p className="mt-1 text-4xl tabular-nums tracking-tight sm:text-5xl">{money(c.total)}</p>
+        <p className="mt-1 text-2xl tabular-nums tracking-tight sm:text-4xl">{money(c.total)}</p>
         {c.status === 'ESTIMATE' || c.status === 'DRAFT' ? <p className="mt-2 text-sm text-text-muted">{t('me.salary.estimateNote')}</p> : null}
       </div>
       <dl className="grid grid-cols-3 gap-3">

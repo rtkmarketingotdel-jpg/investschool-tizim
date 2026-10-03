@@ -19,7 +19,7 @@ function StatTile({ label, value, sub, children }: { label: string; value: strin
     <Card className="flex items-center justify-between gap-3 rounded-3xl p-4 sm:p-6">
       <div className="min-w-0">
         <p className="text-sm text-text-muted">{label}</p>
-        <p className="mt-1 text-2xl tabular-nums tracking-tight sm:text-3xl">{value}</p>
+        <p className="mt-1 text-xl tabular-nums tracking-tight sm:text-2xl">{value}</p>
         {sub && <p className="mt-1 text-sm text-text-muted">{sub}</p>}
       </div>
       {children}
@@ -100,9 +100,9 @@ export default function Classes() {
           ))}
         </div>
         {branchName.size > 1 && (
-          <div className="w-48"><Select aria-label={t('staff.branch')} value={branch} onChange={(e) => setBranch(e.target.value)}><option value="">{t('attendance.day.allBranches')}</option>{[...branchName].map(([id, name]) => <option key={id} value={id}>{name}</option>)}</Select></div>
+          <div className="w-[calc(50%-0.375rem)] sm:w-48"><Select aria-label={t('staff.branch')} value={branch} onChange={(e) => setBranch(e.target.value)}><option value="">{t('attendance.day.allBranches')}</option>{[...branchName].map(([id, name]) => <option key={id} value={id}>{name}</option>)}</Select></div>
         )}
-        <div className="w-44"><Select aria-label={t('students.sort')} value={sort} onChange={(e) => setSort(e.target.value as Sort)}><option value="grade">{t('classes.sort.grade')}</option><option value="fill">{t('classes.sort.fill')}</option><option value="free">{t('classes.sort.free')}</option></Select></div>
+        <div className="w-[calc(50%-0.375rem)] sm:w-44"><Select aria-label={t('students.sort')} value={sort} onChange={(e) => setSort(e.target.value as Sort)}><option value="grade">{t('classes.sort.grade')}</option><option value="fill">{t('classes.sort.fill')}</option><option value="free">{t('classes.sort.free')}</option></Select></div>
         <button type="button" aria-pressed={onlyFree} onClick={() => setOnlyFree((v) => !v)} className={cn('rounded-2xl border px-4 py-3 text-sm transition', onlyFree ? 'border-success/40 bg-success/10 text-success' : 'border-border text-text-muted hover:bg-surface-muted')}>
           {t('classes.onlyFree')}
         </button>

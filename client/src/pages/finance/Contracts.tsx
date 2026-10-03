@@ -89,7 +89,7 @@ function AllView({ onCreate }: { onCreate: () => void }) {
     <div>
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="min-w-64 flex-1"><Input aria-label={t('common.search')} placeholder={t('finance.contracts.search')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} icon={<Search className="h-4 w-4" />} /></div>
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Select aria-label={t('attendance.statusCol')} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
             <option value="">{t('students.allStatuses')}</option>
             {(['DRAFT', 'SENT', 'SIGNED', 'CANCELLED'] as const).map((s) => <option key={s} value={s}>{t(`finance.contracts.statuses.${s}`)}</option>)}

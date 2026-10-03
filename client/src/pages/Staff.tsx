@@ -96,20 +96,20 @@ export default function Staff() {
         <div className="min-w-64 flex-1">
           <Input aria-label={t('common.search')} placeholder={t('staff.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} icon={<Search className="h-4 w-4" />} />
         </div>
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Select aria-label={t('staff.role')} value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allRoles')}</option>
             {(['DIRECTOR', 'MANAGER', 'TEACHER'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
           </Select>
         </div>
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Select aria-label={t('staff.type')} value={type} onChange={(e) => { setType(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allTypes')}</option>
             <option value="teacher">{t('staff.teachersOnly')}</option>
             <option value="tutor">{t('staff.tutorsOnly')}</option>
           </Select>
         </div>
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Select aria-label={t('staff.statusCol')} value={active} onChange={(e) => { setActive(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allStatuses')}</option>
             <option value="true">{t('staff.active')}</option>

@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 
 export function Table({ className, ...rest }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+    <div className="overflow-x-auto rounded-2xl border border-border/70 bg-surface shadow-card">
       <table className={cn('w-full text-left text-[15px]', className)} {...rest} />
     </div>
   );
@@ -14,7 +14,7 @@ export const Thead = (p: HTMLAttributes<HTMLTableSectionElement>) => (
 );
 
 export const Th = ({ className, numeric, ...rest }: ThHTMLAttributes<HTMLTableCellElement> & { numeric?: boolean }) => (
-  <th className={cn('px-4 py-4 font-normal', numeric && 'whitespace-nowrap text-right', className)} {...rest} />
+  <th className={cn('px-4 py-3 font-normal', numeric && 'whitespace-nowrap text-right', className)} {...rest} />
 );
 
 export const Tr = ({ className, ...rest }: HTMLAttributes<HTMLTableRowElement>) => (
@@ -22,5 +22,5 @@ export const Tr = ({ className, ...rest }: HTMLAttributes<HTMLTableRowElement>) 
 );
 
 export const Td = ({ className, numeric, ...rest }: TdHTMLAttributes<HTMLTableCellElement> & { numeric?: boolean }) => (
-  <td className={cn('px-4 py-5', numeric && 'whitespace-nowrap text-right tabular-nums', className)} {...rest} />
+  <td className={cn('px-4 py-3.5', numeric && 'whitespace-nowrap text-right tabular-nums', className)} {...rest} />
 );

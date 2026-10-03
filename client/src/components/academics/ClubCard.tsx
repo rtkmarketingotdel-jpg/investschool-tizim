@@ -22,7 +22,7 @@ export function ClubCard({ club: c, onOpen, onEdit, onDelete }: Props) {
         <div className="flex items-center justify-between gap-3">
           <span className={cn('flex h-14 w-14 items-center justify-center rounded-2xl', tintFor(c.name))}><Icon className="h-7 w-7" /></span>
           <div className="text-right">
-            <p className="text-3xl tabular-nums tracking-tight">{c.members}</p>
+            <p className="text-2xl tabular-nums tracking-tight">{c.members}</p>
             <p className="flex items-center justify-end gap-1.5 text-xs text-text-muted"><Users className="h-3.5 w-3.5" /> {t('academics.membersShort')}</p>
           </div>
         </div>

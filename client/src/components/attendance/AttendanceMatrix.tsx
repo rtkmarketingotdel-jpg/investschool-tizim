@@ -24,7 +24,7 @@ export function AttendanceMatrix() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="w-52"><Input type="month" aria-label={t('finance.payments.period')} value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></div>
+        <div className="w-[calc(50%-0.375rem)] sm:w-52"><Input type="month" aria-label={t('finance.payments.period')} value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></div>
         <Button variant="secondary" onClick={() => void downloadCsv('/attendance/matrix/export', `attendance-${month}.csv`, { month })}><Download className="h-5 w-5" /> CSV</Button>
       </div>
       <div className="flex flex-wrap gap-4 text-sm text-text-muted">

@@ -18,7 +18,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(function Select(
         <select
           ref={ref}
           className={cn(
-            'w-full appearance-none rounded-xl border border-border bg-surface-muted px-4 py-3 pr-10 text-text',
+            'w-full appearance-none rounded-xl border border-border bg-surface-muted px-4 py-2.5 pr-10 text-text',
             error && 'border-red-500',
             className,
           )}

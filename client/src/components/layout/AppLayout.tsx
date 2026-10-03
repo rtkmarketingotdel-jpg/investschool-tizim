@@ -21,13 +21,13 @@ export function AppLayout() {
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
-    <div className="h-screen bg-bg md:p-4">
-    <div className="relative flex h-full overflow-hidden bg-canvas md:rounded-[32px] md:border md:border-border/60 md:shadow-shell">
+    <div className="h-[100dvh] bg-canvas">
+    <div className="relative flex h-full overflow-hidden">
       <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onNavigate={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <OfflineBanner />
         <Topbar onToggleSidebar={() => (isMobile() ? setMobileOpen((o) => !o) : setCollapsed((c) => !c))} />
-        <main className="relative flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+        <main className="relative flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 md:px-8 md:py-8">
           {/* Suspense lives inside the layout: while a page chunk loads, the sidebar and topbar stay on screen. */}
           <Suspense fallback={<div className="space-y-4"><Skeleton className="h-9 w-64" /><Skeleton className="h-64" /></div>}>
             <Outlet />

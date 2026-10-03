@@ -156,7 +156,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <Card className="rounded-3xl p-4 sm:p-6">
       <p className="text-sm text-text-muted">{label}</p>
-      <p className="mt-1 text-2xl tabular-nums tracking-tight sm:text-3xl">{value}</p>
+      <p className="mt-1 text-xl tabular-nums tracking-tight sm:text-2xl">{value}</p>
     </Card>
   );
 }

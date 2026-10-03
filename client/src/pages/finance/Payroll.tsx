@@ -54,7 +54,7 @@ export default function Payroll() {
         subtitle={t('finance.payroll.subtitle')}
         action={
           <div className="flex flex-wrap items-end gap-3">
-            <div className="w-52"><Input type="month" aria-label={t('finance.payments.period')} value={period} onChange={(e) => e.target.value && setPeriod(e.target.value)} /></div>
+            <div className="w-[calc(50%-0.375rem)] sm:w-52"><Input type="month" aria-label={t('finance.payments.period')} value={period} onChange={(e) => e.target.value && setPeriod(e.target.value)} /></div>
             <Button variant="secondary" onClick={() => void downloadCsv('/payroll/export', `payroll-${period}.csv`, { period })}><Download className="h-5 w-5" /> CSV</Button>
             <Button onClick={() => calc.mutate()} loading={calc.isPending}><Calculator className="h-5 w-5" /> {t('finance.payroll.calculate')}</Button>
           </div>

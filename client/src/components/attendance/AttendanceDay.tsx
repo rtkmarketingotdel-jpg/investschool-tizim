@@ -36,7 +36,7 @@ export function AttendanceDay() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end gap-3">
-        <div className="w-52"><Input type="date" aria-label={t('attendance.date')} value={date} max={todayLocal()} onChange={(e) => e.target.value && setDate(e.target.value)} /></div>
+        <div className="w-[calc(50%-0.375rem)] sm:w-52"><Input type="date" aria-label={t('attendance.date')} value={date} max={todayLocal()} onChange={(e) => e.target.value && setDate(e.target.value)} /></div>
         <div className="w-56">
           <Select aria-label={t('attendance.day.branch')} value={branchId} onChange={(e) => setBranchId(e.target.value)}>
             <option value="">{t('attendance.day.allBranches')}</option>

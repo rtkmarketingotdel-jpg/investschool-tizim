@@ -105,7 +105,7 @@ export function AttendanceSelf() {
         {(['onTime', 'late', 'absent'] as const).map((k) => (
           <Card key={k} className="p-4 md:p-6">
             <p className="text-sm text-text-muted">{t(`attendance.stats.${k}`)}</p>
-            <p className="mt-1 text-2xl font-medium tabular-nums md:text-3xl">{mine.data?.stats[k] ?? '–'}</p>
+            <p className="mt-1 text-xl font-medium tabular-nums md:text-2xl">{mine.data?.stats[k] ?? '–'}</p>
           </Card>
         ))}
       </div>

@@ -58,7 +58,7 @@ export default function Payments() {
       <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_2fr]">
         <Card>
           <p className="text-text-muted">{t('finance.payments.total')}</p>
-          <p className="mt-1 text-3xl font-medium tabular-nums">{formatMoney(list.data?.summary.total ?? 0, cur)}</p>
+          <p className="mt-1 text-2xl font-medium tabular-nums">{formatMoney(list.data?.summary.total ?? 0, cur)}</p>
           <p className="mt-1 text-sm text-text-muted">{t('finance.payments.count', { count: list.data?.summary.count ?? 0 })}</p>
         </Card>
         <Card>
@@ -89,17 +89,17 @@ export default function Payments() {
         </div>
         {preset === 'custom' && (
           <>
-            <div className="w-40"><Input type="date" aria-label={t('attendance.from')} value={custom.from} onChange={(e) => { setCustom({ ...custom, from: e.target.value }); setPage(1); }} /></div>
-            <div className="w-40"><Input type="date" aria-label={t('attendance.to')} value={custom.to} onChange={(e) => { setCustom({ ...custom, to: e.target.value }); setPage(1); }} /></div>
+            <div className="w-[calc(50%-0.375rem)] sm:w-40"><Input type="date" aria-label={t('attendance.from')} value={custom.from} onChange={(e) => { setCustom({ ...custom, from: e.target.value }); setPage(1); }} /></div>
+            <div className="w-[calc(50%-0.375rem)] sm:w-40"><Input type="date" aria-label={t('attendance.to')} value={custom.to} onChange={(e) => { setCustom({ ...custom, to: e.target.value }); setPage(1); }} /></div>
           </>
         )}
-        <div className="w-44">
+        <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Select aria-label={t('finance.payments.method')} value={method} onChange={(e) => { setMethod(e.target.value); setPage(1); }}>
             <option value="">{t('finance.payments.allMethods')}</option>
             {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
           </Select>
         </div>
-        <div className="w-40">
+        <div className="w-[calc(50%-0.375rem)] sm:w-40">
           <Select aria-label={t('students.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setPage(1); }}>
             <option value="">{t('students.allClasses')}</option>
             {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}

@@ -83,7 +83,7 @@ export default function Students() {
             icon={<Search className="h-4 w-4" />}
           />
         </div>
-        <div className="w-48">
+        <div className="w-[calc(50%-0.375rem)] sm:w-48">
           <Select aria-label={t('students.status')} value={status} onChange={(e) => setParam('status', e.target.value)}>
             <option value="">{t('students.allStatuses')}</option>
             {(['ACTIVE', 'TRIAL', 'LEFT'] as const).map((s) => (
@@ -91,7 +91,7 @@ export default function Students() {
             ))}
           </Select>
         </div>
-        <div className="w-36">
+        <div className="w-[calc(50%-0.375rem)] sm:w-36">
           <Select aria-label={t('students.class')} value={classId} onChange={(e) => setParam('classId', e.target.value)}>
             <option value="">{t('students.allClasses')}</option>
             {classes.data?.map((c) => (
@@ -99,7 +99,7 @@ export default function Students() {
             ))}
           </Select>
         </div>
-        <div className="w-48">
+        <div className="w-[calc(50%-0.375rem)] sm:w-48">
           <Select aria-label={t('students.boarding')} value={boarding} onChange={(e) => setParam('boarding', e.target.value)}>
             <option value="">{t('students.boardingAny')}</option>
             <option value="true">{t('students.boardingYes')}</option>
@@ -107,14 +107,14 @@ export default function Students() {
           </Select>
         </div>
         {seesFinance && (
-          <div className="w-48">
+          <div className="w-[calc(50%-0.375rem)] sm:w-48">
             <Select aria-label={t('students.debtorsFilter')} value={debtor} onChange={(e) => setParam('debtor', e.target.value)}>
               <option value="">{t('students.debtAny')}</option>
               <option value="true">{t('students.debtOnly')}</option>
             </Select>
           </div>
         )}
-        <div className="w-40">
+        <div className="w-[calc(50%-0.375rem)] sm:w-40">
           <Select aria-label={t('students.sort')} value={sort} onChange={(e) => setParam('sort', e.target.value)}>
             <option value="name">{t('students.sortName')}</option>
             <option value="date">{t('students.sortDate')}</option>
