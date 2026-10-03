@@ -147,7 +147,7 @@ export function LiveMap({ branches, points }: Props) {
   }, [focus]);
 
   return (
-    <div ref={wrap} className={expanded ? 'fixed inset-0 z-[80] flex flex-col gap-3 bg-bg p-3' : 'relative space-y-3'}>
+    <div ref={wrap} className={expanded ? 'fixed inset-0 z-[80] flex flex-col gap-3 bg-canvas p-3' : 'relative space-y-3'}>
       {branches.length > 1 && (
         <div className="flex flex-wrap gap-2" role="group" aria-label={t('attendance.day.branch')}>
           {[{ id: 'all', name: t('attendance.day.allBranches') }, ...branches].map((b) => (

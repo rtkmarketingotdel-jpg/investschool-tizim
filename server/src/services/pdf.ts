@@ -119,7 +119,7 @@ export function contractPdf(contract: Pick<Contract, 'number' | 'language' | 'si
   return render({
     pageSize: 'A4', pageMargins: [50, 50, 50, 50], content,
     styles: {
-      brand: { fontSize: 11, color: '#2563EB', bold: true, alignment: 'center' },
+      brand: { fontSize: 11, color: '#285EB5', bold: true, alignment: 'center' },
       title: { fontSize: 14, bold: true, alignment: 'center', margin: [0, 6, 0, 12] },
       h: { fontSize: 11.5, bold: true },
     },
@@ -137,7 +137,7 @@ export function receiptPdf(payment: Payment, studentName: string, className: str
   return render({
     pageSize: 'A6', pageMargins: [20, 20, 20, 20],
     content: [
-      { text: pdfText(brand.name), fontSize: 12, bold: true, color: '#2563EB', alignment: 'center' },
+      { text: pdfText(brand.name), fontSize: 12, bold: true, color: '#285EB5', alignment: 'center' },
       { text: pdfText(`${brand.address} · ${brand.phone}`), fontSize: 8, color: '#64748B', alignment: 'center', margin: [0, 2, 0, 8] },
       { text: pdfText(`${l.title} № ${payment.id.replace(/\D/g, '').padStart(6, '0')}`), bold: true, alignment: 'center', margin: [0, 0, 0, 2] },
       { text: fmtDateTime(payment.paidAt), alignment: 'center', fontSize: 9, color: '#64748B', margin: [0, 0, 0, 10] },

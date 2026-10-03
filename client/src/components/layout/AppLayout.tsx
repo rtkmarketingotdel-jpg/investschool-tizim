@@ -21,7 +21,8 @@ export function AppLayout() {
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
-    <div className="relative flex h-screen overflow-hidden">
+    <div className="h-screen bg-bg md:p-4">
+    <div className="relative flex h-full overflow-hidden bg-canvas md:rounded-[32px] md:border md:border-border/60 md:shadow-shell">
       <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onNavigate={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <OfflineBanner />
@@ -33,6 +34,7 @@ export function AppLayout() {
           </Suspense>
         </main>
       </div>
+    </div>
     </div>
   );
 }

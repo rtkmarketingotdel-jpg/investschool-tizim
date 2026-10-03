@@ -19,7 +19,7 @@ function pwa(env: Record<string, string>): Plugin {
     orientation: 'any',
     lang: 'uz',
     background_color: '#FFFFFF',
-    theme_color: '#2563EB',
+    theme_color: '#285EB5',
     icons: [
       { src: '/brand/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/brand/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },

@@ -44,7 +44,7 @@ export function GlobalSearch() {
         onChange={(e) => { setText(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onKeyDown={(e) => e.key === 'Enter' && text.trim() && go(`/students?q=${encodeURIComponent(text.trim())}`)}
-        className="w-full rounded-xl border-0 bg-surface-muted py-3 pl-11 pr-4 placeholder:text-text-muted"
+        className="w-full rounded-full border border-border bg-surface py-3 pl-11 pr-4 placeholder:text-text-muted"
       />
       {open && q.length >= 2 && (
         <div className="absolute left-0 right-0 z-40 mt-2 max-h-96 overflow-y-auto rounded-xl border border-border bg-surface p-2 shadow-lg">

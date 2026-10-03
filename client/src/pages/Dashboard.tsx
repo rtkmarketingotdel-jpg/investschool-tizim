@@ -15,15 +15,15 @@ import { Avatar, Badge, Card, EmptyState, Skeleton, type BadgeTone } from '@/com
 
 function Kpi({ icon: Icon, title, value, sub, children }: { icon: LucideIcon; title: string; value: string; sub?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <Card>
-      <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-          <Icon className="h-5 w-5" />
-        </span>
+    <Card className="p-5">
+      <div className="flex items-start justify-between gap-3">
         <p className="text-text-muted">{title}</p>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+          <Icon className="h-[18px] w-[18px]" />
+        </span>
       </div>
-      <p className="mt-4 whitespace-nowrap text-xl font-medium tabular-nums 2xl:text-2xl">{value}</p>
-      {sub && <div className="mt-1 text-sm text-text-muted">{sub}</div>}
+      <p className="mt-5 whitespace-nowrap text-2xl font-normal leading-none tabular-nums">{value}</p>
+      {sub && <div className="mt-3 border-t border-border/60 pt-3 text-sm text-text-muted">{sub}</div>}
       {children}
     </Card>
   );

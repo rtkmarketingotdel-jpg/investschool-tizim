@@ -8,8 +8,8 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const styles: Record<Variant, string> = {
-  primary: 'bg-primary text-white shadow-md shadow-primary/25 hover:opacity-90',
-  secondary: 'border border-border bg-surface text-text hover:bg-surface-muted',
+  primary: 'bg-gradient-to-b from-primary-bright to-primary text-white shadow-md shadow-primary/30 hover:from-primary hover:to-primary-deep',
+  secondary: 'border border-border bg-surface text-text shadow-sm hover:bg-surface-muted',
   ghost: 'text-text-muted hover:bg-surface-muted',
   danger: 'bg-red-600 text-white hover:bg-red-700',
 };
@@ -37,7 +37,7 @@ export function IconButton({ className, ...rest }: ButtonHTMLAttributes<HTMLButt
   return (
     <button
       className={cn(
-        'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-text-muted transition hover:bg-surface-muted',
+        'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-text-muted transition hover:bg-surface-muted',
         className,
       )}
       {...rest}

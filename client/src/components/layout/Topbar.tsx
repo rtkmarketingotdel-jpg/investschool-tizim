@@ -30,7 +30,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 
   if (!user) return null;
   return (
-    <header className="flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-border bg-surface px-4 md:px-8">
+    <header className="flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-border/70 bg-surface px-4 md:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <IconButton aria-label={t('topbar.toggleSidebar')} onClick={onToggleSidebar}>
           <Menu className="h-5 w-5" />

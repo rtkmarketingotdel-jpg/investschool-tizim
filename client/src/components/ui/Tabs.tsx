@@ -8,7 +8,7 @@ interface Props<T extends string> {
 
 export function Tabs<T extends string>({ tabs, value, onChange }: Props<T>) {
   return (
-    <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-border">
+    <div role="tablist" className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-2xl bg-surface-muted p-1 ring-1 ring-border/60">
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -16,8 +16,8 @@ export function Tabs<T extends string>({ tabs, value, onChange }: Props<T>) {
           aria-selected={tab.id === value}
           onClick={() => onChange(tab.id)}
           className={cn(
-            '-mb-px whitespace-nowrap border-b-2 px-4 py-3 font-medium transition',
-            tab.id === value ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text',
+            'whitespace-nowrap rounded-xl px-5 py-2.5 transition',
+            tab.id === value ? 'bg-surface text-primary shadow-card' : 'text-text-muted hover:text-text',
           )}
         >
           {tab.label}

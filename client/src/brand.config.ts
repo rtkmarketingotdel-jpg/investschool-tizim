@@ -1,7 +1,7 @@
 export const brand = {
-  name: import.meta.env.VITE_BRAND_NAME ?? 'Gorizont School',
-  shortName: import.meta.env.VITE_BRAND_SHORT ?? 'Gorizont',
+  name: import.meta.env.VITE_BRAND_NAME ?? 'Invest School',
+  shortName: import.meta.env.VITE_BRAND_SHORT ?? 'Invest',
   logo: '/brand/logo.svg',
   favicon: '/brand/favicon.svg',
-  primary: '#2563EB',
+  primary: '#285EB5',
 };

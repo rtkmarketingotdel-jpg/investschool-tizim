@@ -26,17 +26,17 @@ export function Sidebar({ collapsed, mobileOpen, onNavigate }: Props) {
       {mobileOpen && <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={onNavigate} />}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-surface transition-all md:static md:translate-x-0',
+          'fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border/70 bg-surface transition-all md:static md:translate-x-0',
           collapsed ? 'md:w-[72px]' : 'md:w-[280px]',
           'w-[280px]',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border px-4">
+        <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border/70 px-5">
           <img src={brand.logo} alt="" className="h-10 w-10 shrink-0 rounded-xl" />
           <span className={cn('truncate text-lg font-medium', collapsed && 'md:hidden')}>{brand.name}</span>
         </div>
-        <nav className="flex-1 space-y-6 overflow-y-auto p-4">
+        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
           {/* The director does not need a personal cabinet: own attendance is on the Attendance page, payroll is in Finance. */}
           {user.role !== 'DIRECTOR' && (
             <NavItemLink collapsed={collapsed} onNavigate={onNavigate} to="/me" label={t('nav.me')} icon={UserCircle} />
@@ -85,8 +85,10 @@ function NavItemLink({
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 rounded-xl px-3 py-3 font-medium transition',
-          isActive ? 'bg-primary-soft text-primary' : 'text-text-muted hover:bg-surface-muted hover:text-text',
+          'relative flex items-center gap-3 rounded-2xl px-4 py-3 transition',
+          isActive
+            ? 'bg-primary-soft text-primary before:absolute before:-left-3 before:top-2 before:bottom-2 before:w-1 before:rounded-r-full before:bg-primary'
+            : 'text-text-muted hover:bg-surface-muted hover:text-text',
           collapsed && 'md:justify-center',
         )
       }

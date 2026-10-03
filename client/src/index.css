@@ -3,28 +3,35 @@
 @tailwind utilities;
 
 :root {
-  --bg: 255 255 255;
+  /* Invest School palette: primary #285EB5, bright #306FCE, deep #22519D, navy #1A4081, light gray #D5E1E9 */
+  --bg: 234 240 247;
+  --canvas: 245 248 252;
   --surface: 255 255 255;
-  --surface-muted: 248 250 252;
-  --border: 229 231 235;
-  --text: 15 23 42;
-  --text-muted: 100 116 139;
-  --primary: 37 99 235;
-  --primary-soft: 239 244 255;
+  --surface-muted: 243 247 251;
+  --border: 213 225 233;
+  --text: 26 64 129;
+  --text-muted: 107 128 156;
+  --primary: 40 94 181;
+  --primary-bright: 48 111 206;
+  --primary-deep: 34 81 157;
+  --primary-soft: 232 240 252;
   --success: 22 163 74;
   --warning: 217 119 6;
   --danger: 220 38 38;
   color-scheme: light;
 }
 .dark {
-  --bg: 11 18 32;
-  --surface: 17 24 39;
-  --surface-muted: 31 41 55;
-  --border: 31 41 55;
-  --text: 241 245 249;
-  --text-muted: 148 163 184;
-  --primary: 59 130 246;
-  --primary-soft: 30 41 59;
+  --bg: 8 14 26;
+  --canvas: 11 18 32;
+  --surface: 17 26 43;
+  --surface-muted: 27 39 60;
+  --border: 36 51 77;
+  --text: 232 239 250;
+  --text-muted: 143 163 192;
+  --primary: 86 142 224;
+  --primary-bright: 110 160 238;
+  --primary-deep: 60 112 196;
+  --primary-soft: 27 42 70;
   --success: 74 222 128;
   --warning: 251 191 36;
   --danger: 248 113 113;
@@ -39,7 +46,7 @@
     @apply font-medium;
   }
   :focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-bg;
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-canvas;
   }
 }
 
