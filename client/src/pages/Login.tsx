@@ -9,9 +9,8 @@ import { Button, Input } from '@/components/ui';
 
 const DEMO = [
   { role: 'DIRECTOR', phone: '+998900000001' },
-  { role: 'ACCOUNTANT', phone: '+998900000002' },
-  { role: 'ADMIN', phone: '+998900000003' },
-  { role: 'STAFF', phone: '+998900000010' },
+  { role: 'MANAGER', phone: '+998900000002' },
+  { role: 'TEACHER', phone: '+998900000010' },
 ];
 
 export default function Login() {

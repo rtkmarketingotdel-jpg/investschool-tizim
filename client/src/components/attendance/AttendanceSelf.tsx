@@ -71,29 +71,25 @@ export function AttendanceSelf() {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <Button
-            className="flex-1 py-4 text-lg md:flex-none md:px-10"
-            disabled={!!rec?.checkInAt || today.isLoading}
-            onClick={() => setLocating('in')}
-          >
-            <LogIn className="h-5 w-5" /> {t('attendance.checkIn')}
-          </Button>
-          <Button
-            variant="secondary"
-            className="flex-1 py-4 text-lg md:flex-none md:px-10"
-            disabled={!rec?.checkInAt || done}
-            onClick={() => setLocating('out')}
-          >
-            <LogOut className="h-5 w-5" /> {t('attendance.checkOut')}
-          </Button>
+        <div className="w-full md:w-auto">
+          {!rec?.checkInAt ? (
+            <Button className="w-full py-4 text-lg md:px-12" disabled={today.isLoading} onClick={() => setLocating('in')}>
+              <LogIn className="h-5 w-5" /> {t('attendance.checkIn')}
+            </Button>
+          ) : !done ? (
+            <Button variant="secondary" className="w-full py-4 text-lg md:px-12" onClick={() => setLocating('out')}>
+              <LogOut className="h-5 w-5" /> {t('attendance.checkOut')}
+            </Button>
+          ) : (
+            <p className="rounded-xl bg-surface-muted px-6 py-4 text-center text-text-muted">{t('attendance.dayDone')}</p>
+          )}
         </div>
       </Card>
 
       <LocationStep
         open={locating !== null}
         branches={today.data?.branches ?? []}
-        geoEnforced={today.data?.settings.geoEnforced ?? false}
+        geoEnforced
         maxAccuracyM={today.data?.settings.maxGpsAccuracyM ?? 100}
         onCancel={() => setLocating(null)}
         onConfirm={(f) => { setFix(f); setMode(locating); setLocating(null); }}

@@ -25,9 +25,8 @@
   },
   "roles": {
     "DIRECTOR": "Direktor",
-    "ACCOUNTANT": "Buxgalter",
-    "ADMIN": "Administrator",
-    "STAFF": "Xodim"
+    "MANAGER": "Bosh menejer",
+    "TEACHER": "Oʻqituvchi"
   },
   "auth": {
     "loginTitle": "Tizimga kirish",
@@ -91,7 +90,7 @@
     "ATTENDANCE_NOT_CHECKED_IN": "Avval “Keldim” tugmasini bosing",
     "ATTENDANCE_NOT_WORKDAY": "Bugun ish kuni emas",
     "ATTENDANCE_LOW_ACCURACY": "Joylashuv aniqligi past. Ochiq joyga chiqib qayta urinib koʻring",
-    "ATTENDANCE_OUT_OF_RADIUS": "Siz “{{branch}}” filialidan {{distance}} m uzoqdasiz (ruxsat: {{radius}} m)",
+    "ATTENDANCE_OUT_OF_RADIUS": "Siz maktab hududida emassiz: “{{branch}}” filialidan {{distance}} m uzoqdasiz (ruxsat: {{radius}} m). Davomat qabul qilinmadi",
     "ATTENDANCE_BAD_TIMESTAMP": "Qurilma vaqti notoʻgʻri. Vaqtni tekshirib qayta urinib koʻring",
     "ATTENDANCE_INVALID_PHOTO": "Rasm notoʻgʻri, qayta oling",
     "ATTENDANCE_PHOTO_TOO_LARGE": "Rasm hajmi katta",
@@ -226,7 +225,8 @@
     "selfieNote": "Rasm tizimda saqlanmaydi: u faqat direktorga Telegram orqali yuboriladi.",
     "selfieSent": "Rasm direktorga yuborildi",
     "selfieNotSent": "Rasm direktorga yuborilmadi",
-    "selfieMissing": "Rasm yuborilmagan"
+    "selfieMissing": "Rasm yuborilmagan",
+    "dayDone": "Bugungi davomat yakunlandi"
   },
   "students": {
     "subtitle": "Barcha oʻquvchilar · Jami: {{count}}",

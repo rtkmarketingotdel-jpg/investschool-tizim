@@ -15,7 +15,7 @@ import { StatusDialog } from './StatusDialog';
 export function AttendanceDay() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
+  const canEdit = user?.role !== 'TEACHER';
   const [date, setDate] = useState(todayLocal());
   const [branchId, setBranchId] = useState('');
   const [editing, setEditing] = useState<AttendanceRecord | null>(null);

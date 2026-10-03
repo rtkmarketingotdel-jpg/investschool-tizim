@@ -12,7 +12,7 @@ import { deliverSms, smsBalance, smsStatus } from '../services/sms.js';
 import { createCampaign, prepare, retryFailed, runDebtAuto, usesFinance, type Audience } from '../services/smsCampaigns.js';
 
 export const smsRouter = Router();
-smsRouter.use(requireAuth, requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'));
+smsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
 
 const CATEGORIES = ['DEBT', 'GREETING', 'WARNING', 'OTHER'] as const;
 const phone = z.string().min(1).max(30); // bad numbers are counted as "skipped" by the preview, not rejected

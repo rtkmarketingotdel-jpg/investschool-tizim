@@ -17,7 +17,7 @@ import { PhoneInput } from '../PhoneInput';
 const schema = z.object({
   fullName: z.string().trim().min(3, 'errors.required'),
   phone: z.string().regex(/^\+998\d{9}$/, 'errors.phone'),
-  role: z.enum(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF']),
+  role: z.enum(['DIRECTOR', 'MANAGER', 'TEACHER']),
   position: z.string().trim(),
   subject: z.string(),
   customSubject: z.string(),
@@ -28,7 +28,7 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-const empty: FormValues = { fullName: '', phone: '', role: 'STAFF', position: '', subject: '', customSubject: '', homeroomClassId: '', branchId: '', baseSalary: 4_000_000, isActive: true };
+const empty: FormValues = { fullName: '', phone: '', role: 'TEACHER', position: '', subject: '', customSubject: '', homeroomClassId: '', branchId: '', baseSalary: 4_000_000, isActive: true };
 const OTHER = '__other';
 
 interface Props {
@@ -45,7 +45,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const { user } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
-  const roles: Role[] = user?.role === 'DIRECTOR' ? ['STAFF', 'ADMIN', 'ACCOUNTANT', 'DIRECTOR'] : ['STAFF', 'ADMIN'];
+  const roles: Role[] = user?.role === 'DIRECTOR' ? ['TEACHER', 'MANAGER', 'DIRECTOR'] : ['TEACHER'];
   // The employee type can be changed at any time (e.g. a plain employee becomes a teacher): the cabinet follows it.
   const [type, setType] = useState<'teacher' | 'tutor' | 'staff'>(kind);
   const isTeacher = type === 'teacher';
@@ -100,7 +100,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   });
 
   const err = (k: keyof FormValues) => (errors[k]?.message ? t(errors[k]!.message as string) : undefined);
-  const locked = !!member && user?.role !== 'DIRECTOR' && (member.role === 'DIRECTOR' || member.role === 'ACCOUNTANT');
+  const locked = !!member && user?.role !== 'DIRECTOR' && (member.role === 'DIRECTOR' || member.role === 'MANAGER');
   const needsSubject = hasSubject && (!subject || (subject === OTHER && !watch('customSubject').trim()));
   const needsPosition = !hasSubject && !watch('position').trim();
   const title = member ? t('staff.edit') : t(isTeacher ? 'staff.addTeacher' : isTutor ? 'staff.addTutor' : 'staff.add');

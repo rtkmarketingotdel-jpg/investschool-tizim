@@ -8,7 +8,7 @@ import { studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 
 export const classesRouter = Router();
-classesRouter.use(requireAuth, requireRole('DIRECTOR', 'ACCOUNTANT', 'ADMIN'));
+classesRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
 
 const classSchema = z.object({
   name: z.string().trim().min(1).max(20),
@@ -42,7 +42,7 @@ async function assertTeacher(teacherId: string | null) {
   if (teacherId && !(await userRepo.findById(teacherId))) throw new ApiError(400, 'VALIDATION_ERROR');
 }
 
-classesRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(classSchema), async (req, res, next) => {
+classesRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(classSchema), async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof classSchema>;
     if (await classRepo.findByName(body.name)) throw new ApiError(409, 'CLASS_NAME_EXISTS');
@@ -53,7 +53,7 @@ classesRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(classSche
   }
 });
 
-classesRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(classSchema), async (req, res, next) => {
+classesRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(classSchema), async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof classSchema>;
     const clash = await classRepo.findByName(body.name);

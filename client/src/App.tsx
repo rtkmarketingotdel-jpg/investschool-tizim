@@ -50,11 +50,11 @@ const Contracts = lazy(loaders.Contracts);
 const ContractClass = lazy(loaders.ContractClass);
 const PublicContract = lazy(loaders.PublicContract);
 
-const MGMT = ['DIRECTOR', 'ACCOUNTANT', 'ADMIN'] as const;
+const MGMT = ['DIRECTOR', 'MANAGER'] as const;
 
 function HomeRedirect() {
   const { user } = useAuth();
-  if (user?.role === 'STAFF') return <Navigate to={homeFor('STAFF')} replace />;
+  if (user?.role === 'TEACHER') return <Navigate to={homeFor('TEACHER')} replace />;
   return <Dashboard />;
 }
 
@@ -89,14 +89,14 @@ export default function App() {
             <Route path="/finance/contracts" element={<Contracts />} />
             <Route path="/finance/contracts/class/:classId" element={<ContractClass />} />
           </Route>
-          <Route element={<RoleGuard roles={['DIRECTOR', 'ADMIN']} />}>
+          <Route element={<RoleGuard roles={['DIRECTOR', 'MANAGER']} />}>
             <Route path="/classes" element={<Classes />} />
             <Route path="/academics" element={<Academics />} />
             <Route path="/staff" element={<Staff />} />
             <Route path="/staff/:id" element={<StaffDetail />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
-          <Route element={<RoleGuard roles={['DIRECTOR', 'ACCOUNTANT']} />}>
+          <Route element={<RoleGuard roles={['DIRECTOR', 'MANAGER']} />}>
             <Route path="/finance/payments" element={<Payments />} />
             <Route path="/finance/debtors" element={<Debtors />} />
             <Route path="/finance/payroll" element={<Payroll />} />

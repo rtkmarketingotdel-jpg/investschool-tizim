@@ -35,7 +35,7 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         <IconButton aria-label={t('topbar.toggleSidebar')} onClick={onToggleSidebar}>
           <Menu className="h-5 w-5" />
         </IconButton>
-        {user.role !== 'STAFF' && <GlobalSearch />}
+        {user.role !== 'TEACHER' && <GlobalSearch />}
       </div>
 
       <div className="flex items-center gap-2">

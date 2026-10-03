@@ -16,7 +16,7 @@ import { env } from '../env.js';
 import type { Contract } from '../data/types.js';
 
 export const contractsRouter = Router();
-contractsRouter.use(requireAuth, requireRole('DIRECTOR', 'ACCOUNTANT', 'ADMIN'));
+contractsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
 
 const dateRe = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -114,7 +114,7 @@ contractsRouter.get('/templates', async (_req, res, next) => {
     next(e);
   }
 });
-contractsRouter.post('/templates', requireRole('DIRECTOR', 'ADMIN'), validateBody(templateSchema), async (req, res, next) => {
+contractsRouter.post('/templates', requireRole('DIRECTOR', 'MANAGER'), validateBody(templateSchema), async (req, res, next) => {
   try {
     const rec = await templateRepo.create(req.body);
     await audit(req.user!.id, 'template.create', 'template', rec.id);
@@ -123,7 +123,7 @@ contractsRouter.post('/templates', requireRole('DIRECTOR', 'ADMIN'), validateBod
     next(e);
   }
 });
-contractsRouter.put('/templates/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(templateSchema), async (req, res, next) => {
+contractsRouter.put('/templates/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(templateSchema), async (req, res, next) => {
   try {
     const rec = await templateRepo.update(req.params.id!, req.body);
     if (!rec) throw new ApiError(404, 'NOT_FOUND');
@@ -133,7 +133,7 @@ contractsRouter.put('/templates/:id', requireRole('DIRECTOR', 'ADMIN'), validate
     next(e);
   }
 });
-contractsRouter.delete('/templates/:id', requireRole('DIRECTOR', 'ADMIN'), async (req, res, next) => {
+contractsRouter.delete('/templates/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const t = await templateRepo.findById(req.params.id!);
     if (!t) throw new ApiError(404, 'NOT_FOUND');

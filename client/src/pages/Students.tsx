@@ -21,8 +21,8 @@ const LIMIT = 20;
 export default function Students() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
-  const seesFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
+  const canEdit = user?.role !== 'TEACHER';
+  const seesFinance = user?.role !== 'TEACHER';
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get('q') ?? '');
   const q = useDebounce(search);

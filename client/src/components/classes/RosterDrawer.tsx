@@ -21,7 +21,7 @@ interface Props {
 export function RosterDrawer({ cls, branchName, canEdit, onClose, onEdit }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const seesFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
+  const seesFinance = user?.role !== 'TEACHER';
   const list = useQuery({
     queryKey: ['students', 'roster', cls?.id],
     queryFn: () => schoolApi.students({ classId: cls!.id, page: 1, limit: 100, sort: 'name' }),

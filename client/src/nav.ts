@@ -16,7 +16,7 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-const ALL_MGMT: Role[] = ['DIRECTOR', 'ACCOUNTANT', 'ADMIN'];
+const ALL_MGMT: Role[] = ['DIRECTOR', 'MANAGER'];
 
 export const navGroups: NavGroup[] = [
   {
@@ -27,32 +27,32 @@ export const navGroups: NavGroup[] = [
     titleKey: 'nav.students',
     items: [
       { to: '/students', labelKey: 'nav.studentsList', icon: GraduationCap, roles: ALL_MGMT },
-      { to: '/classes', labelKey: 'nav.classes', icon: School, roles: ['DIRECTOR', 'ADMIN'] },
-      { to: '/academics', labelKey: 'nav.academics', icon: BookOpen, roles: ['DIRECTOR', 'ADMIN'] },
+      { to: '/classes', labelKey: 'nav.classes', icon: School, roles: ['DIRECTOR', 'MANAGER'] },
+      { to: '/academics', labelKey: 'nav.academics', icon: BookOpen, roles: ['DIRECTOR', 'MANAGER'] },
     ],
   },
   {
     titleKey: 'nav.staff',
     items: [
-      { to: '/staff', labelKey: 'nav.staffList', icon: Users, roles: ['DIRECTOR', 'ADMIN'] },
-      { to: '/attendance', labelKey: 'nav.attendance', icon: CalendarCheck, roles: [...ALL_MGMT, 'STAFF'] },
+      { to: '/staff', labelKey: 'nav.staffList', icon: Users, roles: ['DIRECTOR', 'MANAGER'] },
+      { to: '/attendance', labelKey: 'nav.attendance', icon: CalendarCheck, roles: [...ALL_MGMT, 'TEACHER'] },
     ],
   },
   {
     titleKey: 'nav.finance',
     items: [
-      { to: '/finance/payments', labelKey: 'nav.payments', icon: Wallet, roles: ['DIRECTOR', 'ACCOUNTANT'] },
-      { to: '/finance/debtors', labelKey: 'nav.debtors', icon: AlertCircle, roles: ['DIRECTOR', 'ACCOUNTANT'] },
-      { to: '/finance/payroll', labelKey: 'nav.payroll', icon: Banknote, roles: ['DIRECTOR', 'ACCOUNTANT'] },
+      { to: '/finance/payments', labelKey: 'nav.payments', icon: Wallet, roles: ['DIRECTOR', 'MANAGER'] },
+      { to: '/finance/debtors', labelKey: 'nav.debtors', icon: AlertCircle, roles: ['DIRECTOR', 'MANAGER'] },
+      { to: '/finance/payroll', labelKey: 'nav.payroll', icon: Banknote, roles: ['DIRECTOR', 'MANAGER'] },
       { to: '/finance/contracts', labelKey: 'nav.contracts', icon: FileSignature, roles: ALL_MGMT },
     ],
   },
   {
     titleKey: 'nav.communication',
-    items: [{ to: '/sms', labelKey: 'nav.sms', icon: MessageSquare, roles: ['DIRECTOR', 'ACCOUNTANT', 'ADMIN'] }],
+    items: [{ to: '/sms', labelKey: 'nav.sms', icon: MessageSquare, roles: ['DIRECTOR', 'MANAGER'] }],
   },
   {
     titleKey: 'nav.management',
-    items: [{ to: '/settings', labelKey: 'nav.settings', icon: Settings, roles: ['DIRECTOR', 'ADMIN'] }],
+    items: [{ to: '/settings', labelKey: 'nav.settings', icon: Settings, roles: ['DIRECTOR', 'MANAGER'] }],
   },
 ];

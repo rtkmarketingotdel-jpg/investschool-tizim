@@ -9,7 +9,7 @@ import { userRepo } from '../repositories/userRepo.js';
 
 export const catalogRouter = Router();
 catalogRouter.use(requireAuth);
-const manage = requireRole('DIRECTOR', 'ADMIN');
+const manage = requireRole('DIRECTOR', 'MANAGER');
 
 // ---------- subjects (fanlar) ----------
 const subjectSchema = z.object({ name: z.string().trim().min(2).max(60) });

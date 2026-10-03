@@ -14,7 +14,7 @@ export default function Attendance() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('day');
-  const isManager = user?.role !== 'STAFF';
+  const isManager = user?.role !== 'TEACHER';
   // The director supervises everyone else and does not check in himself.
   const tracked = user?.role !== 'DIRECTOR';
   return (

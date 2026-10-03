@@ -21,13 +21,13 @@ export default function StudentDetail() {
   const { id = '' } = useParams();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
+  const canEdit = user?.role !== 'TEACHER';
   const [tab, setTab] = useState<Tab>('info');
   const [editing, setEditing] = useState(false);
   const [paying, setPaying] = useState(false);
   const [contracting, setContracting] = useState(false);
-  const seesFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
-  const canContract = seesFinance || user?.role === 'ADMIN';
+  const seesFinance = user?.role !== 'TEACHER';
+  const canContract = seesFinance;
   const { data: s, isLoading, isError } = useQuery({ queryKey: ['student', id], queryFn: () => schoolApi.student(id) });
   const finance = useQuery({ queryKey: ['student', id, 'finance'], queryFn: () => financeApi.studentFinance(id), enabled: seesFinance && tab === 'payments' });
   const contracts = useQuery({ queryKey: ['contracts', 'student', id], queryFn: () => financeApi.contracts({ studentId: id, page: 1, limit: 50 }), enabled: canContract && tab === 'contracts' });

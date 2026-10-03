@@ -35,7 +35,7 @@ export const auditLogs: AuditLog[] = [];
 // ---- charges and payments (deterministic; enrolment spread gives a growth trend) ----
 const METHODS: PaymentMethod[] = ['CASH', 'CARD', 'CLICK', 'PAYME', 'TRANSFER'];
 const startWeights = [0.55, 0.67, 0.77, 0.85, 0.93, 1];
-const accountant = users.find((u) => u.role === 'ACCOUNTANT')!;
+const accountant = users.find((u) => u.role === 'MANAGER')!;
 
 for (const s of students.filter((x) => x.status === 'ACTIVE')) {
   const r0 = rnd();
@@ -122,7 +122,7 @@ for (const s of students.filter((x) => x.status === 'ACTIVE')) {
 export const nextContractSeq = () => seq++;
 
 // ---- notifications for management ----
-for (const u of users.filter((x) => x.role !== 'STAFF')) {
+for (const u of users.filter((x) => x.role !== 'TEACHER')) {
   notifications.push({
     id: id('n'), userId: u.id, title: 'notif.payrollPending.title', body: 'notif.payrollPending.body',
     params: { period: currentPeriod }, link: '/finance/payroll', isRead: false, createdAt: new Date(),

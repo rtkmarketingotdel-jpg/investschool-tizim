@@ -30,7 +30,7 @@ function StatTile({ label, value, sub, children }: { label: string; value: strin
 export default function Classes() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
+  const canEdit = user?.role !== 'TEACHER';
   const { data, isLoading, isError } = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
   const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches });
   const branchName = useMemo(() => new Map((branches.data ?? []).map((b) => [b.id, b.name])), [branches.data]);

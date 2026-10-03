@@ -25,9 +25,8 @@
   },
   "roles": {
     "DIRECTOR": "Директор",
-    "ACCOUNTANT": "Бухгалтер",
-    "ADMIN": "Администратор",
-    "STAFF": "Сотрудник"
+    "MANAGER": "Главный менеджер",
+    "TEACHER": "Учитель"
   },
   "auth": {
     "loginTitle": "Вход в систему",
@@ -91,7 +90,7 @@
     "ATTENDANCE_NOT_CHECKED_IN": "Сначала нажмите «Пришёл»",
     "ATTENDANCE_NOT_WORKDAY": "Сегодня нерабочий день",
     "ATTENDANCE_LOW_ACCURACY": "Низкая точность геолокации. Выйдите на открытое место и повторите",
-    "ATTENDANCE_OUT_OF_RADIUS": "Вы в {{distance}} м от филиала «{{branch}}» (допустимо: {{radius}} м)",
+    "ATTENDANCE_OUT_OF_RADIUS": "Вы не на территории школы: до филиала «{{branch}}» {{distance}} м (допустимо: {{radius}} м). Отметка не принята",
     "ATTENDANCE_BAD_TIMESTAMP": "Время устройства неверно. Проверьте время и повторите",
     "ATTENDANCE_INVALID_PHOTO": "Неверное фото, переснимите",
     "ATTENDANCE_PHOTO_TOO_LARGE": "Слишком большой размер фото",
@@ -226,7 +225,8 @@
     "selfieNote": "Фото не сохраняется в системе: оно только отправляется директору в Telegram.",
     "selfieSent": "Фото отправлено директору",
     "selfieNotSent": "Фото директору не отправлено",
-    "selfieMissing": "Фото не отправлено"
+    "selfieMissing": "Фото не отправлено",
+    "dayDone": "Отметки на сегодня завершены"
   },
   "students": {
     "subtitle": "Все ученики · Всего: {{count}}",

@@ -16,7 +16,7 @@ export function TemplatesTab() {
   const { user } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
-  const canFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
+  const canFinance = user?.role !== 'TEACHER';
   const list = useQuery({ queryKey: ['sms', 'templates'], queryFn: smsApi.templates });
   const [draft, setDraft] = useState<Draft | null>(null);
   const done = () => { void qc.invalidateQueries({ queryKey: ['sms', 'templates'] }); };

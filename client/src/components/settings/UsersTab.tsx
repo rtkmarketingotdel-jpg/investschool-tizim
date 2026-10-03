@@ -42,7 +42,7 @@ export function UsersTab() {
               <Td><div className="flex items-center gap-3"><Avatar name={m.fullName} size={40} /><div><p className="font-medium">{m.fullName}</p><p className="text-[13px] text-text-muted">{m.phone}</p></div></div></Td>
               <Td className="w-56">
                 <Select aria-label={t('staff.role')} value={m.role} disabled={m.id === user?.id} onChange={(e) => update.mutate({ m, patch: { role: e.target.value as Role } })}>
-                  {(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+                  {(['DIRECTOR', 'MANAGER', 'TEACHER'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
                 </Select>
               </Td>
               <Td><Badge tone={m.isActive ? 'success' : 'danger'}>{t(m.isActive ? 'staff.active' : 'staff.inactive')}</Badge></Td>

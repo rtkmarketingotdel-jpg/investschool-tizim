@@ -14,7 +14,7 @@ import { studentDebt } from '../services/finance.js';
 import { receiptPdf } from '../services/pdf.js';
 
 export const paymentsRouter = Router();
-paymentsRouter.use(requireAuth, requireRole('DIRECTOR', 'ACCOUNTANT'));
+paymentsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
 
 const METHODS = ['CASH', 'CARD', 'CLICK', 'PAYME', 'TRANSFER'] as const;
 

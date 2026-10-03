@@ -8,8 +8,8 @@ import { haversineM } from '../lib/geo.js';
 const hash = bcrypt.hashSync('demo1234', 10);
 
 export const branches: Branch[] = [
-  { id: 'b1', name: 'Asosiy filial', address: 'Samarqand shahri', lat: 39.6542, lng: 66.9597, radiusM: 150 },
-  { id: 'b2', name: 'Bulungʻur filiali', address: 'Bulungʻur tumani', lat: 39.7644, lng: 67.4813, radiusM: 150 },
+  { id: 'b1', name: 'Asosiy filial', address: 'Samarqand shahri', lat: 39.6542, lng: 66.9597, radiusM: 200 },
+  { id: 'b2', name: 'Bulungʻur filiali', address: 'Bulungʻur tumani', lat: 39.7644, lng: 67.4813, radiusM: 200 },
 ];
 const SECOND_BRANCH_USERS = new Set([13, 14, 15]);
 
@@ -37,16 +37,16 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
 
 export const users: User[] = [
   seedUser(1, 'Karimov Rustam Abdullayevich', 'DIRECTOR', 'Direktor', 8_000_000),
-  seedUser(2, 'Yusupova Dilfuza Baxtiyorovna', 'ACCOUNTANT', 'Bosh buxgalter', 6_000_000),
-  seedUser(3, 'Toshmatov Sherzod Olimovich', 'ADMIN', 'Administrator', 5_000_000),
-  seedUser(10, 'Rahimova Malika Anvarovna', 'STAFF', 'Matematika oʻqituvchisi', 5_500_000),
-  seedUser(11, 'Qodirov Jasur Bahodirovich', 'STAFF', 'Ingliz tili oʻqituvchisi', 5_000_000),
-  seedUser(12, 'Ergasheva Sevinch Ilhomovna', 'STAFF', 'Boshlangʻich sinf oʻqituvchisi', 4_800_000),
-  seedUser(13, 'Nazarov Azizbek Ravshanovich', 'STAFF', 'Tarbiyachi', 3_500_000),
-  seedUser(14, 'Sobirova Mohinur Qahramonovna', 'STAFF', 'Oshpaz', 3_200_000),
-  seedUser(15, 'Hamidov Ulugʻbek Sodiqovich', 'STAFF', 'Qorovul', 3_000_000),
-  seedUser(16, 'Raxmatova Zulfiya Baxodirovna', 'STAFF', 'Fizika oʻqituvchisi', 5_200_000),
-  seedUser(17, 'Aliyev Bekzod Nurmatovich', 'STAFF', 'Matematika repetitori', 3_000_000),
+  seedUser(2, 'Yusupova Dilfuza Baxtiyorovna', 'MANAGER', 'Bosh menejer', 6_000_000),
+  seedUser(3, 'Toshmatov Sherzod Olimovich', 'MANAGER', 'Menejer', 5_000_000),
+  seedUser(10, 'Rahimova Malika Anvarovna', 'TEACHER', 'Matematika oʻqituvchisi', 5_500_000),
+  seedUser(11, 'Qodirov Jasur Bahodirovich', 'TEACHER', 'Ingliz tili oʻqituvchisi', 5_000_000),
+  seedUser(12, 'Ergasheva Sevinch Ilhomovna', 'TEACHER', 'Boshlangʻich sinf oʻqituvchisi', 4_800_000),
+  seedUser(13, 'Nazarov Azizbek Ravshanovich', 'TEACHER', 'Tarbiyachi', 3_500_000),
+  seedUser(14, 'Sobirova Mohinur Qahramonovna', 'TEACHER', 'Oshpaz', 3_200_000),
+  seedUser(15, 'Hamidov Ulugʻbek Sodiqovich', 'TEACHER', 'Qorovul', 3_000_000),
+  seedUser(16, 'Raxmatova Zulfiya Baxodirovna', 'TEACHER', 'Fizika oʻqituvchisi', 5_200_000),
+  seedUser(17, 'Aliyev Bekzod Nurmatovich', 'TEACHER', 'Matematika repetitori', 3_000_000),
 ];
 
 // Sample profile content so the director's detail page has something to show.

@@ -30,7 +30,7 @@ branchesRouter.get('/', async (_req, res, next) => {
   }
 });
 
-branchesRouter.get('/:id/members', requireRole('DIRECTOR', 'ADMIN'), async (req, res, next) => {
+branchesRouter.get('/:id/members', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const b = await branchRepo.findById(req.params.id!);
     if (!b) throw new ApiError(404, 'NOT_FOUND');
@@ -43,7 +43,7 @@ branchesRouter.get('/:id/members', requireRole('DIRECTOR', 'ADMIN'), async (req,
   }
 });
 
-branchesRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(schema), async (req, res, next) => {
+branchesRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(schema), async (req, res, next) => {
   try {
     const rec = await branchRepo.create(req.body);
     await audit(req.user!.id, 'branch.create', 'branch', rec.id, { name: rec.name });
@@ -53,7 +53,7 @@ branchesRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(schema),
   }
 });
 
-branchesRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(schema), async (req, res, next) => {
+branchesRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(schema), async (req, res, next) => {
   try {
     const rec = await branchRepo.update(req.params.id!, req.body);
     if (!rec) throw new ApiError(404, 'NOT_FOUND');
@@ -65,7 +65,7 @@ branchesRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(sche
 });
 
 const assignSchema = z.object({ userIds: z.array(z.string()), classIds: z.array(z.string()) });
-branchesRouter.put('/:id/assign', requireRole('DIRECTOR', 'ADMIN'), validateBody(assignSchema), async (req, res, next) => {
+branchesRouter.put('/:id/assign', requireRole('DIRECTOR', 'MANAGER'), validateBody(assignSchema), async (req, res, next) => {
   try {
     const b = await branchRepo.findById(req.params.id!);
     if (!b) throw new ApiError(404, 'NOT_FOUND');
@@ -79,7 +79,7 @@ branchesRouter.put('/:id/assign', requireRole('DIRECTOR', 'ADMIN'), validateBody
 });
 
 /** Deleting a branch that still has data requires ?moveTo=<other branch id> (or moveTo=none to detach). */
-branchesRouter.delete('/:id', requireRole('DIRECTOR', 'ADMIN'), async (req, res, next) => {
+branchesRouter.delete('/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const b = await branchRepo.findById(req.params.id!);
     if (!b) throw new ApiError(404, 'NOT_FOUND');

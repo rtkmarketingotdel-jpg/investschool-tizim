@@ -15,7 +15,7 @@ export function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const q = useDebounce(text.trim(), 300);
   const box = useRef<HTMLDivElement>(null);
-  const canStaff = user?.role === 'DIRECTOR' || user?.role === 'ADMIN';
+  const canStaff = user?.role !== 'TEACHER';
 
   const students = useQuery({ queryKey: ['gs', 'students', q], queryFn: () => schoolApi.students({ q, page: 1, limit: 5 }), enabled: q.length >= 2 });
   const staff = useQuery({ queryKey: ['gs', 'staff', q], queryFn: () => schoolApi.staff({ q, page: 1, limit: 5 }), enabled: q.length >= 2 && canStaff });

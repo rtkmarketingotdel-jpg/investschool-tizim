@@ -63,7 +63,7 @@ export default function Staff() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  const canManage = (m: StaffMember) => user?.role === 'DIRECTOR' || (m.role !== 'DIRECTOR' && m.role !== 'ACCOUNTANT');
+  const canManage = (m: StaffMember) => user?.role === 'DIRECTOR' || (m.role !== 'DIRECTOR' && m.role !== 'MANAGER');
   const rows = list.data?.items ?? [];
 
   return (
@@ -86,7 +86,7 @@ export default function Staff() {
         <div className="w-44">
           <Select aria-label={t('staff.role')} value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allRoles')}</option>
-            {(['DIRECTOR', 'ACCOUNTANT', 'ADMIN', 'STAFF'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+            {(['DIRECTOR', 'MANAGER', 'TEACHER'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
           </Select>
         </div>
         <div className="w-44">

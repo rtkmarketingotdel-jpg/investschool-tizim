@@ -7,23 +7,17 @@ import { schoolApi, type Branch } from '@/lib/schoolApi';
 import type { Settings } from '@/lib/financeApi';
 import { BranchDrawer } from '../branches/BranchDrawer';
 import { Button, Card, EmptyState, Input, Modal, Select, Skeleton, useToast } from '../ui';
-import { Checkbox } from '../FormBits';
 import { numOrNaN, useSaveSettings } from './shared';
 
 function GeoRules({ settings }: { settings: Settings }) {
   const { t } = useTranslation();
   const save = useSaveSettings();
   const [acc, setAcc] = useState(String(settings.maxGpsAccuracyM));
-  const [enforced, setEnforced] = useState(settings.geoEnforced);
   return (
     <Card className="space-y-4">
       <h3 className="text-lg">{t('settings.branches.rules')}</h3>
-      <div>
-        <Checkbox label={t('settings.branches.enforce')} checked={enforced} onChange={setEnforced} />
-        <p className="ml-8 mt-1 text-sm text-text-muted">{t('settings.branches.enforceHint')}</p>
-      </div>
       <div className="max-w-xs"><Input type="number" min={10} label={t('settings.branches.accuracy')} value={acc} onChange={(e) => setAcc(e.target.value)} /></div>
-      <Button disabled={!(numOrNaN(acc) >= 10)} loading={save.isPending} onClick={() => save.mutate({ maxGpsAccuracyM: Number(acc), geoEnforced: enforced })}>{t('common.save')}</Button>
+      <Button disabled={!(numOrNaN(acc) >= 10)} loading={save.isPending} onClick={() => save.mutate({ maxGpsAccuracyM: Number(acc) })}>{t('common.save')}</Button>
     </Card>
   );
 }

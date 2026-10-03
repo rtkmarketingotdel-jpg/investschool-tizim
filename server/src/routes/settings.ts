@@ -9,7 +9,7 @@ import { audit } from '../repositories/notificationRepo.js';
 import { findTelegramChats, sendTelegram } from '../services/telegram.js';
 
 export const settingsRouter = Router();
-settingsRouter.use(requireAuth, requireRole('DIRECTOR', 'ADMIN'));
+settingsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
 
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 

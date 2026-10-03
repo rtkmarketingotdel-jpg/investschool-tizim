@@ -11,7 +11,7 @@ import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
 import { debtMap, studentDebt } from '../services/finance.js';
 
 export const studentsRouter = Router();
-studentsRouter.use(requireAuth, requireRole('DIRECTOR', 'ACCOUNTANT', 'ADMIN'));
+studentsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
 
 const phoneRe = /^\+998\d{9}$/;
 const dateRe = /^\d{4}-\d{2}-\d{2}$/;
@@ -55,7 +55,7 @@ async function present(s: Student, debt: number | null = null) {
   return { ...s, fullName: fullName(s), className: cls?.name ?? null, debt };
 }
 
-const seesFinance = (role: string) => role === 'DIRECTOR' || role === 'ACCOUNTANT';
+const seesFinance = (role: string) => role !== 'TEACHER';
 
 /** Rejects a NEW seat in a full class (existing members moving nowhere are unaffected). */
 async function assertSeat(classId: string | null, status: string, current?: Student) {
@@ -112,7 +112,7 @@ studentsRouter.get('/export', async (req, res, next) => {
   }
 });
 
-studentsRouter.get('/:id/finance', requireRole('DIRECTOR', 'ACCOUNTANT'), async (req, res, next) => {
+studentsRouter.get('/:id/finance', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const s = await studentRepo.findById(req.params.id!);
     if (!s) throw new ApiError(404, 'NOT_FOUND');
@@ -137,7 +137,7 @@ studentsRouter.get('/:id', async (req, res, next) => {
   }
 });
 
-studentsRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(studentSchema), async (req, res, next) => {
+studentsRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(studentSchema), async (req, res, next) => {
   try {
     const body = req.body as StudentInput;
     await assertSeat(body.classId, body.status);
@@ -148,7 +148,7 @@ studentsRouter.post('/', requireRole('DIRECTOR', 'ADMIN'), validateBody(studentS
   }
 });
 
-studentsRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(studentSchema), async (req, res, next) => {
+studentsRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(studentSchema), async (req, res, next) => {
   try {
     const body = req.body as StudentInput;
     const current = await studentRepo.findById(req.params.id!);

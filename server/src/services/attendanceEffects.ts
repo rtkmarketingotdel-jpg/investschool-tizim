@@ -29,7 +29,7 @@ export async function syncFine(rec: Attendance) {
 
 export async function onLateCheckIn(user: User, rec: Attendance) {
   await syncFine(rec);
-  await notifyRoles(['DIRECTOR', 'ADMIN'], 'notif.late', { name: user.fullName, minutes: rec.lateMinutes }, '/attendance');
+  await notifyRoles(['DIRECTOR', 'MANAGER'], 'notif.late', { name: user.fullName, minutes: rec.lateMinutes }, '/attendance');
 }
 
 /** Noon job: marks active employees without a check-in as ABSENT (workdays only). */
@@ -48,7 +48,7 @@ export async function markAbsentees(date = toLocalDate()): Promise<number> {
     absent.push(u);
   }
   if (absent.length) {
-    await notifyRoles(['DIRECTOR', 'ADMIN'], 'notif.absent', { count: absent.length, names: absent.map((a) => a.fullName).slice(0, 3).join(', ') }, '/attendance');
+    await notifyRoles(['DIRECTOR', 'MANAGER'], 'notif.absent', { count: absent.length, names: absent.map((a) => a.fullName).slice(0, 3).join(', ') }, '/attendance');
     await sendTelegram(`❌ Kelmadi (${absent.length}): ${absent.map((a) => a.fullName).join(', ')}`);
   }
   return absent.length;

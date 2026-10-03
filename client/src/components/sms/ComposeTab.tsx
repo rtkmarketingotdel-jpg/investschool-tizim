@@ -38,7 +38,7 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const toast = useToast();
-  const canFinance = user?.role === 'DIRECTOR' || user?.role === 'ACCOUNTANT';
+  const canFinance = user?.role !== 'TEACHER';
 
   const [category, setCategory] = useState<SmsCategory>(canFinance ? 'DEBT' : 'WARNING');
   const [kind, setKind] = useState<Kind>(canFinance ? 'DEBTORS' : 'ALL_PARENTS');

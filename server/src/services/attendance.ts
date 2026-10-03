@@ -56,7 +56,7 @@ async function validate(input: PunchInput, now: Date, user: User) {
   const photo = decodeJpeg(input.photo);
   if (input.accuracy > settings.maxGpsAccuracyM) throw new ApiError(400, 'ATTENDANCE_LOW_ACCURACY');
   const near = nearestBranch(await allowedBranches(user), input.lat, input.lng);
-  if (near && settings.geoEnforced && near.distanceM > near.branch.radiusM) {
+  if (near && near.distanceM > near.branch.radiusM) {
     throw new ApiError(400, 'ATTENDANCE_OUT_OF_RADIUS', { distanceM: near.distanceM, radiusM: near.branch.radiusM, branch: near.branch.name });
   }
   return { photo, distanceM: near?.distanceM ?? null, branchId: near?.branch.id ?? user.branchId };

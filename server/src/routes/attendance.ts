@@ -75,7 +75,7 @@ const listQuery = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
-attendanceRouter.get('/', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+attendanceRouter.get('/', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const q = listQuery.parse(req.query);
     const today = toLocalDate();
@@ -108,7 +108,7 @@ const patchSchema = z.object({
   note: z.string().trim().max(500).nullable(),
 });
 
-attendanceRouter.patch('/:id', requireRole('DIRECTOR', 'ADMIN'), validateBody(patchSchema), async (req, res, next) => {
+attendanceRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(patchSchema), async (req, res, next) => {
   try {
     const rec = (await attendanceRepo.list({ from: '0000-01-01', to: '9999-12-31' })).find((r) => r.id === req.params.id);
     if (!rec) throw new ApiError(404, 'NOT_FOUND');
@@ -133,7 +133,7 @@ async function buildMatrix(month: string) {
   return { month, days, workDays: settings.workDays, rows };
 }
 
-attendanceRouter.get('/matrix', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+attendanceRouter.get('/matrix', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     res.json(await buildMatrix(monthSchema.catch(toLocalDate().slice(0, 7)).parse(req.query.month)));
   } catch (e) {
@@ -141,7 +141,7 @@ attendanceRouter.get('/matrix', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), 
   }
 });
 
-attendanceRouter.get('/matrix/export', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+attendanceRouter.get('/matrix/export', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const m = await buildMatrix(monthSchema.catch(toLocalDate().slice(0, 7)).parse(req.query.month));
     const code: Record<string, string> = { ON_TIME: '+', LATE: 'L', ABSENT: '-', EXCUSED: 'E' };
@@ -161,7 +161,7 @@ attendanceRouter.get('/matrix/export', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNT
 const dayQuery = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), branchId: z.string().optional() });
 
 /** Every active employee for one day (also those without a record), for the director's overview. */
-attendanceRouter.get('/day', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (req, res, next) => {
+attendanceRouter.get('/day', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
   try {
     const q = dayQuery.parse(req.query);
     const date = q.date ?? toLocalDate();
@@ -191,7 +191,7 @@ attendanceRouter.get('/day', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), asy
 });
 
 /** Live map: employees who checked in today and have not left yet (a dot disappears on check-out). */
-attendanceRouter.get('/map', requireRole('DIRECTOR', 'ADMIN', 'ACCOUNTANT'), async (_req, res, next) => {
+attendanceRouter.get('/map', requireRole('DIRECTOR', 'MANAGER'), async (_req, res, next) => {
   try {
     const today = toLocalDate();
     const [records, branches] = await Promise.all([attendanceRepo.list({ from: today, to: today }), branchRepo.list()]);
