@@ -102,7 +102,7 @@ export interface Club {
 }
 export type ClubInput = Pick<Club, 'name' | 'teacherId' | 'monthlyFee'>;
 
-export type Role = 'DIRECTOR' | 'MANAGER' | 'TEACHER';
+export type Role = 'DIRECTOR' | 'MANAGER' | 'ACCOUNTANT' | 'TEACHER';
 export interface StaffMember {
   id: string;
   fullName: string;

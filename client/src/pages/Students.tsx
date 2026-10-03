@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { BedDouble, Download, Eye, LayoutGrid, List, Plus, Search, GraduationCap } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi, type Student, type StudentStatus } from '@/lib/schoolApi';
 import { fmtDay } from '@/lib/dates';
 import { formatMoney } from '@/lib/format';
@@ -21,7 +21,7 @@ const LIMIT = 20;
 export default function Students() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role !== 'TEACHER';
+  const canEdit = isManagement(user?.role);
   const seesFinance = user?.role !== 'TEACHER';
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get('q') ?? '');

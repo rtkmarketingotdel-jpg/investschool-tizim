@@ -95,7 +95,7 @@ export default function Staff() {
         <div className="w-[calc(50%-0.375rem)] sm:w-44">
           <Select aria-label={t('staff.role')} value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allRoles')}</option>
-            {(['DIRECTOR', 'MANAGER', 'TEACHER'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+            {(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER'] as Role[]).map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
           </Select>
         </div>
         <div className="w-[calc(50%-0.375rem)] sm:w-44">

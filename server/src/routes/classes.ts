@@ -8,7 +8,7 @@ import { studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 
 export const classesRouter = Router();
-classesRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
+classesRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
 
 const classSchema = z.object({
   name: z.string().trim().min(1).max(20),

@@ -50,7 +50,7 @@ const Contracts = lazy(loaders.Contracts);
 const ContractClass = lazy(loaders.ContractClass);
 const PublicContract = lazy(loaders.PublicContract);
 
-const MGMT = ['DIRECTOR', 'MANAGER'] as const;
+const ALL = ['DIRECTOR', 'MANAGER', 'ACCOUNTANT'] as const;
 
 function HomeRedirect() {
   const { user } = useAuth();
@@ -81,7 +81,7 @@ export default function App() {
           <Route path="/me" element={<Me />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/attendance" element={<Attendance />} />
-          <Route element={<RoleGuard roles={[...MGMT]} />}>
+          <Route element={<RoleGuard roles={[...ALL]} />}>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/students" element={<Students />} />
             <Route path="/students/:id" element={<StudentDetail />} />
@@ -96,7 +96,7 @@ export default function App() {
             <Route path="/staff/:id" element={<StaffDetail />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
-          <Route element={<RoleGuard roles={['DIRECTOR', 'MANAGER']} />}>
+          <Route element={<RoleGuard roles={[...ALL]} />}>
             <Route path="/finance/payments" element={<Payments />} />
             <Route path="/finance/debtors" element={<Debtors />} />
             <Route path="/finance/payroll" element={<Payroll />} />

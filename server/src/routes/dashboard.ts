@@ -12,13 +12,13 @@ import { userRepo } from '../repositories/userRepo.js';
 import { debtMap } from '../services/finance.js';
 
 export const dashboardRouter = Router();
-dashboardRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
+dashboardRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
 
 dashboardRouter.get('/', async (req, res, next) => {
   try {
     const role = req.user!.role;
     const seesFinance = role !== 'TEACHER';
-    const seesAttendance = role !== 'TEACHER';
+    const seesAttendance = role === 'DIRECTOR' || role === 'MANAGER';
     const today = toLocalDate();
     const period = today.slice(0, 7);
 

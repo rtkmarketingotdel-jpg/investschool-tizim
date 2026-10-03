@@ -25,7 +25,7 @@ const generatePassword = () => Array.from({ length: 10 }, () => ALPHABET[randomI
 const staffSchema = z.object({
   fullName: z.string().trim().min(3).max(120),
   phone: z.string().regex(/^\+998\d{9}$/),
-  role: z.enum(['DIRECTOR', 'MANAGER', 'TEACHER']),
+  role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']),
   position: z.string().trim().min(1).max(120),
   isTeacher: z.boolean().default(false),
   isTutor: z.boolean().default(false),
@@ -44,7 +44,7 @@ type StaffInput = z.infer<typeof staffSchema>;
 const listQuery = z.object({
   ...pageQuery,
   q: z.string().optional(),
-  role: z.enum(['DIRECTOR', 'MANAGER', 'TEACHER']).optional(),
+  role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']).optional(),
   active: z.enum(['true', 'false']).optional(),
   teacher: z.enum(['true']).optional(),
   tutor: z.enum(['true']).optional(),

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap, Search, Users } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi } from '@/lib/schoolApi';
 import { useDebounce } from '@/lib/useDebounce';
 
@@ -15,7 +15,7 @@ export function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const q = useDebounce(text.trim(), 300);
   const box = useRef<HTMLDivElement>(null);
-  const canStaff = user?.role !== 'TEACHER';
+  const canStaff = isManagement(user?.role);
 
   const students = useQuery({ queryKey: ['gs', 'students', q], queryFn: () => schoolApi.students({ q, page: 1, limit: 5 }), enabled: q.length >= 2 });
   const staff = useQuery({ queryKey: ['gs', 'staff', q], queryFn: () => schoolApi.staff({ q, page: 1, limit: 5 }), enabled: q.length >= 2 && canStaff });

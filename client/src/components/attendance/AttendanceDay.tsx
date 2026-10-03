@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Users } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isManagement } from '@/context/AuthContext';
 import { attendanceApi, type AttendanceRecord } from '@/lib/attendanceApi';
 import { schoolApi } from '@/lib/schoolApi';
 import { todayLocal } from '@/lib/dates';
@@ -15,7 +15,7 @@ import { StatusDialog } from './StatusDialog';
 export function AttendanceDay() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role !== 'TEACHER';
+  const canEdit = isManagement(user?.role);
   const [date, setDate] = useState(todayLocal());
   const [branchId, setBranchId] = useState('');
   const [editing, setEditing] = useState<AttendanceRecord | null>(null);

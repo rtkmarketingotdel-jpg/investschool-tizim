@@ -27,7 +27,7 @@ payrollRouter.get('/mine', async (req, res, next) => {
   }
 });
 
-const finance = requireRole('DIRECTOR', 'MANAGER');
+const finance = requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT');
 
 async function present(p: NonNullable<Awaited<ReturnType<typeof payrollRepo.findById>>>) {
   const u = await userRepo.findById(p.userId);

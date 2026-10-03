@@ -16,7 +16,7 @@ import { env } from '../env.js';
 import type { Contract } from '../data/types.js';
 
 export const contractsRouter = Router();
-contractsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
+contractsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
 
 const dateRe = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -2,7 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { api, TOKEN_KEY } from '@/lib/api';
 import { setLanguage } from '@/i18n';
 
-export type Role = 'DIRECTOR' | 'MANAGER' | 'TEACHER';
+export type Role = 'DIRECTOR' | 'MANAGER' | 'ACCOUNTANT' | 'TEACHER';
+/** Director and the chief manager run the whole school; the accountant only sees money and the student list. */
+export const isManagement = (role?: Role) => role === 'DIRECTOR' || role === 'MANAGER';
 export interface AuthUser {
   id: string;
   fullName: string;

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LayoutGrid, List, Plus, School, Search, Users } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi, type SchoolClass } from '@/lib/schoolApi';
 import { cn } from '@/lib/cn';
 import { PageHeader } from '@/components/PageHeader';
@@ -30,7 +30,7 @@ function StatTile({ label, value, sub, children }: { label: string; value: strin
 export default function Classes() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role !== 'TEACHER';
+  const canEdit = isManagement(user?.role);
   const { data, isLoading, isError } = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
   const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches });
   const branchName = useMemo(() => new Map((branches.data ?? []).map((b) => [b.id, b.name])), [branches.data]);

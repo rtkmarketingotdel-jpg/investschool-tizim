@@ -1,4 +1,4 @@
-export type Role = 'DIRECTOR' | 'MANAGER' | 'TEACHER';
+export type Role = 'DIRECTOR' | 'MANAGER' | 'ACCOUNTANT' | 'TEACHER';
 export type Lang = 'uz' | 'ru';
 
 export interface Achievement {

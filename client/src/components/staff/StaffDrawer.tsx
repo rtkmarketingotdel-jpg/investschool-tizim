@@ -17,7 +17,7 @@ import { PhoneInput } from '../PhoneInput';
 const schema = z.object({
   fullName: z.string().trim().min(3, 'errors.required'),
   phone: z.string().regex(/^\+998\d{9}$/, 'errors.phone'),
-  role: z.enum(['DIRECTOR', 'MANAGER', 'TEACHER']),
+  role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']),
   position: z.string().trim(),
   subject: z.string(),
   customSubject: z.string(),
@@ -30,8 +30,8 @@ type FormValues = z.infer<typeof schema>;
 
 const empty: FormValues = { fullName: '', phone: '', role: 'TEACHER', position: '', subject: '', customSubject: '', homeroomClassId: '', branchId: '', baseSalary: 4_000_000, isActive: true };
 const OTHER = '__other';
-type StaffType = 'manager' | 'teacher' | 'tutor';
-const toType = (k: string): StaffType => (k === 'teacher' ? 'teacher' : k === 'tutor' ? 'tutor' : 'manager');
+type StaffType = 'manager' | 'accountant' | 'teacher' | 'tutor';
+const toType = (k: string): StaffType => (k === 'teacher' || k === 'tutor' || k === 'accountant' ? k : 'manager');
 
 interface Props {
   open: boolean;
@@ -65,7 +65,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   useEffect(() => {
     if (!open) return;
     setCopied(false);
-    setType(member ? (member.isTeacher ? 'teacher' : member.isTutor ? 'tutor' : 'manager') : toType(kind));
+    setType(member ? (member.isTeacher ? 'teacher' : member.isTutor ? 'tutor' : member.role === 'ACCOUNTANT' ? 'accountant' : 'manager') : toType(kind));
     setClubIds([]);
     setPassword(member ? '' : generatePassword());
     if (!member) return reset(empty);
@@ -88,7 +88,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
     mutationFn: async (v: FormValues) => {
       const subj = hasSubject ? (v.subject === OTHER ? v.customSubject.trim() : v.subject) || null : null;
       const body = {
-        fullName: v.fullName, phone: v.phone, role: member?.role === 'DIRECTOR' ? ('DIRECTOR' as Role) : type === 'manager' ? ('MANAGER' as Role) : ('TEACHER' as Role), baseSalary: v.baseSalary, isActive: v.isActive,
+        fullName: v.fullName, phone: v.phone, role: member?.role === 'DIRECTOR' ? ('DIRECTOR' as Role) : type === 'manager' ? ('MANAGER' as Role) : type === 'accountant' ? ('ACCOUNTANT' as Role) : ('TEACHER' as Role), baseSalary: v.baseSalary, isActive: v.isActive,
         isTeacher, isTutor, subject: subj,
         position: subj && isTeacher ? `${subj} oʻqituvchisi` : subj && isTutor ? `${subj} repetitori` : v.position,
         homeroomClassId: isTeacher && v.homeroomClassId ? v.homeroomClassId : null,
@@ -124,6 +124,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
           <Select label={t('staff.roleChoose')} value={type} onChange={(e) => setType(e.target.value as StaffType)}>
             <option value="teacher">{t('staff.types.teacher')}</option>
             <option value="manager">{t('staff.types.manager')}</option>
+            <option value="accountant">{t('staff.types.accountant')}</option>
             <option value="tutor">{t('staff.types.tutor')}</option>
           </Select>
         )}

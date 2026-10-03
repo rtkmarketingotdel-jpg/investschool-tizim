@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isManagement } from '@/context/AuthContext';
 import { AttendanceDay } from '@/components/attendance/AttendanceDay';
 import { AttendanceLog } from '@/components/attendance/AttendanceLog';
 import { AttendanceMap } from '@/components/attendance/AttendanceMap';
@@ -14,7 +14,7 @@ export default function Attendance() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('day');
-  const isManager = user?.role !== 'TEACHER';
+  const isManager = isManagement(user?.role);
   // The director supervises everyone else and does not check in himself.
   const tracked = user?.role !== 'DIRECTOR';
   return (

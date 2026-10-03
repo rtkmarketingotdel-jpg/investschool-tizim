@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileSignature, Pencil, Printer, UserX, Wallet } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi } from '@/lib/schoolApi';
 import { financeApi, openPdf } from '@/lib/financeApi';
 import { fmtDay } from '@/lib/dates';
@@ -21,7 +21,7 @@ export default function StudentDetail() {
   const { id = '' } = useParams();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role !== 'TEACHER';
+  const canEdit = isManagement(user?.role);
   const [tab, setTab] = useState<Tab>('info');
   const [editing, setEditing] = useState(false);
   const [paying, setPaying] = useState(false);

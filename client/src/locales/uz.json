@@ -26,7 +26,8 @@
   "roles": {
     "DIRECTOR": "Direktor",
     "MANAGER": "Bosh menejer",
-    "TEACHER": "Oʻqituvchi"
+    "TEACHER": "Oʻqituvchi",
+    "ACCOUNTANT": "Hisobchi"
   },
   "auth": {
     "loginTitle": "Tizimga kirish",
@@ -411,7 +412,8 @@
       "staff": "Menejer",
       "manager": "Bosh menejer",
       "teacher": "Oʻqituvchi",
-      "tutor": "Repetitor"
+      "tutor": "Repetitor",
+      "accountant": "Hisobchi"
     },
     "delete": "Oʻchirish",
     "deleted": "Xodim oʻchirildi",

@@ -7,7 +7,7 @@ import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import { debtMap } from '../services/finance.js';
 
 export const debtorsRouter = Router();
-debtorsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
+debtorsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
 
 const query = z.object({ ...pageQuery, q: z.string().optional(), classId: z.string().optional() });
 

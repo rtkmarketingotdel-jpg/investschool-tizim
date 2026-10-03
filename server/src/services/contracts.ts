@@ -46,7 +46,7 @@ export async function requestOtp(c: Contract) {
   });
   if (!sms) {
     // DEMO mode: staff read the code from the contracts table / bell and the Telegram group.
-    await notifyRoles(['DIRECTOR', 'MANAGER'], 'notif.otp', { number: c.number, code }, '/finance/contracts');
+    await notifyRoles(['DIRECTOR', 'MANAGER', 'ACCOUNTANT'], 'notif.otp', { number: c.number, code }, '/finance/contracts');
     await sendTelegram(otpMessage(c.number, code));
   }
   return { delivery: sms ? 'sms' : 'demo' } as const;
@@ -67,7 +67,7 @@ export async function signContract(c: Contract, code: string, meta: { ip: string
     otpHash: null, otpExpiresAt: null, otpDemoCode: null,
   }))!;
   await audit(null, 'contract.sign', 'contract', c.id, { ip: meta.ip });
-  await notifyRoles(['DIRECTOR', 'MANAGER'], 'notif.contractSigned', { number: c.number, student: `${student.lastName} ${student.firstName}` }, '/finance/contracts');
+  await notifyRoles(['DIRECTOR', 'MANAGER', 'ACCOUNTANT'], 'notif.contractSigned', { number: c.number, student: `${student.lastName} ${student.firstName}` }, '/finance/contracts');
   await sendTelegram(contractSignedMessage(c.number));
   return signed;
 }

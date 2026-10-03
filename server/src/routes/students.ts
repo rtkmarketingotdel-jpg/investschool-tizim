@@ -11,7 +11,7 @@ import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
 import { debtMap, studentDebt } from '../services/finance.js';
 
 export const studentsRouter = Router();
-studentsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
+studentsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
 
 const phoneRe = /^\+998\d{9}$/;
 const dateRe = /^\d{4}-\d{2}-\d{2}$/;
@@ -112,7 +112,7 @@ studentsRouter.get('/export', async (req, res, next) => {
   }
 });
 
-studentsRouter.get('/:id/finance', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
+studentsRouter.get('/:id/finance', requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'), async (req, res, next) => {
   try {
     const s = await studentRepo.findById(req.params.id!);
     if (!s) throw new ApiError(404, 'NOT_FOUND');
