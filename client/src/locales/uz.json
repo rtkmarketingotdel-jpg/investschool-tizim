@@ -411,7 +411,10 @@
       "staff": "Oddiy xodim",
       "teacher": "Oʻqituvchi",
       "tutor": "Repetitor"
-    }
+    },
+    "delete": "Oʻchirish",
+    "deleted": "Xodim oʻchirildi",
+    "deleteConfirm": "“{{name}}” butunlay oʻchirilsinmi? Uning davomat va oylik tarixi ham oʻchadi, sinf va toʻgaraklari boʻshaydi."
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",

@@ -37,34 +37,7 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
 
 export const users: User[] = [
   seedUser(1, 'Karimov Rustam Abdullayevich', 'DIRECTOR', 'Direktor', 8_000_000),
-  seedUser(2, 'Yusupova Dilfuza Baxtiyorovna', 'MANAGER', 'Bosh menejer', 6_000_000),
-  seedUser(3, 'Toshmatov Sherzod Olimovich', 'MANAGER', 'Menejer', 5_000_000),
-  seedUser(10, 'Rahimova Malika Anvarovna', 'TEACHER', 'Matematika oʻqituvchisi', 5_500_000),
-  seedUser(11, 'Qodirov Jasur Bahodirovich', 'TEACHER', 'Ingliz tili oʻqituvchisi', 5_000_000),
-  seedUser(12, 'Ergasheva Sevinch Ilhomovna', 'TEACHER', 'Boshlangʻich sinf oʻqituvchisi', 4_800_000),
-  seedUser(13, 'Nazarov Azizbek Ravshanovich', 'TEACHER', 'Tarbiyachi', 3_500_000),
-  seedUser(14, 'Sobirova Mohinur Qahramonovna', 'TEACHER', 'Oshpaz', 3_200_000),
-  seedUser(15, 'Hamidov Ulugʻbek Sodiqovich', 'TEACHER', 'Qorovul', 3_000_000),
-  seedUser(16, 'Raxmatova Zulfiya Baxodirovna', 'TEACHER', 'Fizika oʻqituvchisi', 5_200_000),
-  seedUser(17, 'Aliyev Bekzod Nurmatovich', 'TEACHER', 'Matematika repetitori', 3_000_000),
 ];
-
-// Sample profile content so the director's detail page has something to show.
-const sample = (id: string, patch: Partial<User>) => Object.assign(users.find((u) => u.id === id)!, patch);
-sample('u17', { isTutor: true, subject: 'Matematika' });
-sample('u11', { achievements: [
-  { id: 'ac1', title: 'IELTS 8.0 sertifikati sohibi', year: 2023, description: 'Xalqaro ingliz tili imtihonidan yuqori natija.' },
-  { id: 'ac2', title: 'Viloyat “Yil oʻqituvchisi” tanlovi finalisti', year: 2024, description: '' },
-] });
-sample('u12', { achievements: [
-  { id: 'ac3', title: 'Respublika metodik konkursida 2-oʻrin', year: 2024, description: 'Boshlangʻich sinflar uchun interaktiv dars ishlanmasi.' },
-] });
-sample('u16', { achievements: [
-  { id: 'ac4', title: 'Fizika olimpiadasi gʻoliblarini tayyorlagan', year: 2025, description: '3 nafar oʻquvchi viloyat bosqichida gʻolib boʻldi.' },
-] });
-sample('u17', { achievements: [
-  { id: 'ac5', title: 'Abituriyentlarni DTM ga tayyorlash', year: 2022, description: '90+ ball olgan 12 nafar shogird.' },
-] });
 
 export const settings: Setting = {
   maxGpsAccuracyM: 100,
@@ -118,27 +91,6 @@ export const attendances: Attendance[] = [];
         ...base, status, lateMinutes: late ? inMin : 0,
         checkInAt: atLocal(date, hhmm(8 * 60 + Math.max(inMin, 0) - (late ? 0 : 10))),
         checkOutAt: atLocal(date, hhmm(outMin)),
-      });
-    }
-  }
-  // Today: a few employees already checked in (no check-out yet) so the live map has dots.
-  if (settings.workDays.includes(isoWeekday(today)) && localMinutes(new Date()) >= 8 * 60 + 30) {
-    const arrivals: Array<[string, string]> = [['u11', '07:52'], ['u12', '08:04'], ['u13', '08:21'], ['u14', '07:48'], ['u16', '08:09']];
-    for (const [uid, hhmm] of arrivals) {
-      const u = users.find((x) => x.id === uid)!;
-      const b = branches.find((x) => x.id === u.branchId)!;
-      // keep dots 40-90 m from the branch icon so the two never overlap on the map
-      const spread = () => { const v = (rnd() - 0.5) * 0.002; return Math.abs(v) < 0.0004 ? (v < 0 ? -0.0004 : 0.0004) : v; };
-      const lat = b.lat + spread();
-      const lng = b.lng + spread();
-      const [h, m] = hhmm.split(':').map(Number) as [number, number];
-      const late = h * 60 + m > 8 * 60 + settings.graceMinutes;
-      attendances.push({
-        id: `a${id++}`, userId: u.id, date: today, status: late ? 'LATE' : 'ON_TIME', lateMinutes: late ? h * 60 + m - 8 * 60 : 0,
-        checkInAt: atLocal(today, hhmm), checkInPhotoUrl: null, checkInLat: lat, checkInLng: lng, checkInAccuracy: 15,
-        checkInDistanceM: haversineM(lat, lng, b.lat, b.lng), checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null,
-        checkOutLng: null, checkOutDistanceM: null, deviceInfo: null, note: null, branchId: b.id,
-        selfieSent: true, selfieOutSent: false, geoOffset: [lat - b.lat, lng - b.lng],
       });
     }
   }

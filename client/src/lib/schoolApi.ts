@@ -158,6 +158,7 @@ export const schoolApi = {
   createStaff: (d: StaffInput) =>
     api.post<{ user: StaffMember; tempPassword: string; generated: boolean }>('/staff', d).then((r) => r.data),
   updateStaff: (id: string, d: StaffInput) => api.patch(`/staff/${id}`, d).then((r) => r.data),
+  deleteStaff: (id: string) => api.delete(`/staff/${id}`).then(() => null),
   resetPassword: (id: string) =>
     api.post<{ tempPassword: string }>(`/staff/${id}/reset-password`).then((r) => r.data),
 };

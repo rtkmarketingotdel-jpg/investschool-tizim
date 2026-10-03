@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, Check, Copy, GraduationCap, KeyRound, Pencil, Plus, Search, Users } from 'lucide-react';
+import { BookOpen, Check, Copy, GraduationCap, KeyRound, Pencil, Plus, Search, Trash2, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { errorCode } from '@/lib/api';
 import { schoolApi, type Role, type StaffMember } from '@/lib/schoolApi';
@@ -29,6 +29,8 @@ export default function Staff() {
   const [type, setType] = useState('');
   const [secret, setSecret] = useState<{ name: string; phone: string; password: string } | null>(null);
   const [resetTarget, setResetTarget] = useState<StaffMember | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<StaffMember | null>(null);
+  const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
   // /staff?add=tutor|teacher opens the matching add drawer (used by the Academics page)
   const [params, setParams] = useSearchParams();
@@ -53,6 +55,17 @@ export default function Staff() {
     onSuccess: (r, m) => {
       setResetTarget(null);
       setSecret({ name: m.fullName, phone: m.phone, password: r.tempPassword });
+    },
+    onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
+  });
+
+  const remove = useMutation({
+    mutationFn: (m: StaffMember) => schoolApi.deleteStaff(m.id),
+    onSuccess: () => {
+      setDeleteTarget(null);
+      toast(t('staff.deleted'));
+      void qc.invalidateQueries({ queryKey: ['staff'] });
+      void qc.invalidateQueries({ queryKey: ['classes'] });
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
   });
@@ -155,6 +168,7 @@ export default function Staff() {
                       <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                         <button aria-label={t('staff.edit')} onClick={() => setDrawer({ open: true, member: m, kind: m.isTeacher ? 'teacher' : m.isTutor ? 'tutor' : 'staff' })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
                         <button aria-label={t('staff.resetPassword')} onClick={() => setResetTarget(m)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><KeyRound className="h-4 w-4" /></button>
+                        {m.id !== user?.id && m.role !== 'DIRECTOR' && <button aria-label={t('staff.delete')} onClick={() => setDeleteTarget(m)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted hover:text-danger"><Trash2 className="h-4 w-4" /></button>}
                       </div>
                     )}
                   </Td>
@@ -167,6 +181,14 @@ export default function Staff() {
       )}
 
       <StaffDrawer open={drawer.open} member={drawer.member} kind={drawer.kind} onClose={() => setDrawer((d) => ({ ...d, open: false }))} onCreated={setSecret} />
+
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title={t('staff.delete')}>
+        <p className="text-text-muted">{t('staff.deleteConfirm', { name: deleteTarget?.fullName })}</p>
+        <div className="mt-6 flex gap-3">
+          <Button variant="secondary" className="flex-1" onClick={() => setDeleteTarget(null)}>{t('common.cancel')}</Button>
+          <Button className="flex-1" loading={remove.isPending} onClick={() => deleteTarget && remove.mutate(deleteTarget)}>{t('staff.delete')}</Button>
+        </div>
+      </Modal>
 
       <Modal open={!!resetTarget} onClose={() => setResetTarget(null)} title={t('staff.resetPassword')}>
         <p className="text-text-muted">{t('staff.resetConfirm', { name: resetTarget?.fullName })}</p>

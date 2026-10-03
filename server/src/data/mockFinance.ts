@@ -35,7 +35,7 @@ export const auditLogs: AuditLog[] = [];
 // ---- charges and payments (deterministic; enrolment spread gives a growth trend) ----
 const METHODS: PaymentMethod[] = ['CASH', 'CARD', 'CLICK', 'PAYME', 'TRANSFER'];
 const startWeights = [0.55, 0.67, 0.77, 0.85, 0.93, 1];
-const accountant = users.find((u) => u.role === 'MANAGER')!;
+const accountant = users.find((u) => u.role === 'MANAGER') ?? users[0]!;
 
 for (const s of students.filter((x) => x.status === 'ACTIVE')) {
   const r0 = rnd();

@@ -168,6 +168,20 @@ staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
   }
 });
 
+staffRouter.delete('/:id', async (req, res, next) => {
+  try {
+    const target = await userRepo.findById(req.params.id!);
+    if (!target) throw new ApiError(404, 'NOT_FOUND');
+    assertCanManage(req.user!.role, target.role);
+    if (target.id === req.user!.id || target.role === 'DIRECTOR') throw new ApiError(400, 'STAFF_CANNOT_MODIFY_SELF');
+    await userRepo.remove(target.id);
+    await audit(req.user!.id, 'staff.delete', 'user', target.id, { name: target.fullName });
+    res.status(204).end();
+  } catch (e) {
+    next(e);
+  }
+});
+
 staffRouter.post('/:id/reset-password', async (req, res, next) => {
   try {
     const target = await userRepo.findById(req.params.id!);
