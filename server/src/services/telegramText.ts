@@ -27,17 +27,32 @@ export function punchCaption(p: { kind: 'in' | 'out'; name: string; position: st
   ].filter(Boolean).join('\n');
 }
 
-export function absentMessage(date: string, people: Array<{ name: string; position: string }>) {
-  const list = people.map((p, i) => `${i + 1}. ${esc(p.name)}${p.position ? ` — ${esc(p.position)}` : ''}`).join('\n');
+export interface AbsentPerson {
+  name: string;
+  position: string;
+  branch: string | null;
+}
+
+/** Absentees grouped by branch (when there is more than one), each with their position under the name. */
+export function absentMessage(date: string, people: AbsentPerson[], fine = 0) {
+  const groups = new Map<string, AbsentPerson[]>();
+  for (const p of people) groups.set(p.branch ?? '', [...(groups.get(p.branch ?? '') ?? []), p]);
+  const grouped = groups.size > 1 || (groups.size === 1 && !groups.has(''));
+  let n = 0;
+  const blocks = [...groups.entries()].map(([branch, list]) => {
+    const rows = list.map((p) => `<b>${++n}.</b> ${esc(p.name)}${p.position ? `\n      <i>${esc(p.position)}</i>` : ''}`).join('\n');
+    return grouped ? `📍 <b>${esc(branch || 'Filialsiz')}</b> · ${list.length}\n${rows}` : rows;
+  });
   return [
     `❌ <b>Kelmaganlar</b> · ${esc(uzDay(date))}`,
     LINE,
-    `Jami: <b>${people.length}</b> xodim`,
+    `👥 Jami: <b>${people.length}</b> xodim`,
+    fine > 0 ? `💸 Har biriga jarima: <b>${esc(fine.toLocaleString('ru-RU'))} soʻm</b>` : '',
     '',
-    `<blockquote expandable>${list}</blockquote>`,
+    blocks.join('\n\n'),
     '',
     footer(),
-  ].join('\n');
+  ].filter((x, i, arr) => x !== '' || arr[i - 1] !== '').join('\n');
 }
 
 export function dailyMessage(date: string, s: { came: number; late: number; absent: number }) {

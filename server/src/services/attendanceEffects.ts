@@ -1,6 +1,7 @@
 import { settings } from '../data/mockStore.js';
 import type { Attendance, User } from '../data/types.js';
 import { isoWeekday, toLocalDate } from '../lib/date.js';
+import { branchRepo } from '../repositories/branchRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { adjustmentRepo } from '../repositories/financeRepo.js';
 import { audit, notifyRoles } from '../repositories/notificationRepo.js';
@@ -50,7 +51,8 @@ export async function markAbsentees(date = toLocalDate()): Promise<number> {
   }
   if (absent.length) {
     await notifyRoles(['DIRECTOR', 'MANAGER'], 'notif.absent', { count: absent.length, names: absent.map((a) => a.fullName).slice(0, 3).join(', ') }, '/attendance');
-    await sendTelegram(absentMessage(date, absent.map((a) => ({ name: a.fullName, position: a.position }))));
+    const branchNames = new Map((await branchRepo.list()).map((b) => [b.id, b.name]));
+    await sendTelegram(absentMessage(date, absent.map((a) => ({ name: a.fullName, position: a.position, branch: a.branchId ? (branchNames.get(a.branchId) ?? null) : null })), settings.absentFine));
   }
   return absent.length;
 }
