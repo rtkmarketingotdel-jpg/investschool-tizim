@@ -9,7 +9,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { deliverSms, smsBalance, smsStatus } from '../services/sms.js';
-import { createCampaign, prepare, retryFailed, runDebtAuto, usesFinance, type Audience } from '../services/smsCampaigns.js';
+import { createCampaign, prepare, retryFailed, runDebtAuto, type Audience } from '../services/smsCampaigns.js';
 
 export const smsRouter = Router();
 smsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER'));
@@ -43,11 +43,6 @@ function audienceLabel(a: Audience): string {
     case 'NUMBERS': return `NUMBERS:${a.numbers.length}`;
     default: return a.kind;
   }
-}
-
-/** ADMIN must not learn debts: block the debtor audience and debt variables for that role. */
-function guardFinance(role: string, text: string, audience: Audience) {
-  if (role === 'ADMIN' && usesFinance(text, audience)) throw new ApiError(403, 'FORBIDDEN');
 }
 
 const summary = (c: SmsCampaign) => {
@@ -116,7 +111,6 @@ smsRouter.delete('/templates/:id', async (req, res, next) => {
 smsRouter.post('/preview', validateBody(composeSchema), async (req, res, next) => {
   try {
     const b = req.body as z.infer<typeof composeSchema>;
-    guardFinance(req.user!.role, b.text, b.audience);
     const p = await prepare(b.text, b.audience as Audience, { bothPhones: b.bothPhones, lang: b.lang });
     res.json({
       count: p.messages.length, segments: p.segments, invalidPhones: p.invalidPhones, duplicates: p.duplicates,
@@ -138,7 +132,6 @@ const sendSchema = composeSchema.extend({
 smsRouter.post('/send', validateBody(sendSchema), async (req, res, next) => {
   try {
     const b = req.body as z.infer<typeof sendSchema>;
-    guardFinance(req.user!.role, b.text, b.audience);
     const c = await createCampaign({
       category: b.category as SmsCategory, title: b.title || normalizeSms(b.text.replace(/\{\{\s*\w+\s*\}\}/g, '…')).slice(0, 60), audienceLabel: audienceLabel(b.audience as Audience),
       text: b.text, audience: b.audience as Audience, bothPhones: b.bothPhones, lang: b.lang,

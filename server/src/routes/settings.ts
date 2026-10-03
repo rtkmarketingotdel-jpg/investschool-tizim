@@ -34,9 +34,6 @@ const patchSchema = z
   })
   .partial();
 
-/** ADMIN may only change where the school is (needed to set up the check-in radius). */
-const ADMIN_FIELDS = new Set(['maxGpsAccuracyM', 'geoEnforced']);
-
 settingsRouter.get('/', (_req, res) => {
   res.json({ settings });
 });
@@ -44,7 +41,6 @@ settingsRouter.get('/', (_req, res) => {
 settingsRouter.put('/', validateBody(patchSchema), async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof patchSchema>;
-    if (req.user!.role !== 'DIRECTOR' && Object.keys(body).some((k) => !ADMIN_FIELDS.has(k))) throw new ApiError(403, 'FORBIDDEN');
     if (body.workStart && body.workEnd && body.workStart >= body.workEnd) throw new ApiError(400, 'VALIDATION_ERROR');
     Object.assign(settings, body);
     await audit(req.user!.id, 'settings.update', 'settings', 'main', { fields: Object.keys(body) });
