@@ -8,6 +8,13 @@ export default {
   theme: {
     extend: {
       fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      keyframes: {
+        'tip-in': {
+          '0%': { opacity: '0', transform: 'translate(-10px, -50%) scale(0.92)' },
+          '100%': { opacity: '1', transform: 'translate(0, -50%) scale(1)' },
+        },
+      },
+      animation: { 'tip-in': 'tip-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both' },
       boxShadow: {
         card: '0 1px 2px rgb(26 64 129 / 0.04), 0 8px 24px -12px rgb(26 64 129 / 0.12)',
         shell: '0 24px 60px -30px rgb(26 64 129 / 0.35)',

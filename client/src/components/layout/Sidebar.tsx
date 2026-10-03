@@ -60,7 +60,7 @@ function RailLink({ to, label, icon: Icon, end }: { to: string; label: string; i
         onClick={() => setTip(null)}
         className={({ isActive }) =>
           cn(
-            'relative flex h-11 w-11 items-center justify-center rounded-xl transition',
+            'relative flex h-11 w-11 items-center justify-center rounded-xl transition duration-200 hover:scale-105',
             isActive
               ? 'bg-primary-soft text-primary before:absolute before:-left-[11px] before:top-2.5 before:bottom-2.5 before:w-1 before:rounded-r-full before:bg-primary md:before:-left-[15px]'
               : 'text-text-muted hover:bg-surface-muted hover:text-text',
@@ -74,7 +74,7 @@ function RailLink({ to, label, icon: Icon, end }: { to: string; label: string; i
           <div
             role="tooltip"
             style={{ left: tip.x, top: tip.y }}
-            className="pointer-events-none fixed z-[90] -translate-y-1/2 whitespace-nowrap rounded-lg bg-primary-deep px-3 py-2 text-sm text-white shadow-lg before:absolute before:-left-1 before:top-1/2 before:h-2 before:w-2 before:-translate-y-1/2 before:rotate-45 before:bg-primary-deep"
+            className="pointer-events-none fixed z-[90] -translate-y-1/2 animate-tip-in whitespace-nowrap motion-reduce:animate-none rounded-lg bg-primary-deep px-3 py-2 text-sm text-white shadow-lg before:absolute before:-left-1 before:top-1/2 before:h-2 before:w-2 before:-translate-y-1/2 before:rotate-45 before:bg-primary-deep"
           >
             {label}
           </div>,
