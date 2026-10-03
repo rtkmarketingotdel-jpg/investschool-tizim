@@ -88,3 +88,38 @@ meRouter.get('/teaching', async (req, res, next) => {
     next(e);
   }
 });
+
+const phoneRe = /^\+998\d{9}$/;
+const optionalStr = z.string().trim().max(500).nullable().transform((v) => v || null);
+const classStudentSchema = z.object({
+  firstName: z.string().trim().min(1).max(60),
+  lastName: z.string().trim().min(1).max(60),
+  middleName: optionalStr,
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+  gender: z.enum(['MALE', 'FEMALE']),
+  parentName: z.string().trim().min(1).max(120),
+  parentPhone: z.string().regex(phoneRe),
+  parentPhone2: z.string().regex(phoneRe).nullable(),
+  address: optionalStr,
+  district: optionalStr,
+  isBoarding: z.boolean(),
+});
+
+/** A homeroom teacher enrols students into their own class. Fees stay 0 until management sets them. */
+meRouter.post('/class/:classId/students', validateBody(classStudentSchema), async (req, res, next) => {
+  try {
+    const cls = await classRepo.findById(req.params.classId!);
+    if (!cls) throw new ApiError(404, 'NOT_FOUND');
+    if (cls.teacherId !== req.user!.id) throw new ApiError(403, 'FORBIDDEN');
+    const taken = (await studentRepo.occupancy()).get(cls.id) ?? 0;
+    if (taken >= cls.capacity) throw new ApiError(409, 'CLASS_FULL');
+    const body = req.body as z.infer<typeof classStudentSchema>;
+    const rec = await studentRepo.create({
+      ...body, classId: cls.id, clubs: [], monthlyFee: 0, discountPercent: 0, status: 'ACTIVE',
+      enrolledAt: new Date().toISOString().slice(0, 10), leftAt: null, notes: null,
+    });
+    res.status(201).json({ id: rec.id, fullName: fullName(rec) });
+  } catch (e) {
+    next(e);
+  }
+});

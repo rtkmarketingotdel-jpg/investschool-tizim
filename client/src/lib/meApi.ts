@@ -57,3 +57,18 @@ export const ageOf = (birthDate: string | null) => {
   if (now.getMonth() < b.getMonth() || (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())) age--;
   return age;
 };
+
+export interface ClassStudentInput {
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  birthDate: string | null;
+  gender: 'MALE' | 'FEMALE';
+  parentName: string;
+  parentPhone: string;
+  parentPhone2: string | null;
+  address: string | null;
+  district: string | null;
+  isBoarding: boolean;
+}
+export const addClassStudent = (classId: string, d: ClassStudentInput) => api.post(`/me/class/${classId}/students`, d).then((r) => r.data);

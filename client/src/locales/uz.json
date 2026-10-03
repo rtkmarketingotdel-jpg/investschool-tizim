@@ -965,7 +965,9 @@
       "copyPhones": "Telefonlarni nusxalash",
       "boy": "Oʻgʻil bola",
       "girl": "Qiz bola",
-      "age": "{{count}} yosh"
+      "age": "{{count}} yosh",
+      "add": "Oʻquvchi qoʻshish",
+      "addStudent": "{{name}} sinfiga oʻquvchi qoʻshish"
     },
     "clubs": {
       "none": "Siz toʻgarak rahbari emassiz",

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BedDouble, Check, Copy, MapPin, Phone, Search, UserX } from 'lucide-react';
+import { BedDouble, Check, Copy, MapPin, Phone, Plus, Search, UserX } from 'lucide-react';
 import { ageOf, type TeachingClass, type TeachingStudent } from '@/lib/meApi';
 import { fmtDay } from '@/lib/dates';
 import { cn } from '@/lib/cn';
 import { fillOf, fillTone, levelOf, levelTone, Ring, SplitBar } from '../classes/parts';
+import { AddClassStudent } from './AddClassStudent';
 import { Avatar, Badge, Button, Card, EmptyState, Input, Select, type BadgeTone } from '../ui';
 
 const contractTone: Record<TeachingStudent['contract'], BadgeTone> = { SIGNED: 'success', SENT: 'warning', DRAFT: 'neutral', NONE: 'danger' };
@@ -73,6 +74,7 @@ export function TeacherClass({ classes }: { classes: TeachingClass[] }) {
   const [q, setQ] = useState('');
   const [contract, setContract] = useState('');
   const { copied, copy } = useCopy();
+  const [adding, setAdding] = useState(false);
   const c = classes.find((x) => x.id === id) ?? classes[0];
 
   const shown = useMemo(() => {
@@ -125,6 +127,9 @@ export function TeacherClass({ classes }: { classes: TeachingClass[] }) {
             <option value="SIGNED">{t('finance.contracts.statuses.SIGNED')}</option>
           </Select>
         </div>
+        <Button className="px-4 py-3 text-sm" disabled={c.freeSeats === 0} onClick={() => setAdding(true)}>
+          <Plus className="h-4 w-4" /> {t('me.class.add')}
+        </Button>
         <Button variant="secondary" className="px-4 py-3 text-sm" disabled={shown.length === 0} onClick={() => void copy('phones', phones)}>
           {copied === 'phones' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {t(copied === 'phones' ? 'finance.debtors.copied' : 'me.class.copyPhones')}
         </Button>
@@ -135,6 +140,7 @@ export function TeacherClass({ classes }: { classes: TeachingClass[] }) {
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">{shown.map((s) => <StudentCard key={s.id} s={s} />)}</div>
       )}
+      <AddClassStudent open={adding} classId={c.id} className={c.name} onClose={() => setAdding(false)} />
     </div>
   );
 }
