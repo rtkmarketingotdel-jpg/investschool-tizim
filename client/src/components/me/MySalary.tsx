@@ -39,7 +39,7 @@ function CurrentMonth({ c }: { c: PayrollCurrent }) {
   const cur = t('common.currency');
   const money = (n: number) => formatMoney(n, cur);
   return (
-    <Card className="space-y-6 rounded-3xl p-6 sm:p-8">
+    <Card className="space-y-6 rounded-xl p-6 sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm text-text-muted">{t('me.salary.thisMonth')}</p>
@@ -74,12 +74,12 @@ export function MySalary() {
   const cur = t('common.currency');
   const money = (n: number) => formatMoney(n, cur);
 
-  if (isLoading || !data) return <Skeleton className="h-96 rounded-3xl" />;
+  if (isLoading || !data) return <Skeleton className="h-96 rounded-xl" />;
   const past = data.items.filter((p) => p.period !== data.current.period);
   return (
     <div className="space-y-6">
       <CurrentMonth c={data.current} />
-      <Card className="rounded-3xl">
+      <Card className="rounded-xl">
         <h3 className="mb-1 text-lg">{t('me.salary.adjustments')}</h3>
         <Adjustments list={data.current.adjustments} />
       </Card>

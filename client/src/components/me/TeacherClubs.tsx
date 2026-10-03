@@ -17,7 +17,7 @@ export function TeacherClubs({ clubs }: { clubs: TeachingClub[] }) {
         const Icon = clubIcon(c.name);
         const phones = c.members.map((m) => `${m.fullName} — ${m.parentName}: ${m.parentPhone}`).join('\n');
         return (
-          <Card key={c.id} className="space-y-4 rounded-3xl p-6">
+          <Card key={c.id} className="space-y-4 rounded-xl p-6">
             <div className="flex flex-wrap items-center gap-4">
               <span className={cn('flex h-14 w-14 items-center justify-center rounded-2xl', tintFor(c.name))}><Icon className="h-7 w-7" /></span>
               <div className="min-w-0 flex-1">

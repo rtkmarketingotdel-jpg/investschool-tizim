@@ -9,7 +9,7 @@ import { clubIcon, subjectIcon, tintFor } from './parts';
 
 function Header({ icon: Icon, name, sub }: { icon: typeof Users; name: string; sub: string }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-border p-5">
+    <div className="flex items-center gap-4 rounded-xl bg-surface-muted p-5">
       <span className={cn('flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl', tintFor(name))}><Icon className="h-7 w-7" /></span>
       <div className="min-w-0"><p className="truncate text-xl">{name}</p><p className="text-sm text-text-muted">{sub}</p></div>
     </div>

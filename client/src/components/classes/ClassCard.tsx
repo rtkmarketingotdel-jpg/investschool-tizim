@@ -19,11 +19,11 @@ export function ClassCard({ cls: c, branchName, canEdit, onOpen, onEdit }: Props
   const tone = levelTone[levelOf(c.grade)];
   return (
     <article
-      className="group relative overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_1px_2px_rgb(0_0_0/0.04),0_12px_28px_-18px_rgb(0_0_0/0.18)] transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_2px_4px_rgb(0_0_0/0.05),0_22px_40px_-20px_rgb(37_99_235/0.30)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group relative overflow-hidden rounded-xl bg-surface transition duration-300 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {/* soft wash in the level colour */}
       <div aria-hidden className={cn('pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-60 blur-2xl', tone.chip)} />
-      <button type="button" onClick={onOpen} className="relative block w-full p-6 text-left focus-visible:rounded-3xl" aria-label={`${c.name} · ${t('classes.roster')}`}>
+      <button type="button" onClick={onOpen} className="relative block w-full p-6 text-left focus-visible:rounded-xl" aria-label={`${c.name} · ${t('classes.roster')}`}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-4">
             <span className={cn('flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-2xl tracking-tight', tone.chip)}>{c.name}</span>

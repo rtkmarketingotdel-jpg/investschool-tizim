@@ -21,7 +21,7 @@ function useFail() {
 }
 
 const CardGrid = ({ children }: { children: React.ReactNode }) => <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{children}</div>;
-const GridSkeleton = () => <CardGrid>{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-48 rounded-3xl" />)}</CardGrid>;
+const GridSkeleton = () => <CardGrid>{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-48 rounded-xl" />)}</CardGrid>;
 
 function SubjectsTab({ q, adding, onAddDone }: { q: string; adding: boolean; onAddDone: () => void }) {
   const { t } = useTranslation();
@@ -131,7 +131,7 @@ function TutorsTab({ q }: { q: string }) {
         <CardGrid>
           {rows.map((u) => (
             <article key={u.id} className={cardShell}>
-              <button type="button" onClick={() => navigate(`/staff/${u.id}`)} className="block w-full p-6 text-left focus-visible:rounded-3xl" aria-label={u.fullName}>
+              <button type="button" onClick={() => navigate(`/staff/${u.id}`)} className="block w-full p-6 text-left focus-visible:rounded-xl" aria-label={u.fullName}>
                 <div className="flex items-center gap-4">
                   <Avatar name={u.fullName} size={60} src={u.photoUrl} />
                   <div className="min-w-0 flex-1">
@@ -154,7 +154,7 @@ function TutorsTab({ q }: { q: string }) {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <Card className="rounded-3xl p-4 sm:p-6">
+    <Card className="rounded-xl p-4 sm:p-6">
       <p className="text-sm text-text-muted">{label}</p>
       <p className="mt-1 text-xl tabular-nums tracking-tight sm:text-2xl">{value}</p>
     </Card>

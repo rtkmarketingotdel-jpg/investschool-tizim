@@ -18,7 +18,7 @@ export function ClubCard({ club: c, onOpen, onEdit, onDelete }: Props) {
   const Icon = clubIcon(c.name);
   return (
     <article className={cardShell}>
-      <button type="button" onClick={onOpen} className="block w-full p-6 text-left focus-visible:rounded-3xl" aria-label={`${c.name} · ${t('academics.clubMembers')}`}>
+      <button type="button" onClick={onOpen} className="block w-full p-6 text-left focus-visible:rounded-xl" aria-label={`${c.name} · ${t('academics.clubMembers')}`}>
         <div className="flex items-center justify-between gap-3">
           <span className={cn('flex h-14 w-14 items-center justify-center rounded-2xl', tintFor(c.name))}><Icon className="h-7 w-7" /></span>
           <div className="text-right">

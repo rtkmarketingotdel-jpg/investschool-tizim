@@ -32,7 +32,7 @@ function StudentCard({ s }: { s: TeachingStudent }) {
   const { t, i18n } = useTranslation();
   const age = ageOf(s.birthDate);
   return (
-    <article className="rounded-2xl border border-border bg-surface p-5">
+    <article className="rounded-xl bg-surface p-5">
       <div className="flex items-start gap-4">
         <Avatar name={`${s.firstName} ${s.lastName}`} size={48} />
         <div className="min-w-0 flex-1">
@@ -98,9 +98,9 @@ export function TeacherClass({ classes }: { classes: TeachingClass[] }) {
         </div>
       )}
 
-      <Card className="rounded-3xl p-6 sm:p-8">
+      <Card className="rounded-xl p-6 sm:p-8">
         <div className="flex flex-wrap items-center gap-6">
-          <span className={cn('flex h-20 w-20 items-center justify-center rounded-3xl text-3xl tracking-tight', levelTone[levelOf(c.grade)].chip)}>{c.name}</span>
+          <span className={cn('flex h-20 w-20 items-center justify-center rounded-xl text-3xl tracking-tight', levelTone[levelOf(c.grade)].chip)}>{c.name}</span>
           <Ring value={c.studentCount} total={c.capacity} fill={fill} size={96}><span className="text-2xl tabular-nums">{c.studentCount}</span></Ring>
           <div className="min-w-48 flex-1 space-y-3">
             <p className="tabular-nums"><span className="text-2xl">{c.studentCount}</span><span className="text-text-muted"> / {c.capacity} {t('me.class.students')}</span></p>

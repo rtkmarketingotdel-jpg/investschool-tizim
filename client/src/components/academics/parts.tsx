@@ -34,4 +34,4 @@ export function AvatarStack({ people, max = 4 }: { people: Array<{ id: string; f
 }
 
 export const cardShell =
-  'group relative overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_1px_2px_rgb(0_0_0/0.04),0_12px_28px_-18px_rgb(0_0_0/0.18)] transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_2px_4px_rgb(0_0_0/0.05),0_22px_40px_-20px_rgb(37_99_235/0.30)] motion-reduce:transition-none motion-reduce:hover:translate-y-0';
+  'group relative overflow-hidden rounded-xl bg-surface transition duration-300 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0';

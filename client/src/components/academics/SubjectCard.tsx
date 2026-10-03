@@ -20,7 +20,7 @@ export function SubjectCard({ subject, onOpen, onEdit, onDelete }: Props) {
   const tutors = s.people.length - teachers;
   return (
     <article className={cardShell}>
-      <button type="button" onClick={onOpen} className="block w-full p-6 text-left focus-visible:rounded-3xl" aria-label={`${s.name} · ${t('academics.whoTeaches')}`}>
+      <button type="button" onClick={onOpen} className="block w-full p-6 text-left focus-visible:rounded-xl" aria-label={`${s.name} · ${t('academics.whoTeaches')}`}>
         <span className={cn('flex h-14 w-14 items-center justify-center rounded-2xl', tintFor(s.name))}><Icon className="h-7 w-7" /></span>
         <h3 className="mt-5 text-xl leading-snug">{s.name}</h3>
         <div className="mt-4 flex min-h-8 items-center gap-3">

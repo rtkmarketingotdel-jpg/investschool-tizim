@@ -16,7 +16,7 @@ type Sort = 'grade' | 'fill' | 'free';
 
 function StatTile({ label, value, sub, children }: { label: string; value: string; sub?: string; children?: React.ReactNode }) {
   return (
-    <Card className="flex items-center justify-between gap-3 rounded-3xl p-4 sm:p-6">
+    <Card className="flex items-center justify-between gap-3 rounded-xl p-4 sm:p-6">
       <div className="min-w-0">
         <p className="text-sm text-text-muted">{label}</p>
         <p className="mt-1 text-xl tabular-nums tracking-tight sm:text-2xl">{value}</p>
@@ -114,7 +114,7 @@ export default function Classes() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-72 rounded-3xl" />)}</div>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-72 rounded-xl" />)}</div>
       ) : isError ? (
         <EmptyState icon={School} title={t('errors.INTERNAL_ERROR')} />
       ) : all.length === 0 ? (

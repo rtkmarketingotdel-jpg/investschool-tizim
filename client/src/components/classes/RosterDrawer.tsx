@@ -34,7 +34,7 @@ export function RosterDrawer({ cls, branchName, canEdit, onClose, onEdit }: Prop
     <Drawer open={!!cls} onClose={onClose} title={cls ? `${cls.name} · ${t('classes.roster')}` : ''} width={560}>
       {cls && (
         <div className="space-y-6">
-          <div className="flex items-center gap-5 rounded-2xl border border-border p-5">
+          <div className="flex items-center gap-5 rounded-xl bg-surface-muted p-5">
             <Ring value={cls.studentCount} total={cls.capacity} fill={fill} size={96}>
               <span className="text-2xl tabular-nums">{cls.studentCount}</span>
             </Ring>

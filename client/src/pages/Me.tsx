@@ -36,7 +36,7 @@ export default function Me() {
       <InstallBanner />
       <div className="overflow-x-auto"><Tabs value={tab} onChange={setTab} tabs={tabs} /></div>
       {tab === 'attendance' && <AttendanceSelf />}
-      {tab === 'class' && (teaching.isLoading ? <Skeleton className="h-96 rounded-3xl" /> : <TeacherClass classes={tr?.classes ?? []} />)}
+      {tab === 'class' && (teaching.isLoading ? <Skeleton className="h-96 rounded-xl" /> : <TeacherClass classes={tr?.classes ?? []} />)}
       {tab === 'clubs' && <TeacherClubs clubs={tr?.clubs ?? []} />}
       {tab === 'salary' && <MySalary />}
     </div>
