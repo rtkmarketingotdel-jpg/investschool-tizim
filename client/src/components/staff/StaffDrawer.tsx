@@ -30,6 +30,8 @@ type FormValues = z.infer<typeof schema>;
 
 const empty: FormValues = { fullName: '', phone: '', role: 'TEACHER', position: '', subject: '', customSubject: '', homeroomClassId: '', branchId: '', baseSalary: 4_000_000, isActive: true };
 const OTHER = '__other';
+type StaffType = 'manager' | 'teacher' | 'tutor';
+const toType = (k: string): StaffType => (k === 'teacher' ? 'teacher' : k === 'tutor' ? 'tutor' : 'manager');
 
 interface Props {
   open: boolean;
@@ -45,9 +47,9 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const { user } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
-  const roles: Role[] = user?.role === 'DIRECTOR' ? ['TEACHER', 'MANAGER', 'DIRECTOR'] : ['TEACHER'];
   // The employee type can be changed at any time (e.g. a plain employee becomes a teacher): the cabinet follows it.
-  const [type, setType] = useState<'teacher' | 'tutor' | 'staff'>(kind);
+  const [type, setType] = useState<StaffType>(toType(kind));
+  const [clubIds, setClubIds] = useState<string[]>([]);
   const isTeacher = type === 'teacher';
   const isTutor = type === 'tutor';
   const hasSubject = isTeacher || isTutor;
@@ -55,6 +57,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const [copied, setCopied] = useState(false);
   const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open && isTeacher });
   const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches, enabled: open });
+  const clubsQ = useQuery({ queryKey: ['clubs'], queryFn: schoolApi.clubs, enabled: open && isTutor });
   const subjectsQ = useQuery({ queryKey: ['subjects'], queryFn: schoolApi.subjects, enabled: open && hasSubject });
   const subjectNames = (subjectsQ.data ?? []).map((s) => s.name);
 
@@ -62,7 +65,8 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   useEffect(() => {
     if (!open) return;
     setCopied(false);
-    setType(member ? (member.isTeacher ? 'teacher' : member.isTutor ? 'tutor' : 'staff') : kind);
+    setType(member ? (member.isTeacher ? 'teacher' : member.isTutor ? 'tutor' : 'manager') : toType(kind));
+    setClubIds([]);
     setPassword(member ? '' : generatePassword());
     if (!member) return reset(empty);
     const known = member.subject && (subjectsQ.data ?? []).some((x) => x.name === member.subject);
@@ -73,6 +77,10 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
     });
   }, [open, member, kind, reset, subjectsQ.data]);
 
+  useEffect(() => {
+    if (open && member && clubsQ.data) setClubIds(clubsQ.data.filter((c) => c.teacherId === member.id).map((c) => c.id));
+  }, [open, member, clubsQ.data]);
+
   const subject = watch('subject');
   const passwordError = !member && password.length > 0 && password.length < 8;
 
@@ -80,11 +88,12 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
     mutationFn: async (v: FormValues) => {
       const subj = hasSubject ? (v.subject === OTHER ? v.customSubject.trim() : v.subject) || null : null;
       const body = {
-        fullName: v.fullName, phone: v.phone, role: v.role, baseSalary: v.baseSalary, isActive: v.isActive,
+        fullName: v.fullName, phone: v.phone, role: member?.role === 'DIRECTOR' ? ('DIRECTOR' as Role) : type === 'manager' ? ('MANAGER' as Role) : ('TEACHER' as Role), baseSalary: v.baseSalary, isActive: v.isActive,
         isTeacher, isTutor, subject: subj,
         position: subj && isTeacher ? `${subj} oʻqituvchisi` : subj && isTutor ? `${subj} repetitori` : v.position,
         homeroomClassId: isTeacher && v.homeroomClassId ? v.homeroomClassId : null,
         branchId: v.branchId || null,
+        ...(isTutor ? { clubIds } : {}),
       };
       if (member) return schoolApi.updateStaff(member.id, body).then(() => null);
       return schoolApi.createStaff({ ...body, password: password || undefined });
@@ -100,10 +109,10 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   });
 
   const err = (k: keyof FormValues) => (errors[k]?.message ? t(errors[k]!.message as string) : undefined);
-  const locked = !!member && user?.role !== 'DIRECTOR' && (member.role === 'DIRECTOR' || member.role === 'MANAGER');
+  const locked = !!member && user?.role !== 'DIRECTOR' && member.role === 'DIRECTOR';
   const needsSubject = hasSubject && (!subject || (subject === OTHER && !watch('customSubject').trim()));
   const needsPosition = !hasSubject && !watch('position').trim();
-  const title = member ? t('staff.edit') : t(isTeacher ? 'staff.addTeacher' : isTutor ? 'staff.addTutor' : 'staff.add');
+  const title = member ? t('staff.edit') : t('staff.add');
 
   return (
     <Drawer open={open} onClose={onClose} title={title}>
@@ -111,20 +120,39 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
         <Input label={t('staff.fullName')} error={err('fullName')} {...register('fullName')} />
         <Controller control={control} name="phone" render={({ field }) => <PhoneInput label={t('staff.phoneLogin')} value={field.value} onChange={field.onChange} error={err('phone')} />} />
 
-        <Select label={t('staff.employeeType')} value={type} onChange={(e) => setType(e.target.value as typeof type)}>
-          <option value="staff">{t('staff.types.staff')}</option>
-          <option value="teacher">{t('staff.types.teacher')}</option>
-          <option value="tutor">{t('staff.types.tutor')}</option>
-        </Select>
+        {member?.role !== 'DIRECTOR' && (
+          <Select label={t('staff.roleChoose')} value={type} onChange={(e) => setType(e.target.value as StaffType)}>
+            <option value="teacher">{t('staff.types.teacher')}</option>
+            <option value="manager">{t('staff.types.manager')}</option>
+            <option value="tutor">{t('staff.types.tutor')}</option>
+          </Select>
+        )}
 
         {hasSubject ? (
           <>
-            <Select label={t('staff.subject')} {...register('subject')}>
+            <Select label={`${t('staff.subject')} *`} {...register('subject')}>
               <option value="">—</option>
               {subjectNames.map((s) => <option key={s} value={s}>{s}</option>)}
               <option value={OTHER}>{t('staff.otherSubject')}</option>
             </Select>
             {subject === OTHER && <Input label={t('staff.customSubject')} {...register('customSubject')} />}
+            {isTutor && (
+              <div>
+                <span className="mb-1.5 block text-sm">{t('staff.tutorClubs')}</span>
+                <div className="flex flex-wrap gap-2">
+                  {(clubsQ.data ?? []).map((c) => {
+                    const on = clubIds.includes(c.id);
+                    return (
+                      <button key={c.id} type="button" aria-pressed={on} onClick={() => setClubIds(on ? clubIds.filter((x) => x !== c.id) : [...clubIds, c.id])}
+                        className={`rounded-full border px-4 py-2 text-sm transition ${on ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text-muted hover:bg-surface-muted'}`}>
+                        {c.name}
+                      </button>
+                    );
+                  })}
+                  {clubsQ.data?.length === 0 && <p className="text-sm text-text-muted">{t('staff.noClubs')}</p>}
+                </div>
+              </div>
+            )}
             {isTeacher && <Select label={t('staff.homeroom')} {...register('homeroomClassId')}>
               <option value="">{t('staff.noHomeroom')}</option>
               {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}{c.teacherName ? ` · ${c.teacherName}` : ''}</option>)}
@@ -137,9 +165,6 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
         <Select label={t('staff.branch')} {...register('branchId')}>
           <option value="">{t('staff.anyBranch')}</option>
           {branches.data?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-        </Select>
-        <Select label={t('staff.role')} {...register('role')}>
-          {roles.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
         </Select>
         <Input type="number" min={0} step={100000} label={t('staff.baseSalary')} error={err('baseSalary')} {...register('baseSalary', { valueAsNumber: true })} />
         {member && <Controller control={control} name="isActive" render={({ field }) => <Checkbox label={t('staff.active')} checked={field.value} onChange={field.onChange} />} />}

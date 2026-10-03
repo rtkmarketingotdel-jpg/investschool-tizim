@@ -33,6 +33,8 @@ const staffSchema = z.object({
   /** Optional login password on creation; generated when omitted. */
   password: z.string().min(8).max(64).optional(),
   homeroomClassId: z.string().nullable().default(null),
+  /** Clubs a tutor leads (kept in sync only when sent). */
+  clubIds: z.array(z.string()).max(30).optional(),
   branchId: z.string().nullable().default(null),
   baseSalary: z.number().int().min(0).max(100_000_000),
   isActive: z.boolean().default(true),
@@ -48,11 +50,21 @@ const listQuery = z.object({
   tutor: z.enum(['true']).optional(),
 });
 
-/** Only the director may hand out roles above STAFF/ADMIN, or touch such accounts. */
+/** Only the director may touch (or create) director accounts; a manager manages everyone else. */
 function assertCanManage(actorRole: Role, targetRole: Role, newRole?: Role) {
   if (actorRole === 'DIRECTOR') return;
-  const privileged: Role[] = ['DIRECTOR', 'MANAGER'];
+  const privileged: Role[] = ['DIRECTOR'];
   if (privileged.includes(targetRole) || (newRole && privileged.includes(newRole))) throw new ApiError(403, 'FORBIDDEN');
+}
+
+const clubsExist = async (ids: string[]) => { const all = await clubRepo.list(); return ids.every((id) => all.some((c) => c.id === id)); };
+
+/** A tutor leads exactly the clubs listed: free the others, take the chosen ones. */
+async function syncClubs(userId: string, clubIds: string[]) {
+  for (const c of await clubRepo.list()) {
+    if (clubIds.includes(c.id)) await clubRepo.update(c.id, { name: c.name, monthlyFee: c.monthlyFee, teacherId: userId });
+    else if (c.teacherId === userId) await clubRepo.update(c.id, { name: c.name, monthlyFee: c.monthlyFee, teacherId: null });
+  }
 }
 
 staffRouter.get('/', async (req, res, next) => {
@@ -116,9 +128,10 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
     const body = req.body as StaffInput;
     assertCanManage(req.user!.role, body.role, body.role);
     if (await userRepo.findByPhone(body.phone)) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
-    const { password, homeroomClassId, ...data } = body;
+    const { password, homeroomClassId, clubIds, ...data } = body;
     if (homeroomClassId && !(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
     if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
+    if (clubIds && !(await clubsExist(clubIds))) throw new ApiError(400, 'VALIDATION_ERROR');
     const finalPassword = password ?? generatePassword();
     const user = await userRepo.create({
       ...data,
@@ -135,6 +148,7 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
       hiredAt: new Date(),
     });
     if (homeroomClassId) await classRepo.update(homeroomClassId, { teacherId: user.id });
+    if (user.isTutor && clubIds) await syncClubs(user.id, clubIds);
     await audit(req.user!.id, 'staff.create', 'user', user.id, { role: user.role, isTeacher: user.isTeacher });
     res.status(201).json({ user: toPublicUser(user), tempPassword: finalPassword, generated: !password });
   } catch (e) {
@@ -153,14 +167,16 @@ staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
     }
     const clash = await userRepo.findByPhone(body.phone);
     if (clash && clash.id !== target.id) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
-    const { password: _ignored, homeroomClassId, ...data } = body;
+    const { password: _ignored, homeroomClassId, clubIds, ...data } = body;
     void _ignored;
+    if (clubIds && !(await clubsExist(clubIds))) throw new ApiError(400, 'VALIDATION_ERROR');
     if (homeroomClassId) {
       if (!(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
       await classRepo.update(homeroomClassId, { teacherId: target.id });
     }
     if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
     const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher || data.isTutor ? data.subject : null });
+    if (updated!.isTutor && clubIds) await syncClubs(target.id, clubIds);
     await audit(req.user!.id, 'staff.update', 'user', target.id);
     res.json({ user: toPublicUser(updated!) });
   } catch (e) {

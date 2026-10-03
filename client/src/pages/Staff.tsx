@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, Check, Copy, GraduationCap, KeyRound, Pencil, Plus, Search, Trash2, Users } from 'lucide-react';
+import { Check, Copy, KeyRound, Pencil, Plus, Search, Trash2, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { errorCode } from '@/lib/api';
 import { schoolApi, type Role, type StaffMember } from '@/lib/schoolApi';
@@ -85,11 +85,7 @@ export default function Staff() {
         title={t('nav.staffList')}
         subtitle={t('staff.subtitle', { count: list.data?.total ?? 0 })}
         action={
-          <div className="flex flex-wrap gap-3">
-            <Button variant="secondary" onClick={() => setDrawer({ open: true, member: null, kind: 'staff' })}><Plus className="h-5 w-5" /> {t('staff.add')}</Button>
-            <Button variant="secondary" onClick={() => setDrawer({ open: true, member: null, kind: 'tutor' })}><BookOpen className="h-5 w-5" /> {t('staff.addTutor')}</Button>
-            <Button onClick={() => setDrawer({ open: true, member: null, kind: 'teacher' })}><GraduationCap className="h-5 w-5" /> {t('staff.addTeacher')}</Button>
-          </div>
+          <Button onClick={() => setDrawer({ open: true, member: null, kind: 'teacher' })}><Plus className="h-5 w-5" /> {t('staff.add')}</Button>
         }
       />
       <div className="mb-6 flex flex-wrap gap-3">

@@ -123,6 +123,7 @@ export interface StaffMember {
 export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive' | 'isTeacher' | 'isTutor' | 'subject' | 'branchId'> & {
   password?: string;
   homeroomClassId?: string | null;
+  clubIds?: string[];
 };
 
 const clean = <T extends object>(o: T) =>

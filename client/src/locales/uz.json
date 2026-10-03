@@ -408,13 +408,17 @@
     "nothingYet": "Hali kiritilmagan",
     "employeeType": "Xodim turi",
     "types": {
-      "staff": "Oddiy xodim",
+      "staff": "Menejer",
+      "manager": "Bosh menejer",
       "teacher": "Oʻqituvchi",
       "tutor": "Repetitor"
     },
     "delete": "Oʻchirish",
     "deleted": "Xodim oʻchirildi",
-    "deleteConfirm": "“{{name}}” butunlay oʻchirilsinmi? Uning davomat va oylik tarixi ham oʻchadi, sinf va toʻgaraklari boʻshaydi."
+    "deleteConfirm": "“{{name}}” butunlay oʻchirilsinmi? Uning davomat va oylik tarixi ham oʻchadi, sinf va toʻgaraklari boʻshaydi.",
+    "roleChoose": "Rol tanlang",
+    "tutorClubs": "Toʻgaraklar (bir nechta tanlash mumkin)",
+    "noClubs": "Toʻgaraklar hali yaratilmagan"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",
