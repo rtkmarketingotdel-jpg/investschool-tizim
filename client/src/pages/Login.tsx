@@ -42,7 +42,7 @@ export default function Login() {
       <div className="flex items-center justify-center p-6">
         <form onSubmit={submit} className="w-full max-w-md space-y-5">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <img src={brand.logo} alt="" className="h-10 w-10 rounded-xl" />
+            <img src={brand.logo} alt="" className="h-10 w-10 rounded-full" />
             <span className="text-lg font-medium">{brand.name}</span>
           </div>
           <div>
@@ -99,7 +99,7 @@ export default function Login() {
         </form>
       </div>
       <div className="hidden flex-col items-center justify-center gap-6 bg-primary p-12 text-white lg:flex">
-        <img src={brand.logo} alt="" className="h-24 w-24 rounded-3xl shadow-xl" />
+        <img src={brand.logo} alt="" className="h-32 w-32 rounded-full" />
         <h2 className="text-4xl font-medium">{brand.name}</h2>
         <p className="text-lg text-white/80">{t('brand.slogan')}</p>
       </div>

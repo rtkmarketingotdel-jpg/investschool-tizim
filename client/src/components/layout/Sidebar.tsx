@@ -33,7 +33,7 @@ export function Sidebar({ collapsed, mobileOpen, onNavigate }: Props) {
         )}
       >
         <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border/70 px-5">
-          <img src={brand.logo} alt="" className="h-10 w-10 shrink-0 rounded-xl" />
+          <img src={brand.logo} alt="" className="h-10 w-10 shrink-0 rounded-full" />
           <span className={cn('truncate text-lg font-medium', collapsed && 'md:hidden')}>{brand.name}</span>
         </div>
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">

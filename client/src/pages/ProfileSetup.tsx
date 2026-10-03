@@ -39,7 +39,7 @@ export default function ProfileSetup() {
     <div className="min-h-screen bg-surface-muted">
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-          <img src={brand.logo} alt="" className="h-9 w-9 rounded-lg" />
+          <img src={brand.logo} alt="" className="h-9 w-9 rounded-full" />
           <span className="flex-1">{brand.name}</span>
           <button onClick={logout} aria-label={t('auth.logout')} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><LogOut className="h-5 w-5" /></button>
         </div>

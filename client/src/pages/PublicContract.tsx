@@ -60,7 +60,7 @@ export default function PublicContract() {
     <div className="min-h-screen bg-surface-muted">
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
-          <img src={brand.logo} alt="" className="h-9 w-9 rounded-lg" />
+          <img src={brand.logo} alt="" className="h-9 w-9 rounded-full" />
           <span className="flex-1 font-medium">{c.school}</span>
           {c.demoMode && <Badge tone="warning">{x.demo}</Badge>}
         </div>
