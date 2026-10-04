@@ -1,5 +1,8 @@
 /* Minimal service worker: the app shell opens fast and offline; data is never cached (always live from the API). */
-const SHELL = 'shell-v1';
+const SHELL = 'shell-v2';
+
+// Never keep an HTML answer under an asset URL (a missing hashed file must not poison the cache).
+const cacheable = (res) => res.ok && !(res.headers.get('content-type') || '').includes('text/html');
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -39,7 +42,7 @@ self.addEventListener('fetch', (event) => {
         (hit) =>
           hit ??
           fetch(req).then((res) => {
-            if (res.ok) {
+            if (cacheable(res)) {
               const copy = res.clone();
               void caches.open(SHELL).then((c) => c.put(req, copy));
             }
@@ -55,7 +58,7 @@ self.addEventListener('fetch', (event) => {
     caches.match(req).then((hit) => {
       const network = fetch(req)
         .then((res) => {
-          if (res.ok) {
+          if (cacheable(res)) {
             const copy = res.clone();
             void caches.open(SHELL).then((c) => c.put(req, copy));
           }

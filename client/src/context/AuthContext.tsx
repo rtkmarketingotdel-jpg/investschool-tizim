@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { store } from '@/lib/storage';
 import { api, TOKEN_KEY } from '@/lib/api';
 import { setLanguage } from '@/i18n';
 
@@ -28,20 +29,20 @@ const Ctx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(!!localStorage.getItem(TOKEN_KEY));
+  const [loading, setLoading] = useState(!!store.get(TOKEN_KEY));
 
   useEffect(() => {
-    if (!localStorage.getItem(TOKEN_KEY)) return;
+    if (!store.get(TOKEN_KEY)) return;
     api
       .get('/me')
       .then((r) => setUser(r.data.user))
-      .catch(() => localStorage.removeItem(TOKEN_KEY))
+      .catch(() => store.remove(TOKEN_KEY))
       .finally(() => setLoading(false));
   }, []);
 
   const login = useCallback(async (phone: string, password: string) => {
     const { data } = await api.post('/auth/login', { phone, password });
-    localStorage.setItem(TOKEN_KEY, data.token);
+    store.set(TOKEN_KEY, data.token);
     setUser(data.user);
     return data.user as AuthUser;
   }, []);
@@ -52,13 +53,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    store.remove(TOKEN_KEY);
     setUser(null);
   }, []);
 
   // keep UI language in sync with the stored user preference on login
   useEffect(() => {
-    if (user && !localStorage.getItem('lang')) setLanguage(user.language);
+    if (user && !store.get('lang')) setLanguage(user.language);
   }, [user]);
 
   return <Ctx.Provider value={{ user, loading, login, logout, refresh }}>{children}</Ctx.Provider>;

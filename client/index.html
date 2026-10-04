@@ -24,6 +24,21 @@
         if (t === 'dark') document.documentElement.classList.add('dark');
       } catch (e) {}
     </script>
+    <script>
+      // Self-heal: if the page has no styles or the app did not mount (stale cache after a deploy), wipe caches and reload once.
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          var styled = getComputedStyle(document.body).fontFamily.indexOf('Inter') !== -1 || getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)';
+          if (root && root.childElementCount > 0 && styled) return;
+          try { if (sessionStorage.getItem('self-heal')) return; sessionStorage.setItem('self-heal', '1'); } catch (e) {}
+          var jobs = [];
+          if (window.caches) jobs.push(caches.keys().then(function (k) { return Promise.all(k.map(function (n) { return caches.delete(n); })); }));
+          if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function (r) { return Promise.all(r.map(function (x) { return x.unregister(); })); }));
+          Promise.all(jobs).catch(function () {}).then(function () { location.reload(); });
+        }, 4000);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

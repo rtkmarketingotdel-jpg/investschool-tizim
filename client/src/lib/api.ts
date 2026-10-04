@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { store } from './storage';
 
 export const TOKEN_KEY = 'token';
 
@@ -7,7 +8,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = store.get(TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -17,7 +18,7 @@ api.interceptors.response.use(
   (error) => {
     const isLogin = error.config?.url?.includes('/auth/login');
     if (error.response?.status === 401 && !isLogin) {
-      localStorage.removeItem(TOKEN_KEY);
+      store.remove(TOKEN_KEY);
       if (location.pathname !== '/login') location.assign('/login');
     }
     return Promise.reject(error);

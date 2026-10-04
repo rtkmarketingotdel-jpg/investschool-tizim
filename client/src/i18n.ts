@@ -19,7 +19,9 @@ i18n.use(initReactI18next).init({
 });
 
 export const setLanguage = (lang: 'uz' | 'ru') => {
-  localStorage.setItem('lang', lang);
+  try {
+    localStorage.setItem('lang', lang);
+  } catch { /* storage unavailable */ }
   void i18n.changeLanguage(lang);
   document.documentElement.lang = lang;
 };
