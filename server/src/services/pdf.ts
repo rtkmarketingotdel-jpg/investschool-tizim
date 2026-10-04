@@ -46,10 +46,10 @@ export interface ContractValues {
   [key: string]: string;
 }
 
-export function contractValues(c: Pick<Contract, 'number' | 'language' | 'monthlyFee' | 'startDate' | 'endDate'>, student: Student, className: string | null): ContractValues {
+export function contractValues(c: Pick<Contract, 'number' | 'language' | 'monthlyFee' | 'startDate' | 'endDate'>, student: Student, className: string | null, on: Date = new Date()): ContractValues {
   return {
     contractNumber: c.number,
-    date: fmtDateDMY(new Date()),
+    date: fmtDateDMY(on),
     schoolLegalName: brand.legalName,
     schoolInn: brand.inn,
     schoolAddress: brand.address,
@@ -67,7 +67,7 @@ export function contractValues(c: Pick<Contract, 'number' | 'language' | 'monthl
 }
 
 export const renderTemplate = (body: string, values: ContractValues) =>
-  body.replace(/\{\{(\w+)\}\}/g, (_, k: string) => values[k] ?? '');
+  body.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k: string) => values[k] ?? '');
 
 export interface ContractBlock {
   heading: string | null;

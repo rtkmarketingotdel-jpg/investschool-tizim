@@ -233,6 +233,8 @@ export interface Contract {
   signedIp: string | null;
   signedUserAgent: string | null;
   signerPhone: string | null;
+  /** Text and values frozen when the contract is sent: later template/student/brand edits must not rewrite it. */
+  snapshot: { body: string; values: Record<string, string> } | null;
   createdAt: Date;
 }
 

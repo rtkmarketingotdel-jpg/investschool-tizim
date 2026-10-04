@@ -1,4 +1,6 @@
 import { settings } from '../data/mockStore.js';
+import { toLocalDate } from '../lib/date.js';
+import { ApiError } from '../lib/errors.js';
 import type { Payroll } from '../data/types.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
@@ -33,10 +35,11 @@ export async function refreshDraft(userId: string, period: string) {
 
 /** Calculates payroll for all active users; APPROVED/PAID rows are skipped. */
 export async function calculatePeriod(period: string): Promise<{ calculated: number; skipped: number }> {
+  if (period > toLocalDate().slice(0, 7)) throw new ApiError(400, 'VALIDATION_ERROR'); // no payroll for future months
   let calculated = 0;
   let skipped = 0;
   for (const u of await userRepo.list()) {
-    if (!u.isActive) continue;
+    if (!u.isActive || toLocalDate(u.hiredAt) > `${period}-31`) continue; // not employed yet that month
     const existing = await payrollRepo.find(u.id, period);
     if (existing && existing.status !== 'DRAFT') {
       skipped++;

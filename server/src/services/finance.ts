@@ -1,6 +1,7 @@
 import { toLocalDate } from '../lib/date.js';
 import { dueDateFor } from '../lib/period.js';
 import { settings } from '../data/mockStore.js';
+import type { Student } from '../data/types.js';
 import { students } from '../data/mockStudents.js';
 import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
 import { chargeAmount, computeDebt, type DebtInfo } from './debt.js';
@@ -16,6 +17,12 @@ export async function generateMonthlyCharges(period: string): Promise<number> {
     created++;
   }
   return created;
+}
+
+/** Bills one student for the current month (a student enrolled mid-month would otherwise wait for the 1st). Idempotent. */
+export async function generateChargeFor(s: Student, period = toLocalDate().slice(0, 7)) {
+  if (s.status !== 'ACTIVE' || s.monthlyFee <= 0 || (await chargeRepo.exists(s.id, period))) return;
+  await chargeRepo.create({ studentId: s.id, period, amount: chargeAmount(s.monthlyFee, s.discountPercent), dueDate: dueDateFor(period, settings.paymentDueDay) });
 }
 
 /** Debt for every student in one pass (avoids N+1 over the arrays). */

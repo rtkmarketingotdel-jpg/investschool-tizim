@@ -19,8 +19,15 @@ const MAX_ATTEMPTS = 5;
 async function context(c: Contract) {
   const [student, template] = await Promise.all([studentRepo.findById(c.studentId), templateRepo.findById(c.templateId)]);
   if (!student || !template) throw new ApiError(404, 'NOT_FOUND');
+  if (c.snapshot) return { student, template: { body: c.snapshot.body }, values: c.snapshot.values };
   const cls = student.classId ? await classRepo.findById(student.classId) : null;
-  return { student, template, values: contractValues(c, student, cls?.name ?? null) };
+  return { student, template: { body: template.body }, values: contractValues(c, student, cls?.name ?? null, c.createdAt) };
+}
+
+/** Freezes the contract text when it is sent to the parent. */
+export async function freezeContract(c: Contract) {
+  const { template, values } = await context(c);
+  return contractRepo.update(c.id, { snapshot: { body: template.body, values }, status: 'SENT' });
 }
 
 export async function contractText(c: Contract) {
@@ -57,10 +64,9 @@ export async function signContract(c: Contract, code: string, meta: { ip: string
   if (!c.otpHash || !c.otpExpiresAt) throw new ApiError(400, 'OTP_NOT_REQUESTED');
   if (c.otpExpiresAt.getTime() < Date.now()) throw new ApiError(400, 'OTP_EXPIRED');
   if (c.otpAttempts >= MAX_ATTEMPTS) throw new ApiError(429, 'OTP_TOO_MANY_ATTEMPTS');
-  if (!(await bcrypt.compare(code, c.otpHash))) {
-    await contractRepo.update(c.id, { otpAttempts: c.otpAttempts + 1 });
-    throw new ApiError(400, 'OTP_INVALID');
-  }
+  // count the attempt before the (slow) hash comparison so parallel requests cannot exceed the limit
+  await contractRepo.update(c.id, { otpAttempts: c.otpAttempts + 1 });
+  if (!(await bcrypt.compare(code, c.otpHash))) throw new ApiError(400, 'OTP_INVALID');
   const { student } = await context(c);
   const signed = (await contractRepo.update(c.id, {
     status: 'SIGNED', signedAt: new Date(), signedIp: meta.ip, signedUserAgent: meta.userAgent, signerPhone: student.parentPhone,

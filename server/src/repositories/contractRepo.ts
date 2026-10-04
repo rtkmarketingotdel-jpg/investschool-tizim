@@ -14,14 +14,14 @@ export const contractRepo = {
   async findByToken(token: string) {
     return contracts.find((c) => c.publicToken === token) ?? null;
   },
-  async create(data: Omit<Contract, 'id' | 'number' | 'publicToken' | 'createdAt' | 'otpHash' | 'otpExpiresAt' | 'otpAttempts' | 'otpDemoCode' | 'signedAt' | 'signedIp' | 'signedUserAgent' | 'signerPhone'>, prefix: string) {
+  async create(data: Omit<Contract, 'id' | 'number' | 'publicToken' | 'createdAt' | 'otpHash' | 'otpExpiresAt' | 'otpAttempts' | 'otpDemoCode' | 'signedAt' | 'signedIp' | 'signedUserAgent' | 'signerPhone' | 'snapshot'>, prefix: string) {
     const rec: Contract = {
       id: `ctn${counter++}`,
       number: `${prefix}-${new Date().getFullYear()}-${String(nextContractSeq()).padStart(4, '0')}`,
       publicToken: randomBytes(16).toString('hex'),
       createdAt: new Date(),
       otpHash: null, otpExpiresAt: null, otpAttempts: 0, otpDemoCode: null,
-      signedAt: null, signedIp: null, signedUserAgent: null, signerPhone: null,
+      signedAt: null, signedIp: null, signedUserAgent: null, signerPhone: null, snapshot: null,
       ...data,
     };
     contracts.push(rec);

@@ -165,16 +165,23 @@ staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
     if (target.id === req.user!.id && (!body.isActive || body.role !== target.role)) {
       throw new ApiError(400, 'STAFF_CANNOT_MODIFY_SELF');
     }
+    // only the director sets pay: nobody else raises their own salary
+    if (req.user!.role !== 'DIRECTOR' && target.id === req.user!.id && body.baseSalary !== target.baseSalary) throw new ApiError(403, 'FORBIDDEN');
     const clash = await userRepo.findByPhone(body.phone);
     if (clash && clash.id !== target.id) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
     const { password: _ignored, homeroomClassId, clubIds, ...data } = body;
     void _ignored;
+    // validate everything before the first write
     if (clubIds && !(await clubsExist(clubIds))) throw new ApiError(400, 'VALIDATION_ERROR');
-    if (homeroomClassId) {
-      if (!(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
-      await classRepo.update(homeroomClassId, { teacherId: target.id });
-    }
+    if (homeroomClassId && !(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
     if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
+    const stillTeacher = data.isTeacher && data.isActive && data.role === 'TEACHER';
+    if (!stillTeacher) {
+      // no longer an active teacher: free the classes they led
+      for (const c of await classRepo.list()) if (c.teacherId === target.id) await classRepo.update(c.id, { teacherId: null });
+    }
+    if (homeroomClassId && stillTeacher) await classRepo.update(homeroomClassId, { teacherId: target.id });
+    if (!data.isTutor || !data.isActive) await syncClubs(target.id, []);
     const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher || data.isTutor ? data.subject : null });
     if (updated!.isTutor && clubIds) await syncClubs(target.id, clubIds);
     await audit(req.user!.id, 'staff.update', 'user', target.id);

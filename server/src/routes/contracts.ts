@@ -9,7 +9,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { contractRepo, templateRepo } from '../repositories/contractRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
-import { contractPdfFor } from '../services/contracts.js';
+import { contractPdfFor, freezeContract } from '../services/contracts.js';
 import { chargeAmount } from '../services/debt.js';
 import { contractPdf, contractValues } from '../services/pdf.js';
 import { env } from '../env.js';
@@ -217,7 +217,7 @@ contractsRouter.post('/:id/send', async (req, res, next) => {
   try {
     const c = await load(req.params.id!);
     if (c.status !== 'DRAFT') throw new ApiError(409, 'CONTRACT_BAD_STATE');
-    res.json(await present((await contractRepo.update(c.id, { status: 'SENT' }))!));
+    res.json(await present((await freezeContract(c))!));
   } catch (e) {
     next(e);
   }
@@ -227,6 +227,7 @@ contractsRouter.post('/:id/cancel', async (req, res, next) => {
   try {
     const c = await load(req.params.id!);
     if (c.status === 'CANCELLED') throw new ApiError(409, 'CONTRACT_BAD_STATE');
+    if (c.status === 'SIGNED' && req.user!.role !== 'DIRECTOR') throw new ApiError(403, 'FORBIDDEN');
     await audit(req.user!.id, 'contract.cancel', 'contract', c.id, { from: c.status });
     res.json(await present((await contractRepo.update(c.id, { status: 'CANCELLED', otpHash: null, otpDemoCode: null }))!));
   } catch (e) {

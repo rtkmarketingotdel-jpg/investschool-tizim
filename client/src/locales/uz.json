@@ -124,7 +124,8 @@
     "SMS_SCHEDULE_IN_PAST": "Yuborish vaqti oʻtib ketgan",
     "SMS_BAD_STATE": "Bu amalni hozir bajarib boʻlmaydi",
     "SMS_BAD_PHONE": "Telefon raqam notoʻgʻri",
-    "SMS_PROVIDER_ERROR": "SMS provayderi xato qaytardi"
+    "SMS_PROVIDER_ERROR": "SMS provayderi xato qaytardi",
+    "CLASS_CAPACITY_BELOW_OCCUPANCY": "Sinf sigʻimi hozirgi oʻquvchilar sonidan kam boʻlishi mumkin emas"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",

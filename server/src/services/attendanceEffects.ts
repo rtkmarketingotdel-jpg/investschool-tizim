@@ -3,16 +3,24 @@ import type { Attendance, User } from '../data/types.js';
 import { isoWeekday, toLocalDate } from '../lib/date.js';
 import { branchRepo } from '../repositories/branchRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
-import { adjustmentRepo } from '../repositories/financeRepo.js';
+import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
 import { audit, notifyRoles } from '../repositories/notificationRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
+import { ApiError } from '../lib/errors.js';
 import { lateFine } from './payrollCalc.js';
 import { refreshDraft } from './payroll.js';
 import { sendTelegram } from './telegram.js';
 import { absentMessage, dailyMessage } from './telegramText.js';
 
+async function payrollLocked(userId: string, period: string) {
+  const row = await payrollRepo.find(userId, period);
+  return !!row && row.status !== 'DRAFT';
+}
+
 /** Replaces any ATTENDANCE fine linked to the record with the one matching its current status. */
 export async function syncFine(rec: Attendance) {
+  // an approved/paid payslip must keep adding up: its fines are no longer touched
+  if (await payrollLocked(rec.userId, rec.date.slice(0, 7))) return;
   const removed = await adjustmentRepo.removeByAttendance(rec.id);
   const period = rec.date.slice(0, 7);
   const amount =
@@ -66,11 +74,12 @@ export async function dailyReport(date = toLocalDate()) {
 }
 
 export async function setStatus(rec: Attendance, status: Attendance['status'], note: string | null, actorId: string) {
+  if (await payrollLocked(rec.userId, rec.date.slice(0, 7))) throw new ApiError(409, 'PAYROLL_LOCKED');
   const before = rec.status;
   const updated = (await attendanceRepo.update(rec.id, {
     status,
     note,
-    lateMinutes: status === 'LATE' ? rec.lateMinutes : status === 'EXCUSED' || status === 'ABSENT' ? 0 : rec.lateMinutes,
+    lateMinutes: status === 'LATE' ? rec.lateMinutes : 0,
   }))!;
   // EXCUSED removes the linked fine; other statuses re-derive it.
   await syncFine(updated);

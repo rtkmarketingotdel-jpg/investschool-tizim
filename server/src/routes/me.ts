@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { toLocalDate } from '../lib/date.js';
 import { ApiError } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
@@ -116,7 +117,7 @@ meRouter.post('/class/:classId/students', validateBody(classStudentSchema), asyn
     const body = req.body as z.infer<typeof classStudentSchema>;
     const rec = await studentRepo.create({
       ...body, classId: cls.id, clubs: [], monthlyFee: 0, discountPercent: 0, status: 'ACTIVE',
-      enrolledAt: new Date().toISOString().slice(0, 10), leftAt: null, notes: null,
+      enrolledAt: toLocalDate(), leftAt: null, notes: null,
     });
     res.status(201).json({ id: rec.id, fullName: fullName(rec) });
   } catch (e) {

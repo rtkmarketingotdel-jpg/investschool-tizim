@@ -117,8 +117,9 @@ payrollRouter.post('/:id/approve', requireRole('DIRECTOR'), async (req, res, nex
     const p = await payrollRepo.findById(req.params.id!);
     if (!p) throw new ApiError(404, 'NOT_FOUND');
     if (p.status !== 'DRAFT') throw new ApiError(409, 'PAYROLL_BAD_STATE');
+    const fresh = (await refreshDraft(p.userId, p.period)) ?? p; // approve the up-to-date figures, not a stale draft
     const updated = await payrollRepo.update(p.id, { status: 'APPROVED', approvedAt: new Date() });
-    await audit(req.user!.id, 'payroll.approve', 'payroll', p.id, { userId: p.userId, period: p.period, total: p.total });
+    await audit(req.user!.id, 'payroll.approve', 'payroll', p.id, { userId: p.userId, period: p.period, total: fresh.total });
     res.json(updated);
   } catch (e) {
     next(e);

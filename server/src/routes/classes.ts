@@ -39,7 +39,9 @@ classesRouter.get('/', async (_req, res, next) => {
 });
 
 async function assertTeacher(teacherId: string | null) {
-  if (teacherId && !(await userRepo.findById(teacherId))) throw new ApiError(400, 'VALIDATION_ERROR');
+  if (!teacherId) return;
+  const t = await userRepo.findById(teacherId);
+  if (!t || !t.isTeacher || !t.isActive) throw new ApiError(400, 'VALIDATION_ERROR'); // only an active teacher can lead a class
 }
 
 classesRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(classSchema), async (req, res, next) => {
@@ -59,6 +61,8 @@ classesRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(cla
     const clash = await classRepo.findByName(body.name);
     if (clash && clash.id !== req.params.id) throw new ApiError(409, 'CLASS_NAME_EXISTS');
     await assertTeacher(body.teacherId);
+    const taken = (await studentRepo.occupancy()).get(req.params.id!) ?? 0;
+    if (body.capacity < taken) throw new ApiError(409, 'CLASS_CAPACITY_BELOW_OCCUPANCY');
     const rec = await classRepo.update(req.params.id!, body);
     if (!rec) throw new ApiError(404, 'NOT_FOUND');
     res.json(await withStats(rec));

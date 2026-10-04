@@ -116,7 +116,7 @@ for (const s of students.filter((x) => x.status === 'ACTIVE')) {
     otpHash: null, otpExpiresAt: null, otpAttempts: 0, otpDemoCode: null,
     signedAt: status === 'SIGNED' ? signedAt : null, signedIp: status === 'SIGNED' ? '84.54.72.10' : null,
     signedUserAgent: status === 'SIGNED' ? 'Mozilla/5.0 (Linux; Android 13)' : null,
-    signerPhone: status === 'SIGNED' ? s.parentPhone : null, createdAt: new Date('2026-08-20T10:00:00+05:00'),
+    signerPhone: status === 'SIGNED' ? s.parentPhone : null, snapshot: null, createdAt: new Date('2026-08-20T10:00:00+05:00'),
   });
 }
 export const nextContractSeq = () => seq++;

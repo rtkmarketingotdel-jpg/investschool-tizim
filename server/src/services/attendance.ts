@@ -5,7 +5,7 @@ import type { Attendance, Branch, User } from '../data/types.js';
 import { branchRepo } from '../repositories/branchRepo.js';
 import { ApiError } from '../lib/errors.js';
 import { haversineM } from '../lib/geo.js';
-import { isoWeekday, localMinutes, parseHHMM, toLocalDate } from '../lib/date.js';
+import { addDays, isoWeekday, localMinutes, parseHHMM, toLocalDate } from '../lib/date.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { onLateCheckIn, syncFine } from './attendanceEffects.js';
 import { sendTelegramPhoto } from './telegram.js';
@@ -91,9 +91,10 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
   const workStart = parseHHMM(settings.workStart);
   const minutes = localMinutes(now);
   const late = minutes > workStart + settings.graceMinutes;
+  const keepExcused = existing?.status === 'EXCUSED'; // an excused day stays excused, the arrival time is still recorded
   const data = {
-    status: late ? ('LATE' as const) : ('ON_TIME' as const),
-    lateMinutes: late ? minutes - workStart : 0,
+    status: keepExcused ? ('EXCUSED' as const) : late ? ('LATE' as const) : ('ON_TIME' as const),
+    lateMinutes: keepExcused || !late ? 0 : minutes - workStart,
     checkInAt: now,
     checkInPhotoUrl: null,
     selfieSent: false,
@@ -112,7 +113,7 @@ export async function checkIn(user: User, input: PunchInput, userAgent: string |
     checkOutAt: null, checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null, selfieOutSent: false,
     ...data,
   });
-  if (rec.status === 'LATE') await onLateCheckIn(user, rec);
+  if (rec.status === 'LATE' && !keepExcused) await onLateCheckIn(user, rec);
   else if (existing) await syncFine(rec); // an earlier ABSENT fine no longer applies
   const selfie = await reportSelfie(user, rec, photo, 'in');
   await attendanceRepo.update(rec.id, { selfieSent: selfie === 'sent' });
@@ -123,7 +124,12 @@ export async function checkOut(user: User, input: PunchInput) {
   if (user.role === 'DIRECTOR') throw new ApiError(403, 'ATTENDANCE_NOT_TRACKED');
   const now = new Date();
   const date = toLocalDate(now);
-  const rec = await attendanceRepo.findByUserDate(user.id, date);
+  // a shift that runs past midnight closes yesterday's open record
+  let rec = await attendanceRepo.findByUserDate(user.id, date);
+  if (!rec?.checkInAt) {
+    const prev = await attendanceRepo.findByUserDate(user.id, addDays(date, -1));
+    if (prev?.checkInAt && !prev.checkOutAt) rec = prev;
+  }
   if (!rec?.checkInAt) throw new ApiError(400, 'ATTENDANCE_NOT_CHECKED_IN');
   if (rec.checkOutAt) throw new ApiError(409, 'ATTENDANCE_ALREADY_CHECKED_OUT');
 

@@ -8,7 +8,8 @@ import { classRepo } from '../repositories/classRepo.js';
 import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import type { Student } from '../data/types.js';
 import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
-import { debtMap, studentDebt } from '../services/finance.js';
+import { toLocalDate } from '../lib/date.js';
+import { debtMap, generateChargeFor, studentDebt } from '../services/finance.js';
 
 export const studentsRouter = Router();
 studentsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
@@ -119,7 +120,7 @@ studentsRouter.get('/:id/finance', requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTAN
     const [charges, payments, info] = await Promise.all([chargeRepo.byStudent(s.id), paymentRepo.byStudent(s.id), studentDebt(s.id)]);
     const timeline = [
       ...charges.map((c) => ({ kind: 'CHARGE' as const, id: c.id, date: c.dueDate, period: c.period, amount: c.amount, method: null })),
-      ...payments.map((p) => ({ kind: 'PAYMENT' as const, id: p.id, date: p.paidAt.toISOString().slice(0, 10), period: p.period, amount: p.amount, method: p.method })),
+      ...payments.map((p) => ({ kind: 'PAYMENT' as const, id: p.id, date: toLocalDate(p.paidAt), period: p.period, amount: p.amount, method: p.method })),
     ].sort((a, b) => b.date.localeCompare(a.date) || (a.kind === 'PAYMENT' ? -1 : 1));
     res.json({ balance: -info.debt, debt: Math.max(0, info.debt), overdueDays: info.overdueDays, timeline });
   } catch (e) {
@@ -141,7 +142,8 @@ studentsRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(studen
   try {
     const body = req.body as StudentInput;
     await assertSeat(body.classId, body.status);
-    const rec = await studentRepo.create({ ...body, leftAt: body.status === 'LEFT' ? new Date().toISOString().slice(0, 10) : null });
+    const rec = await studentRepo.create({ ...body, leftAt: body.status === 'LEFT' ? toLocalDate() : null });
+    if (rec.status === 'ACTIVE') await generateChargeFor(rec);
     res.status(201).json(await present(rec));
   } catch (e) {
     next(e);
@@ -154,8 +156,10 @@ studentsRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(st
     const current = await studentRepo.findById(req.params.id!);
     if (!current) throw new ApiError(404, 'NOT_FOUND');
     await assertSeat(body.classId, body.status, current);
-    const leftAt = body.status === 'LEFT' ? (current.leftAt ?? new Date().toISOString().slice(0, 10)) : null;
-    res.json(await present((await studentRepo.update(current.id, { ...body, leftAt }))!));
+    const leftAt = body.status === 'LEFT' ? (current.leftAt ?? toLocalDate()) : null;
+    const updated = (await studentRepo.update(current.id, { ...body, leftAt }))!;
+    if (updated.status === 'ACTIVE' && current.status !== 'ACTIVE') await generateChargeFor(updated); // newly active students are billed for this month
+    res.json(await present(updated));
   } catch (e) {
     next(e);
   }
