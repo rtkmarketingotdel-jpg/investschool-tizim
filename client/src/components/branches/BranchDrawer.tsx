@@ -116,7 +116,7 @@ export function BranchDrawer({ open, branch, onClose }: Props) {
           <p className="mt-1 text-xs text-text-muted">{t('settings.branches.assignHint')}</p>
         </fieldset>
 
-        <div className="sticky bottom-0 -mx-6 flex gap-3 border-t border-border bg-surface px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 -mb-6 flex gap-3 border-t border-border bg-surface px-6 py-4">
           <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>{t('common.cancel')}</Button>
           <Button type="submit" className="flex-1" disabled={!valid} loading={save.isPending}>{t('common.save')}</Button>
         </div>

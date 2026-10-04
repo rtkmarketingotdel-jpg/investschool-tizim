@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { InstallBanner } from '@/components/InstallApp';
@@ -22,6 +23,7 @@ export default function Me() {
   const tr = teaching.data;
   const showClass = !!tr && (tr.isTeacher || tr.classes.length > 0);
   const showClubs = !!tr && tr.clubs.length > 0;
+  if (user?.role === 'DIRECTOR') return <Navigate to="/" replace />; // the director supervises and is not tracked
 
   const tabs: Array<{ id: Tab; label: string }> = [
     { id: 'attendance', label: t('me.tabs.attendance') },

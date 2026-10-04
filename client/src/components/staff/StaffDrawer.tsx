@@ -15,10 +15,10 @@ import { Checkbox } from '../FormBits';
 import { PhoneInput } from '../PhoneInput';
 
 const schema = z.object({
-  fullName: z.string().trim().min(3, 'errors.required'),
+  fullName: z.string().trim().min(3, 'errors.required').max(120, 'errors.tooLong'),
   phone: z.string().regex(/^\+998\d{9}$/, 'errors.phone'),
   role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']),
-  position: z.string().trim(),
+  position: z.string().trim().max(120, 'errors.tooLong'),
   subject: z.string(),
   customSubject: z.string(),
   homeroomClassId: z.string(),

@@ -107,7 +107,7 @@ export default function Payroll() {
       )}
 
       <Drawer open={!!detailId} onClose={() => setDetailId(null)} title={dr?.fullName ?? t('finance.payroll.details')}>
-        {!dr ? <Skeleton className="h-40" /> : (
+        {!detailId ? null : !dr ? <Skeleton className="h-40" /> : (
           <div className="space-y-6">
             <div className="flex items-center gap-3"><Avatar name={dr.fullName} size={48} /><div><p className="font-medium">{dr.fullName}</p><p className="text-sm text-text-muted">{dr.position} · {dr.period}</p></div><Badge tone={payrollTone[dr.status]}>{t(`finance.payroll.statuses.${dr.status}`)}</Badge></div>
             <dl className="grid grid-cols-2 gap-4 rounded-xl border border-border p-4">

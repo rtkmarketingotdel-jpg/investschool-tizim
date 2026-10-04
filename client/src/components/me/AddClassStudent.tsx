@@ -13,16 +13,16 @@ import { PhoneInput } from '../PhoneInput';
 
 const phone = z.string().regex(/^\+998\d{9}$/, 'errors.phone');
 const schema = z.object({
-  lastName: z.string().trim().min(1, 'errors.required'),
-  firstName: z.string().trim().min(1, 'errors.required'),
-  middleName: z.string(),
+  lastName: z.string().trim().min(1, 'errors.required').max(60, 'errors.tooLong'),
+  firstName: z.string().trim().min(1, 'errors.required').max(60, 'errors.tooLong'),
+  middleName: z.string().max(60, 'errors.tooLong'),
   birthDate: z.string(),
   gender: z.enum(['MALE', 'FEMALE']),
-  parentName: z.string().trim().min(1, 'errors.required'),
+  parentName: z.string().trim().min(1, 'errors.required').max(120, 'errors.tooLong'),
   parentPhone: phone,
   parentPhone2: z.string().refine((v) => v === '' || /^\+998\d{9}$/.test(v), 'errors.phone'),
   district: z.string(),
-  address: z.string(),
+  address: z.string().max(500, 'errors.tooLong'),
   isBoarding: z.boolean(),
 });
 type FormValues = z.infer<typeof schema>;

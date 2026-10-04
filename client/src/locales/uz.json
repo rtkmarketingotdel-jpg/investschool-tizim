@@ -128,7 +128,8 @@
     "CLASS_CAPACITY_BELOW_OCCUPANCY": "Sinf sigʻimi hozirgi oʻquvchilar sonidan kam boʻlishi mumkin emas",
     "SMS_DELIVERY_FAILED": "SMS yuborilmadi, keyinroq urinib koʻring",
     "INVALID_JSON": "Notoʻgʻri soʻrov formati",
-    "PAYLOAD_TOO_LARGE": "Yuborilgan maʼlumot juda katta"
+    "PAYLOAD_TOO_LARGE": "Yuborilgan maʼlumot juda katta",
+    "tooLong": "Matn juda uzun"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",
@@ -411,9 +412,7 @@
     "homeroomOf": "Sinf rahbari",
     "clubsLed": "Toʻgarak rahbari",
     "nothingYet": "Hali kiritilmagan",
-    "employeeType": "Xodim turi",
     "types": {
-      "staff": "Menejer",
       "manager": "Bosh menejer",
       "teacher": "Oʻqituvchi",
       "tutor": "Repetitor",
@@ -678,7 +677,7 @@
       "unknown": "Nomaʼlum maydonlar (boʻsh chiqadi): {{list}}"
     },
     "telegram": {
-      "chatId": "Chat ID (direktor/admin guruhi)",
+      "chatId": "Chat ID (direktor/menejer guruhi)",
       "hint": "Bot tokeni serverda (TELEGRAM_BOT_TOKEN) saqlanadi. Xodimlarning kelish/ketish selfilari shu chatga yuboriladi. Shaxsiy chat boʻlsa, avval botni oching va Start bosing, chat ID ni @userinfobot dan oling; guruh boʻlsa botni guruhga qoʻshing.",
       "test": "Test xabar yuborish",
       "sent": "Test xabar yuborildi",

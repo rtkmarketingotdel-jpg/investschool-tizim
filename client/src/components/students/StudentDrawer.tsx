@@ -16,24 +16,24 @@ import { PhoneInput } from '../PhoneInput';
 
 const phone = z.string().regex(/^\+998\d{9}$/, 'errors.phone');
 const schema = z.object({
-  lastName: z.string().trim().min(1, 'errors.required'),
-  firstName: z.string().trim().min(1, 'errors.required'),
-  middleName: z.string(),
+  lastName: z.string().trim().min(1, 'errors.required').max(60, 'errors.tooLong'),
+  firstName: z.string().trim().min(1, 'errors.required').max(60, 'errors.tooLong'),
+  middleName: z.string().max(60, 'errors.tooLong'),
   birthDate: z.string(),
   gender: z.enum(['MALE', 'FEMALE']),
   classId: z.string(),
-  parentName: z.string().trim().min(1, 'errors.required'),
+  parentName: z.string().trim().min(1, 'errors.required').max(120, 'errors.tooLong'),
   parentPhone: phone,
   parentPhone2: z.string().refine((v) => v === '' || /^\+998\d{9}$/.test(v), 'errors.phone'),
   district: z.string(),
-  address: z.string(),
+  address: z.string().max(500, 'errors.tooLong'),
   isBoarding: z.boolean(),
   clubs: z.array(z.string()),
   monthlyFee: z.number({ invalid_type_error: 'errors.required' }).int().min(0),
   discountPercent: z.number({ invalid_type_error: 'errors.required' }).int().min(0).max(100),
   status: z.enum(['ACTIVE', 'TRIAL', 'LEFT']),
   enrolledAt: z.string().min(1, 'errors.required'),
-  notes: z.string(),
+  notes: z.string().max(500, 'errors.tooLong'),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -207,7 +207,7 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
           <Textarea label={t('students.notes')} {...register('notes')} />
         </FormSection>
 
-        <div className="sticky bottom-0 -mx-6 flex gap-3 border-t border-border bg-surface px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 -mb-6 flex gap-3 border-t border-border bg-surface px-6 py-4">
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
           <Button type="submit" loading={save.isPending} className="flex-1">{t('common.save')}</Button>
         </div>

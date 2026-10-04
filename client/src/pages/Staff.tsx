@@ -76,7 +76,7 @@ export default function Staff() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  const canManage = (m: StaffMember) => user?.role === 'DIRECTOR' || (m.role !== 'DIRECTOR' && m.role !== 'MANAGER');
+  const canManage = (m: StaffMember) => user?.role === 'DIRECTOR' || m.role !== 'DIRECTOR';
   const rows = list.data?.items ?? [];
 
   return (
