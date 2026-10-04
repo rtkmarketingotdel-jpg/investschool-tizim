@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { csvCell } from '../lib/csv.js';
 import { z } from 'zod';
 import { settings } from '../data/mockStore.js';
 import { addDays, isoWeekday, toLocalDate } from '../lib/date.js';
@@ -112,6 +113,7 @@ attendanceRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(
   try {
     const rec = (await attendanceRepo.list({ from: '0000-01-01', to: '9999-12-31' })).find((r) => r.id === req.params.id);
     if (!rec) throw new ApiError(404, 'NOT_FOUND');
+    if (rec.userId === req.user!.id && req.user!.role !== 'DIRECTOR') throw new ApiError(403, 'FORBIDDEN'); // own attendance is not editable
     const body = req.body as z.infer<typeof patchSchema>;
     res.json({ record: await setStatus(rec, body.status, body.note, req.user!.id) });
   } catch (e) {
@@ -145,7 +147,7 @@ attendanceRouter.get('/matrix/export', requireRole('DIRECTOR', 'MANAGER'), async
   try {
     const m = await buildMatrix(monthSchema.catch(toLocalDate().slice(0, 7)).parse(req.query.month));
     const code: Record<string, string> = { ON_TIME: '+', LATE: 'L', ABSENT: '-', EXCUSED: 'E' };
-    const cell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const cell = csvCell;
     const lines = [['Employee', ...m.days.map((d) => d.slice(8)), 'On time', 'Late', 'Absent', 'Excused'].map(cell).join(',')];
     for (const r of m.rows) {
       lines.push([r.user.fullName, ...m.days.map((d) => code[r.days[d] ?? ''] ?? ''), r.totals.onTime, r.totals.late, r.totals.absent, r.totals.excused].map(cell).join(','));

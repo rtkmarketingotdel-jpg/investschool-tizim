@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { csvCell } from '../lib/csv.js';
 import { z } from 'zod';
 import { toLocalDate } from '../lib/date.js';
 import { ApiError } from '../lib/errors.js';
@@ -68,7 +69,7 @@ payrollRouter.get('/export', finance, async (req, res, next) => {
   try {
     const period = periodSchema.catch(toLocalDate().slice(0, 7)).parse(req.query.period);
     const rows = await Promise.all((await payrollRepo.byPeriod(period)).map(present));
-    const cell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const cell = csvCell;
     const lines = [['Employee', 'Position', 'Base', 'Bonus', 'Fine', 'Total', 'Worked days', 'Late', 'Absent', 'Status'].map(cell).join(',')];
     for (const r of rows) lines.push([r.fullName, r.position, r.baseSalary, r.bonusTotal, r.fineTotal, r.total, r.workedDays, r.lateCount, r.absentCount, r.status].map(cell).join(','));
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -101,6 +102,7 @@ payrollRouter.post('/adjustments', finance, validateBody(adjustSchema), async (r
   try {
     const body = req.body as z.infer<typeof adjustSchema>;
     if (!(await userRepo.findById(body.userId))) throw new ApiError(404, 'NOT_FOUND');
+    if (body.userId === req.user!.id && req.user!.role !== 'DIRECTOR') throw new ApiError(403, 'FORBIDDEN'); // nobody but the director adjusts their own pay
     const existing = await payrollRepo.find(body.userId, body.period);
     if (existing && isLocked(existing)) throw new ApiError(409, 'PAYROLL_LOCKED');
     const adj = await adjustmentRepo.create({ ...body, source: 'MANUAL', attendanceId: null });

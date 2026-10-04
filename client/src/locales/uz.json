@@ -125,7 +125,10 @@
     "SMS_BAD_STATE": "Bu amalni hozir bajarib boʻlmaydi",
     "SMS_BAD_PHONE": "Telefon raqam notoʻgʻri",
     "SMS_PROVIDER_ERROR": "SMS provayderi xato qaytardi",
-    "CLASS_CAPACITY_BELOW_OCCUPANCY": "Sinf sigʻimi hozirgi oʻquvchilar sonidan kam boʻlishi mumkin emas"
+    "CLASS_CAPACITY_BELOW_OCCUPANCY": "Sinf sigʻimi hozirgi oʻquvchilar sonidan kam boʻlishi mumkin emas",
+    "SMS_DELIVERY_FAILED": "SMS yuborilmadi, keyinroq urinib koʻring",
+    "INVALID_JSON": "Notoʻgʻri soʻrov formati",
+    "PAYLOAD_TOO_LARGE": "Yuborilgan maʼlumot juda katta"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",

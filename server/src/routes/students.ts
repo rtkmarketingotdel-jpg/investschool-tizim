@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { csvCell } from '../lib/csv.js';
 import { z } from 'zod';
 import { ApiError } from '../lib/errors.js';
 import { paginate, pageQuery } from '../lib/pagination.js';
@@ -87,7 +88,7 @@ studentsRouter.get('/', async (req, res, next) => {
   }
 });
 
-const csvCell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
 
 studentsRouter.get('/export', async (req, res, next) => {
   try {

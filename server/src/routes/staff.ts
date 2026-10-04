@@ -156,11 +156,16 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
   }
 });
 
-staffRouter.patch('/:id', validateBody(staffSchema), async (req, res, next) => {
+staffRouter.patch('/:id', validateBody(staffSchema.partial()), async (req, res, next) => {
   try {
-    const body = req.body as StaffInput;
     const target = await userRepo.findById(req.params.id!);
     if (!target) throw new ApiError(404, 'NOT_FOUND');
+    // fields that were not sent keep their current value (nothing is silently reset, a deactivated user stays deactivated)
+    const sent = Object.fromEntries(Object.entries(req.body as Partial<StaffInput>).filter(([, v]) => v !== undefined));
+    const body = {
+      fullName: target.fullName, phone: target.phone, role: target.role, position: target.position, isTeacher: target.isTeacher, isTutor: target.isTutor,
+      subject: target.subject, branchId: target.branchId, baseSalary: target.baseSalary, isActive: target.isActive, homeroomClassId: null, ...sent,
+    } as StaffInput;
     assertCanManage(req.user!.role, target.role, body.role);
     if (target.id === req.user!.id && (!body.isActive || body.role !== target.role)) {
       throw new ApiError(400, 'STAFF_CANNOT_MODIFY_SELF');

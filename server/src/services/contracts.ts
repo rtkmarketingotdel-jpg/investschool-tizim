@@ -51,6 +51,7 @@ export async function requestOtp(c: Contract) {
     otpHash: await bcrypt.hash(code, 8), otpExpiresAt: new Date(Date.now() + OTP_TTL_MS), otpAttempts: 0,
     otpDemoCode: sms ? null : env.demoMode ? code : null,
   });
+  if (!sms && !env.demoMode) throw new ApiError(502, 'SMS_DELIVERY_FAILED'); // outside demo mode the code must only reach the parent
   if (!sms) {
     // DEMO mode: staff read the code from the contracts table / bell and the Telegram group.
     await notifyRoles(['DIRECTOR', 'MANAGER', 'ACCOUNTANT'], 'notif.otp', { number: c.number, code }, '/finance/contracts');

@@ -107,10 +107,16 @@ smsRouter.delete('/templates/:id', async (req, res, next) => {
   }
 });
 
+/** Free-number and staff audiences are for the director and chief manager only (an accountant texts parents/debtors). */
+function assertAudience(role: string, kind: string) {
+  if ((kind === 'NUMBERS' || kind === 'STAFF') && role === 'ACCOUNTANT') throw new ApiError(403, 'FORBIDDEN');
+}
+
 // ---------- compose ----------
 smsRouter.post('/preview', validateBody(composeSchema), async (req, res, next) => {
   try {
     const b = req.body as z.infer<typeof composeSchema>;
+    assertAudience(req.user!.role, b.audience.kind);
     const p = await prepare(b.text, b.audience as Audience, { bothPhones: b.bothPhones, lang: b.lang });
     res.json({
       count: p.messages.length, segments: p.segments, invalidPhones: p.invalidPhones, duplicates: p.duplicates,
@@ -132,6 +138,8 @@ const sendSchema = composeSchema.extend({
 smsRouter.post('/send', validateBody(sendSchema), async (req, res, next) => {
   try {
     const b = req.body as z.infer<typeof sendSchema>;
+    assertAudience(req.user!.role, b.audience.kind);
+    if (b.scheduleAt && new Date(b.scheduleAt).getTime() > Date.now() + 366 * 86_400_000) throw new ApiError(400, 'VALIDATION_ERROR');
     const c = await createCampaign({
       category: b.category as SmsCategory, title: b.title || normalizeSms(b.text.replace(/\{\{\s*\w+\s*\}\}/g, '…')).slice(0, 60), audienceLabel: audienceLabel(b.audience as Audience),
       text: b.text, audience: b.audience as Audience, bothPhones: b.bothPhones, lang: b.lang,
@@ -192,6 +200,7 @@ smsRouter.post('/campaigns/:id/cancel', async (req, res, next) => {
 smsRouter.post('/test', validateBody(z.object({ phone, text: z.string().min(1).max(300) })), async (req, res, next) => {
   try {
     const b = req.body as { phone: string; text: string };
+    if (req.user!.role === 'ACCOUNTANT') throw new ApiError(403, 'FORBIDDEN');
     const to = toPhone(b.phone);
     if (!to) throw new ApiError(400, 'SMS_BAD_PHONE');
     const text = normalizeSms(b.text);

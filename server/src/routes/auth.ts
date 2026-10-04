@@ -9,11 +9,23 @@ import { toPublicUser, userRepo } from '../repositories/userRepo.js';
 
 export const authRouter = Router();
 
+// only failed attempts count (a shared school network must not lock out correct logins); a second limiter keys on the phone number
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 10,
+  limit: 40,
+  skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
+  message: { error: 'AUTH_TOO_MANY_ATTEMPTS' },
+});
+
+const phoneLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 6,
+  skipSuccessfulRequests: true,
+  standardHeaders: false,
+  legacyHeaders: false,
+  keyGenerator: (req) => String((req.body as { phone?: string } | undefined)?.phone ?? 'none'),
   message: { error: 'AUTH_TOO_MANY_ATTEMPTS' },
 });
 
@@ -22,7 +34,7 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-authRouter.post('/login', loginLimiter, validateBody(loginSchema), async (req, res, next) => {
+authRouter.post('/login', loginLimiter, phoneLimiter, validateBody(loginSchema), async (req, res, next) => {
   try {
     const { phone, password } = req.body as z.infer<typeof loginSchema>;
     const user = await userRepo.findByPhone(phone);

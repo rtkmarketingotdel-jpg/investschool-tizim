@@ -6,7 +6,26 @@ import { settings } from '../data/mockStore.js';
  * (plain fetch: no extra dependency needed for send-only notifications).
  * No-op when the bot token or chat id is not configured.
  */
+/** Telegram allows 4096 characters per message: long lists are split at line boundaries (a <blockquote> never spans two parts). */
+export function splitMessage(text: string, max = 3800): string[] {
+  if (text.length <= max) return [text];
+  const parts: string[] = [];
+  let cur = '';
+  for (const line of text.split('\n')) {
+    if (cur && cur.length + line.length + 1 > max) { parts.push(cur); cur = ''; }
+    cur += (cur ? '\n' : '') + line;
+  }
+  if (cur) parts.push(cur);
+  return parts;
+}
+
 export async function sendTelegram(text: string, chatId: string | null = settings.telegramChatId): Promise<boolean> {
+  const parts = splitMessage(text);
+  if (parts.length > 1) {
+    let all = true;
+    for (const p of parts) all = (await sendTelegram(p, chatId)) && all;
+    return all;
+  }
   if (!env.telegramToken || !chatId) {
     console.log(`[telegram:skipped] ${text.replace(/<[^>]+>/g, '').replace(/\n/g, ' | ')}`);
     return false;
@@ -39,7 +58,8 @@ export async function sendTelegramPhoto(photo: Buffer, caption: string, chatId: 
     try {
       const form = new FormData();
       form.append('chat_id', chatId);
-      form.append('caption', caption.slice(0, 1000));
+      // cut on a line boundary so an HTML tag is never sliced in half
+      form.append('caption', splitMessage(caption, 1000)[0] ?? '');
       form.append('parse_mode', 'HTML');
       form.append('photo', new Blob([new Uint8Array(photo)], { type: 'image/jpeg' }), 'selfie.jpg');
       const res = await fetch(`${env.telegramApiUrl}/bot${env.telegramToken}/sendPhoto`, { method: 'POST', body: form, signal: AbortSignal.timeout(8000) });

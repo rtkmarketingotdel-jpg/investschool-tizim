@@ -145,7 +145,7 @@ export async function createCampaign(input: {
   };
   smsCampaigns.unshift(campaign);
   await audit(input.createdById, input.scheduledAt ? 'sms.schedule' : 'sms.send', 'sms', campaign.id, { count: campaign.messages.length, category: input.category, auto: !!input.auto });
-  if (!input.scheduledAt) void processCampaign(campaign.id);
+  if (!input.scheduledAt) void processCampaign(campaign.id).catch((e) => console.error('[sms] campaign failed', e));
   return campaign;
 }
 
@@ -185,14 +185,14 @@ export async function retryFailed(campaignId: string): Promise<number> {
   if (c.status === 'SENDING' || c.status === 'SCHEDULED') throw new ApiError(409, 'SMS_BAD_STATE');
   const failed = c.messages.filter((m) => m.status === 'FAILED');
   failed.forEach((m) => { m.status = 'QUEUED'; m.error = null; });
-  if (failed.length) void processCampaign(c.id);
+  if (failed.length) void processCampaign(c.id).catch((e) => console.error('[sms] campaign failed', e));
   return failed.length;
 }
 
 /** Cron: sends scheduled campaigns whose time has come. */
 export async function runDueCampaigns(now = new Date()) {
   for (const c of smsCampaigns) {
-    if (c.status === 'SCHEDULED' && c.scheduledAt && c.scheduledAt <= now) void processCampaign(c.id);
+    if (c.status === 'SCHEDULED' && c.scheduledAt && c.scheduledAt <= now) void processCampaign(c.id).catch((e) => console.error('[sms] campaign failed', e));
   }
 }
 
