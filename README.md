@@ -62,10 +62,10 @@ Android/Chrome shows a real install prompt; iOS Safari has none, so the app show
 
 ## Checks
 `npm run build`, `npm run typecheck`, `npm run lint` in both folders; `npm test` in `server` (money words, debt incl. instalments, payroll, SMS text).
-`grep -ri "gorizont" client/src server/src` must list only `brand.config.ts` files (and locale files).
+`grep -ri "rtk maktab" client/src server/src` must list only `brand.config.ts` files (and locale files).
 
 ## Rebranding
-1. Replace `client/public/brand/logo.svg` and `favicon.svg`.
+1. The brand is text only (no logo image): replace `client/public/brand/favicon.svg` and the `icon-*.png` / `apple-touch-icon.png` app icons.
 2. Update `BRAND_*` (Railway) and `VITE_BRAND_*` (Vercel) env values.
 3. Update brand-dependent keys in `client/src/locales/*.json` (`brand.slogan`).
 4. Update the contract prefix setting (e.g. `IS`).

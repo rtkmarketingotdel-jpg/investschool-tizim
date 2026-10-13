@@ -1,5 +1,5 @@
 /* Minimal service worker: the app shell opens fast and offline; data is never cached (always live from the API). */
-const SHELL = 'shell-v2';
+const SHELL = 'shell-v3';
 
 // Never keep an HTML answer under an asset URL (a missing hashed file must not poison the cache).
 const cacheable = (res) => res.ok && !(res.headers.get('content-type') || '').includes('text/html');

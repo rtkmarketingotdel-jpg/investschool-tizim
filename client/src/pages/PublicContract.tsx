@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Download, FileSignature, ShieldCheck } from 'lucide-react';
-import { brand } from '@/brand.config';
 import { api, errorCode } from '@/lib/api';
 import { financeApi } from '@/lib/financeApi';
 import { Badge, Button, Card, EmptyState, Input, Skeleton } from '@/components/ui';
@@ -60,8 +59,7 @@ export default function PublicContract() {
     <div className="min-h-screen bg-surface-muted">
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
-          <img src={brand.logo} alt="" className="h-9 w-9 rounded-full" />
-          <span className="flex-1 font-medium">{c.school}</span>
+          <span className="flex-1 text-lg font-semibold text-primary">{c.school}</span>
           {c.demoMode && <Badge tone="warning">{x.demo}</Badge>}
         </div>
       </header>

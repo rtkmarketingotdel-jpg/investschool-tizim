@@ -1,7 +1,7 @@
 import './env.js';
 export const brand = {
-  name: process.env.BRAND_NAME || 'Invest School',
-  legalName: process.env.BRAND_LEGAL_NAME || '"Invest School" MChJ',
+  name: process.env.BRAND_NAME || 'RTK Maktab',
+  legalName: process.env.BRAND_LEGAL_NAME || '"RTK Maktab" MChJ',
   inn: process.env.BRAND_INN || '000000000',
   address: process.env.BRAND_ADDRESS || 'Samarqand viloyati',
   director: process.env.BRAND_DIRECTOR || 'Direktor F.I.Sh.',

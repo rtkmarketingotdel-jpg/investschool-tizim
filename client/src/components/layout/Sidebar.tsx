@@ -63,8 +63,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boolean; on
       >
         <aside className={cn('absolute inset-y-0 left-0 flex flex-col overflow-hidden border-r border-border/70 bg-surface transition-[width] duration-300 ease-out', desktop ? (pinned ? 'w-[248px]' : 'w-[76px]') : 'w-[272px]')}>
           <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border/70 px-4">
-            <img src={brand.logo} alt="" className="h-11 w-11 shrink-0 rounded-full" />
-            <span className={cn('truncate text-lg transition-opacity duration-200', open ? 'opacity-100 delay-100' : 'pointer-events-none opacity-0')}>{brand.name}</span>
+            {/* text-only brand: the short name fits the collapsed rail */}
+            <span className="truncate text-xl font-semibold tracking-tight text-primary" title={brand.name}>{open ? brand.name : brand.shortName}</span>
           </div>
           <nav className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4">
             {user.role !== 'DIRECTOR' && (

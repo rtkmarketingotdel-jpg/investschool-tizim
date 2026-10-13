@@ -20,7 +20,7 @@ function IosSteps({ open, onClose }: { open: boolean; onClose: () => void }) {
           <span className="pt-1.5">{t('install.iosStep2')}</span>
         </li>
         <li className="flex items-start gap-3">
-          <img src={brand.logo} alt="" className="h-9 w-9 shrink-0 rounded-full" />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-[11px] font-bold text-white">{brand.shortName}</span>
           <span className="pt-1.5">{t('install.iosStep3', { name: brand.shortName })}</span>
         </li>
       </ol>
@@ -74,7 +74,6 @@ export function InstallBanner() {
   };
   return (
     <div className="relative flex flex-wrap items-center gap-x-3 gap-y-3 rounded-2xl border border-border bg-primary-soft p-4 pr-12">
-      <img src={brand.logo} alt="" className="h-10 w-10 shrink-0 rounded-full" />
       <div className="min-w-0 flex-1 basis-40">
         <p>{t('install.bannerTitle')}</p>
         <p className="text-sm text-text-muted">{t('install.bannerText')}</p>
