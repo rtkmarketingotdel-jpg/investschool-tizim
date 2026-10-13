@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import type { Attendance, AttendanceStatus, Branch, Role, Setting, User } from './types.js';
+import type { Attendance, Branch, Role, Setting, User } from './types.js';
 import { addDays, atLocal, isoWeekday, toLocalDate } from '../lib/date.js';
 
 // In-memory mock data. Replaced by a real database (hosted in Uzbekistan) later;
@@ -8,9 +8,7 @@ const hash = bcrypt.hashSync('demo1234', 10);
 
 export const branches: Branch[] = [
   { id: 'b1', name: 'Asosiy filial', address: 'Samarqand shahri', lat: 39.6542, lng: 66.9597, radiusM: 200 },
-  { id: 'b2', name: 'Bulungʻur filiali', address: 'Bulungʻur tumani', lat: 39.7644, lng: 67.4813, radiusM: 200 },
 ];
-const SECOND_BRANCH_USERS = new Set([13, 14, 15]);
 
 const seedUser = (n: number, fullName: string, role: Role, position: string, baseSalary: number): User => ({
   id: `u${n}`,
@@ -23,18 +21,20 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
   photoUrl: null,
   achievements: [],
   documents: [],
-  profileCompletedAt: n >= 11 ? new Date('2025-09-05') : null,
+  profileCompletedAt: new Date('2026-09-01'),
   specialty: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
-  branchId: SECOND_BRANCH_USERS.has(n) ? 'b2' : 'b1',
+  branchId: 'b1',
   baseSalary,
   language: 'uz',
   isActive: true,
-  hiredAt: new Date('2024-09-01'),
-  createdAt: new Date('2024-09-01'),
+  hiredAt: new Date('2026-09-01'),
+  createdAt: new Date('2026-09-01'),
 });
 
+// One example of each kind of record: the director (signs in) and one teacher.
 export const users: User[] = [
   seedUser(1, 'Karimov Rustam Abdullayevich', 'DIRECTOR', 'Direktor', 8_000_000),
+  seedUser(2, 'Yusupova Dilnoza Akmalovna', 'TEACHER', 'Tikuvchilik oʻqituvchisi', 4_000_000),
 ];
 
 export const settings: Setting = {
@@ -48,7 +48,7 @@ export const settings: Setting = {
   lateFineMax: 50000,
   absentFine: 100000,
   paymentDueDays: 30,
-  contractPrefix: 'GS',
+  contractPrefix: 'RTK',
   // env default: the settings live in memory (until the real database), so a chat id set in the UI is lost on restart
   telegramChatId: process.env.TELEGRAM_CHAT_ID || null,
   smsDebtAutoEnabled: false,
@@ -57,39 +57,15 @@ export const settings: Setting = {
   smsDebtTemplateId: 'st1',
 };
 
-// Deterministic mock history for the last 14 days (no photos: UI falls back to initials).
+// One attendance record: the teacher came in on time on the last working day.
 export const attendances: Attendance[] = [];
 {
-  let seed = 42;
-  const rnd = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);
-  const today = toLocalDate();
-  let id = 1;
-  for (let back = 14; back >= 1; back--) {
-    const date = addDays(today, -back);
-    if (!settings.workDays.includes(isoWeekday(date))) continue;
-    for (const u of users) {
-      if (u.role === 'DIRECTOR') continue; // the director is not tracked
-      const r = rnd();
-      const base = {
-        id: `a${id++}`, userId: u.id, date, lateMinutes: 0,
-        checkInPhotoUrl: null, checkInLat: null, checkInLng: null, checkInAccuracy: null, checkInDistanceM: null,
-        checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null,
-        deviceInfo: null, note: null, branchId: u.branchId, selfieSent: true, selfieOutSent: true,
-      };
-      if (r < 0.05) {
-        attendances.push({ ...base, status: 'ABSENT', checkInAt: null, checkOutAt: null });
-        continue;
-      }
-      const late = r > 0.85;
-      const inMin = late ? 11 + Math.floor(rnd() * 35) : Math.floor(rnd() * 12) - 6 + 5;
-      const outMin = 17 * 60 + Math.floor(rnd() * 40) - 5;
-      const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-      const status: AttendanceStatus = late ? 'LATE' : 'ON_TIME';
-      attendances.push({
-        ...base, status, lateMinutes: late ? inMin : 0,
-        checkInAt: atLocal(date, hhmm(8 * 60 + Math.max(inMin, 0) - (late ? 0 : 10))),
-        checkOutAt: atLocal(date, hhmm(outMin)),
-      });
-    }
-  }
+  let date = addDays(toLocalDate(), -1);
+  while (!settings.workDays.includes(isoWeekday(date))) date = addDays(date, -1);
+  attendances.push({
+    id: 'a1', userId: 'u2', date, status: 'ON_TIME', lateMinutes: 0,
+    checkInAt: atLocal(date, '07:55'), checkInPhotoUrl: null, checkInLat: null, checkInLng: null, checkInAccuracy: null, checkInDistanceM: null,
+    checkOutAt: atLocal(date, '17:05'), checkOutPhotoUrl: null, checkOutLat: null, checkOutLng: null, checkOutDistanceM: null,
+    deviceInfo: null, note: null, branchId: 'b1', selfieSent: true, selfieOutSent: true,
+  });
 }

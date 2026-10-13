@@ -18,7 +18,7 @@ Environment variables live in the Vercel / Railway dashboards (see `.env.example
 cd server && cp .env.example .env && npm install && npm run dev   # :4000
 cd client && cp .env.example .env && npm install && npm run dev   # :5173
 ```
-Demo login (password `demo1234`): Director `+998900000001` (other staff are created in the app).
+Demo logins (password `demo1234`): Director `+998900000001`, Teacher `+998900000002`. The demo data holds one example of each record (branch, course, group, trainee, bill, payment, contract, attendance, payroll, SMS template).
 
 ## Modules (all on mock data)
 Dashboard, trainees (tinglovchilar: own phone, passport, JSHSHIR; statuses studying / graduated / left), courses (name, length in months,
