@@ -7,8 +7,9 @@ import { fileURLToPath, URL } from 'node:url';
  * so rebranding stays a pure env change (no brand name is written into static files).
  */
 function pwa(env: Record<string, string>): Plugin {
-  const name = env.VITE_BRAND_NAME || 'School';
-  const short = env.VITE_BRAND_SHORT || name;
+  // same defaults as src/brand.config.ts
+  const name = env.VITE_BRAND_NAME || 'RTK Maktab';
+  const short = env.VITE_BRAND_SHORT || 'RTK';
   const manifest = JSON.stringify({
     name,
     short_name: short,
