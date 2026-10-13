@@ -1016,5 +1016,26 @@
       "studying": "Oʻqiyotganlar",
       "graduates": "Bitiruvchilar"
     }
+  },
+  "telegram": {
+    "title": "Telegram",
+    "link": "Telegramni ulash",
+    "unlink": "Uzish",
+    "linked": "Telegram ulangan",
+    "notLinked": "Telegram ulanmagan",
+    "hint": "Ulasangiz, oylik toʻlanganda bot sizga shaxsan xabar yuboradi.",
+    "waiting": "Telegram ochildi: botda “Start” tugmasini bosing, soʻng shu sahifaga qayting.",
+    "waitingShort": "Kutilmoqda…",
+    "botMissing": "Telegram bot hali sozlanmagan. Direktorga murojaat qiling.",
+    "linkedToast": "Telegram ulandi",
+    "unlinkedToast": "Telegram uzildi",
+    "unlinkConfirm": "Telegram uzilsinmi? Oylik haqidagi xabarlar kelmay qoladi.",
+    "timeout": "Botdan javob kelmadi. Qaytadan urinib koʻring.",
+    "payResult": {
+      "sent": "xodimga Telegramda xabar yuborildi",
+      "not_linked": "xodim Telegramni ulamagan, xabar yuborilmadi",
+      "failed": "Telegram xabari yuborilmadi"
+    },
+    "linkedHint": "Oylik toʻlanganda bot shu Telegramga xabar yuboradi."
   }
 }

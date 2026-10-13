@@ -45,6 +45,8 @@ export interface User {
   profileCompletedAt: Date | null;
   /** null = may check in at any branch */
   branchId: string | null;
+  /** Personal Telegram chat, linked by the employee through the bot (salary notices go there). */
+  telegramChatId: string | null;
   baseSalary: number;
   language: Lang;
   isActive: boolean;

@@ -96,3 +96,35 @@ export async function findTelegramChats(): Promise<TelegramChat[]> {
   }
   return [...chats.values()];
 }
+
+let botUsername: string | null = null;
+
+/** The bot's @username (for t.me deep links), fetched once. */
+export async function getBotUsername(): Promise<string | null> {
+  if (botUsername || !env.telegramToken) return botUsername;
+  try {
+    const res = await fetch(`${env.telegramApiUrl}/bot${env.telegramToken}/getMe`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { result?: { username?: string } };
+    botUsername = json.result?.username ?? null;
+  } catch (e) {
+    console.error('[telegram] getMe failed', e);
+  }
+  return botUsername;
+}
+
+/**
+ * Finds the private chat that sent "/start <code>" to the bot (the employee opened the t.me link and pressed Start).
+ * Reads getUpdates without confirming them, so the director's "find chat" keeps seeing the same updates.
+ */
+export async function findStartChat(code: string): Promise<string | null> {
+  if (!env.telegramToken) return null;
+  const res = await fetch(`${env.telegramApiUrl}/bot${env.telegramToken}/getUpdates?limit=100&allowed_updates=["message"]`, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) return null;
+  const json = (await res.json()) as { result?: Array<{ message?: { text?: string; chat?: { id: number; type: string } } }> };
+  for (const u of [...(json.result ?? [])].reverse()) {
+    const m = u.message;
+    if (m?.chat?.type === 'private' && m.text?.trim() === `/start ${code}`) return String(m.chat.id);
+  }
+  return null;
+}

@@ -9,6 +9,8 @@ import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
 import { audit, notifyRoles } from '../repositories/notificationRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 import { calculatePeriod, isLocked, previewPayroll, refreshDraft } from '../services/payroll.js';
+import { sendTelegram } from '../services/telegram.js';
+import { salaryPaidMessage } from '../services/telegramText.js';
 
 export const payrollRouter = Router();
 payrollRouter.use(requireAuth);
@@ -32,7 +34,7 @@ const finance = requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT');
 
 async function present(p: NonNullable<Awaited<ReturnType<typeof payrollRepo.findById>>>) {
   const u = await userRepo.findById(p.userId);
-  return { ...p, fullName: u?.fullName ?? '—', position: u?.position ?? '' };
+  return { ...p, fullName: u?.fullName ?? '—', position: u?.position ?? '', telegramLinked: !!u?.telegramChatId };
 }
 
 payrollRouter.get('/', finance, async (req, res, next) => {
@@ -135,7 +137,15 @@ payrollRouter.post('/:id/pay', finance, async (req, res, next) => {
     if (p.status !== 'APPROVED') throw new ApiError(409, 'PAYROLL_BAD_STATE');
     const updated = await payrollRepo.update(p.id, { status: 'PAID', paidAt: new Date() });
     await audit(req.user!.id, 'payroll.pay', 'payroll', p.id, { userId: p.userId, period: p.period, total: p.total });
-    res.json(updated);
+    // the employee is told personally through the bot (only if they linked their Telegram)
+    const u = await userRepo.findById(p.userId);
+    const telegram = !u?.telegramChatId
+      ? 'not_linked'
+      : (await sendTelegram(salaryPaidMessage({
+          name: u.fullName.split(' ').slice(1).join(' ') || u.fullName, period: p.period, total: p.total,
+          base: p.baseSalary, bonus: p.bonusTotal, fine: p.fineTotal,
+        }), u.telegramChatId)) ? 'sent' : 'failed';
+    res.json({ ...updated, telegram });
   } catch (e) {
     next(e);
   }

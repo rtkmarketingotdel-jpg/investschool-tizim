@@ -137,6 +137,7 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
       documents: [],
       // the director supervises and needs no profile; everybody else fills it in on first sign-in
       profileCompletedAt: data.role === 'DIRECTOR' ? new Date() : null,
+      telegramChatId: null,
       passwordHash: await bcrypt.hash(finalPassword, 10),
       language: 'uz',
       hiredAt: new Date(),

@@ -24,6 +24,7 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
   profileCompletedAt: new Date('2026-09-01'),
   specialty: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
   branchId: 'b1',
+  telegramChatId: null,
   baseSalary,
   language: 'uz',
   isActive: true,

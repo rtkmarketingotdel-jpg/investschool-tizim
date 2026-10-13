@@ -79,6 +79,8 @@ export interface PayrollRow {
   userId: string;
   fullName: string;
   position: string;
+  /** whether the employee linked their Telegram (salary notices) */
+  telegramLinked?: boolean;
   period: string;
   baseSalary: number;
   bonusTotal: number;
@@ -203,7 +205,7 @@ export const financeApi = {
   addAdjustment: (d: { userId: string; period: string; type: 'BONUS' | 'FINE'; amount: number; reason: string }) =>
     api.post('/payroll/adjustments', d).then((r) => r.data),
   approvePayroll: (id: string) => api.post(`/payroll/${id}/approve`).then((r) => r.data),
-  payPayroll: (id: string) => api.post(`/payroll/${id}/pay`).then((r) => r.data),
+  payPayroll: (id: string) => api.post<{ telegram: 'sent' | 'failed' | 'not_linked' }>(`/payroll/${id}/pay`).then((r) => r.data),
 
   contracts: (p: { q?: string; status?: string; studentId?: string; page: number; limit: number }) =>
     api.get<Paged<ContractRow>>('/contracts', { params: clean(p) }).then((r) => r.data),

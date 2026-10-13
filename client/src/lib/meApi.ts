@@ -43,6 +43,10 @@ export interface Teaching {
 
 export const meApi = {
   teaching: () => api.get<Teaching>('/me/teaching').then((r) => r.data),
+  telegram: () => api.get<{ linked: boolean; botConfigured: boolean }>('/me/telegram').then((r) => r.data),
+  telegramLink: () => api.post<{ url: string }>('/me/telegram/link').then((r) => r.data),
+  telegramCheck: () => api.post<{ linked: boolean; expired: boolean }>('/me/telegram/link/check').then((r) => r.data),
+  telegramUnlink: () => api.delete('/me/telegram').then((r) => r.data),
 };
 
 export const ageOf = (birthDate: string | null) => {

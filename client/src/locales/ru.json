@@ -1018,5 +1018,26 @@
       "studying": "Обучаются",
       "graduates": "Выпускники"
     }
+  },
+  "telegram": {
+    "title": "Telegram",
+    "link": "Подключить Telegram",
+    "unlink": "Отключить",
+    "linked": "Telegram подключён",
+    "notLinked": "Telegram не подключён",
+    "hint": "После подключения бот лично сообщит вам о выплате зарплаты.",
+    "waiting": "Telegram открыт: нажмите «Start» в боте и вернитесь на эту страницу.",
+    "waitingShort": "Ожидание…",
+    "botMissing": "Telegram-бот ещё не настроен. Обратитесь к директору.",
+    "linkedToast": "Telegram подключён",
+    "unlinkedToast": "Telegram отключён",
+    "unlinkConfirm": "Отключить Telegram? Уведомления о зарплате перестанут приходить.",
+    "timeout": "Бот не ответил. Попробуйте ещё раз.",
+    "payResult": {
+      "sent": "сотруднику отправлено сообщение в Telegram",
+      "not_linked": "сотрудник не подключил Telegram, сообщение не отправлено",
+      "failed": "сообщение в Telegram не отправлено"
+    },
+    "linkedHint": "При выплате зарплаты бот пришлёт сообщение в этот Telegram."
   }
 }

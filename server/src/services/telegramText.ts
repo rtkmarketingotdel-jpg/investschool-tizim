@@ -70,3 +70,28 @@ export function dailyMessage(date: string, s: { came: number; late: number; abse
 export const contractSignedMessage = (number: string) => [`📝 <b>Shartnoma imzolandi</b>`, LINE, `Raqami: <b>${esc(number)}</b>`, '', footer()].join('\n');
 export const otpMessage = (number: string, code: string) => [`🔐 <b>Tasdiqlash kodi</b>`, LINE, `Shartnoma: ${esc(number)}`, `Kod: <code>${esc(code)}</code>`, '', footer()].join('\n');
 export const testMessage = () => [`✅ <b>Telegram ulandi</b>`, LINE, 'Davomat xabarlari shu chatga keladi.', '', footer()].join('\n');
+
+const fmtSum = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+/** "2026-yil oktabr" from a YYYY-MM period. */
+export const uzMonth = (period: string) => `${period.slice(0, 4)}-yil ${MONTHS[Number(period.slice(5, 7)) - 1]}`;
+
+/** Sent to the employee personally when the accountant marks their salary as paid. */
+export function salaryPaidMessage(p: { name: string; period: string; total: number; base: number; bonus: number; fine: number }) {
+  const lines = [
+    '💰 <b>Oylik toʻlandi</b>',
+    LINE,
+    `Hurmatli ${esc(p.name)}, sizga <b>${esc(uzMonth(p.period))}</b> oyi uchun <b>${esc(fmtSum(p.total))} soʻm</b> oylik toʻlandi.`,
+  ];
+  if (p.bonus || p.fine) {
+    lines.push('', `Oklad: ${esc(fmtSum(p.base))} soʻm`);
+    if (p.bonus) lines.push(`➕ Bonus: ${esc(fmtSum(p.bonus))} soʻm`);
+    if (p.fine) lines.push(`➖ Jarima: ${esc(fmtSum(p.fine))} soʻm`);
+  }
+  lines.push('', footer());
+  return lines.join('\n');
+}
+
+/** Reply in the employee's chat right after linking. */
+export function linkedMessage(name: string) {
+  return [`✅ <b>Telegram ulandi</b>`, LINE, `${esc(name)}, oylik toʻlanganda shu yerga xabar keladi.`, '', footer()].join('\n');
+}

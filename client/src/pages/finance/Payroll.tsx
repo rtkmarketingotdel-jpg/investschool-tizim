@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Banknote, Calculator, CheckCircle2, Download, Plus } from 'lucide-react';
+import { Banknote, Calculator, CheckCircle2, Download, Plus, Send } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { errorCode } from '@/lib/api';
 import { downloadCsv, financeApi, type PayrollRow, type PayrollStatus } from '@/lib/financeApi';
@@ -31,7 +31,15 @@ export default function Payroll() {
 
   const calc = useMutation({ mutationFn: () => financeApi.calculatePayroll(period), onSuccess: (r) => { toast(t('finance.payroll.calculated', r)); refresh(); }, onError: fail });
   const approve = useMutation({ mutationFn: financeApi.approvePayroll, onSuccess: () => { toast(t('finance.payroll.approvedToast')); refresh(); }, onError: fail });
-  const pay = useMutation({ mutationFn: financeApi.payPayroll, onSuccess: () => { toast(t('finance.payroll.paidToast')); refresh(); }, onError: fail });
+  const pay = useMutation({
+    mutationFn: financeApi.payPayroll,
+    onSuccess: (r) => {
+      // say whether the employee got the Telegram notice, so an unlinked employee can be told in person
+      toast(`${t('finance.payroll.paidToast')} · ${t(`telegram.payResult.${r.telegram}`)}`, r.telegram === 'failed' ? 'error' : 'success');
+      refresh();
+    },
+    onError: fail,
+  });
 
   const cur = t('common.currency');
   const rows = list.data?.items ?? [];
@@ -91,7 +99,7 @@ export default function Payroll() {
                 <Td>
                   <div className="flex items-center gap-3">
                     <Avatar name={r.fullName} size={40} />
-                    <div><p className="font-medium">{r.fullName}</p><p className="text-[13px] text-text-muted">{r.position}</p></div>
+                    <div><p className="flex items-center gap-1.5 font-medium">{r.fullName}{r.telegramLinked && <Send aria-label={t('telegram.linked')} className="h-3.5 w-3.5 text-primary" />}</p><p className="text-[13px] text-text-muted">{r.position}</p></div>
                   </div>
                 </Td>
                 <Td numeric>{money(r.baseSalary)}</Td>

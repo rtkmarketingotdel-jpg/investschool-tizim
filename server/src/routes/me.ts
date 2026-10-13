@@ -10,8 +10,13 @@ import { courseRepo } from '../repositories/courseRepo.js';
 import { groupRepo, groupStatus } from '../repositories/groupRepo.js';
 import { contractRepo } from '../repositories/contractRepo.js';
 import { fullName, studentRepo } from '../repositories/studentRepo.js';
+import { audit } from '../repositories/notificationRepo.js';
 import { toPublicUser, userRepo } from '../repositories/userRepo.js';
 import { syncCourseCharge } from '../services/finance.js';
+import { findStartChat, getBotUsername, sendTelegram } from '../services/telegram.js';
+import { linkedMessage } from '../services/telegramText.js';
+import { env } from '../env.js';
+import { randomBytes } from 'node:crypto';
 
 export const meRouter = Router();
 meRouter.use(requireAuth);
@@ -42,6 +47,55 @@ meRouter.post('/password', validateBody(passwordSchema), async (req, res, next) 
     }
     await userRepo.update(req.user!.id, { passwordHash: await bcrypt.hash(newPassword, 10) });
     res.json({ ok: true });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// ---------- personal Telegram (salary notices) ----------
+const LINK_TTL_MS = 15 * 60 * 1000;
+/** userId -> one-time code the employee sends to the bot as "/start <code>" through the t.me link. */
+const linkCodes = new Map<string, { code: string; expiresAt: number }>();
+
+meRouter.get('/telegram', (req, res) => {
+  res.json({ linked: !!req.user!.telegramChatId, botConfigured: !!env.telegramToken });
+});
+
+meRouter.post('/telegram/link', async (req, res, next) => {
+  try {
+    const bot = await getBotUsername();
+    if (!bot) throw new ApiError(400, 'TELEGRAM_NOT_CONFIGURED');
+    const code = randomBytes(8).toString('hex');
+    linkCodes.set(req.user!.id, { code, expiresAt: Date.now() + LINK_TTL_MS });
+    res.json({ url: `https://t.me/${bot}?start=${code}` });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/** Polled by the profile page after the employee opened the bot: links the chat that sent this user's code. */
+meRouter.post('/telegram/link/check', async (req, res, next) => {
+  try {
+    const me = req.user!;
+    const pending = linkCodes.get(me.id);
+    if (!pending || pending.expiresAt < Date.now()) return res.json({ linked: !!me.telegramChatId, expired: !me.telegramChatId });
+    const chatId = await findStartChat(pending.code);
+    if (!chatId) return res.json({ linked: false, expired: false });
+    linkCodes.delete(me.id);
+    await userRepo.update(me.id, { telegramChatId: chatId });
+    await audit(me.id, 'telegram.link', 'user', me.id);
+    await sendTelegram(linkedMessage(me.fullName.split(' ').slice(1).join(' ') || me.fullName), chatId);
+    res.json({ linked: true, expired: false });
+  } catch (e) {
+    next(e);
+  }
+});
+
+meRouter.delete('/telegram', async (req, res, next) => {
+  try {
+    await userRepo.update(req.user!.id, { telegramChatId: null });
+    await audit(req.user!.id, 'telegram.unlink', 'user', req.user!.id);
+    res.json({ linked: false });
   } catch (e) {
     next(e);
   }
