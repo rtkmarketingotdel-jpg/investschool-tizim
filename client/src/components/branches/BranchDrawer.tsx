@@ -25,10 +25,10 @@ export function BranchDrawer({ open, branch, onClose }: Props) {
   const [lng, setLng] = useState('66.9597');
   const [radius, setRadius] = useState('150');
   const [userIds, setUserIds] = useState<string[]>([]);
-  const [classIds, setClassIds] = useState<string[]>([]);
+  const [groupIds, setGroupIds] = useState<string[]>([]);
   const [locating, setLocating] = useState(false);
   const staff = useQuery({ queryKey: ['staff', 'branch-assign'], queryFn: () => schoolApi.staff({ active: 'true', page: 1, limit: 100 }), enabled: open });
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups, enabled: open });
 
   useEffect(() => {
     if (!open) return;
@@ -44,19 +44,19 @@ export function BranchDrawer({ open, branch, onClose }: Props) {
   }, [open, branch, staff.data]);
   useEffect(() => {
     if (!open) return;
-    setClassIds(branch ? (classes.data?.filter((c) => c.branchId === branch.id).map((c) => c.id) ?? []) : []);
-  }, [open, branch, classes.data]);
+    setGroupIds(branch ? (groups.data?.filter((g) => g.branchId === branch.id).map((g) => g.id) ?? []) : []);
+  }, [open, branch, groups.data]);
 
   const save = useMutation({
     mutationFn: async () => {
       const body = { name: name.trim(), address: address.trim() || null, lat: Number(lat), lng: Number(lng), radiusM: Number(radius) };
       const saved = branch ? await schoolApi.updateBranch(branch.id, body) : await schoolApi.createBranch(body);
-      await schoolApi.assignBranch(saved.id, userIds, classIds);
+      await schoolApi.assignBranch(saved.id, userIds, groupIds);
       return saved;
     },
     onSuccess: () => {
       toast(t('settings.branches.saved'));
-      for (const k of ['branches', 'staff', 'classes', 'attendance']) void qc.invalidateQueries({ queryKey: [k] });
+      for (const k of ['branches', 'staff', 'groups', 'attendance']) void qc.invalidateQueries({ queryKey: [k] });
       onClose();
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
@@ -109,9 +109,9 @@ export function BranchDrawer({ open, branch, onClose }: Props) {
           </div>
         </fieldset>
         <fieldset>
-          <legend className="mb-2 text-sm uppercase tracking-wider text-text-muted">{t('settings.branches.classes')} ({classIds.length})</legend>
+          <legend className="mb-2 text-sm uppercase tracking-wider text-text-muted">{t('settings.branches.groups')} ({groupIds.length})</legend>
           <div className="max-h-44 overflow-y-auto rounded-xl border border-border p-1">
-            {classes.data?.map((c) => check(classIds.includes(c.id), c.name, null, () => toggle(classIds, setClassIds, c.id), branchName(c.branchId)))}
+            {groups.data?.map((g) => check(groupIds.includes(g.id), g.name, g.courseName, () => toggle(groupIds, setGroupIds, g.id), branchName(g.branchId)))}
           </div>
           <p className="mt-1 text-xs text-text-muted">{t('settings.branches.assignHint')}</p>
         </fieldset>

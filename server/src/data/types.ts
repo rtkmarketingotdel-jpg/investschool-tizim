@@ -19,16 +19,13 @@ export interface StaffDocument {
   mime: string;
 }
 
-export interface Subject {
+/** A vocational programme (kasb kursi): its full price is billed once per enrolment. */
+export interface Course {
   id: string;
   name: string;
-}
-
-export interface Club {
-  id: string;
-  name: string;
-  teacherId: string | null;
-  monthlyFee: number;
+  durationMonths: number;
+  price: number;
+  description: string | null;
 }
 
 export interface User {
@@ -39,8 +36,8 @@ export interface User {
   role: Role;
   position: string;
   isTeacher: boolean;
-  isTutor: boolean;
-  subject: string | null;
+  /** Course name the teacher (master) teaches; kept in sync when the course is renamed. */
+  specialty: string | null;
   photoUrl: string | null;
   achievements: Achievement[];
   documents: StaffDocument[];
@@ -106,7 +103,8 @@ export interface Setting {
   lateFinePerMinute: number;
   lateFineMax: number;
   absentFine: number;
-  paymentDueDay: number;
+  /** Days after the group start (or a later enrolment) by which the course price is due. */
+  paymentDueDays: number;
   contractPrefix: string;
   telegramChatId: string | null;
   /** Automatic debtor reminders (daily job). */
@@ -116,16 +114,25 @@ export interface Setting {
   smsDebtTemplateId: string | null;
 }
 
-export type StudentStatus = 'ACTIVE' | 'TRIAL' | 'LEFT';
+export type StudentStatus = 'ACTIVE' | 'GRADUATED' | 'LEFT';
 export type Gender = 'MALE' | 'FEMALE';
 
-export interface SchoolClass {
+/** Derived from the dates: PLANNED before startDate, FINISHED after endDate. */
+export type GroupStatus = 'PLANNED' | 'ACTIVE' | 'FINISHED';
+
+export interface Group {
   id: string;
   name: string;
-  grade: number;
-  capacity: number;
+  courseId: string;
   teacherId: string | null;
   branchId: string | null;
+  capacity: number;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  days: number[]; // 1=Mon ... 7=Sun
+  timeStart: string; // HH:MM
+  timeEnd: string; // HH:MM
+  room: string | null;
 }
 
 export interface Student {
@@ -135,15 +142,17 @@ export interface Student {
   middleName: string | null;
   birthDate: string | null; // YYYY-MM-DD
   gender: Gender;
-  classId: string | null;
-  parentName: string;
-  parentPhone: string;
-  parentPhone2: string | null;
+  groupId: string | null;
+  phone: string;
+  phone2: string | null;
+  /** Passport series and number, e.g. AB1234567. */
+  passport: string | null;
+  /** JSHSHIR, 14 digits. */
+  pinfl: string | null;
   address: string | null;
   district: string | null;
-  isBoarding: boolean;
-  clubs: string[];
-  monthlyFee: number;
+  /** Agreed full course price before the discount. */
+  coursePrice: number;
   discountPercent: number;
   status: StudentStatus;
   enrolledAt: string; // YYYY-MM-DD
@@ -157,12 +166,14 @@ export type AdjustmentSource = 'MANUAL' | 'ATTENDANCE';
 export type PayrollStatus = 'DRAFT' | 'APPROVED' | 'PAID';
 export type ContractStatus = 'DRAFT' | 'SENT' | 'SIGNED' | 'CANCELLED';
 
+/** The course bill: one per student (an enrolment), its amount follows the price and discount. */
 export interface StudentCharge {
   id: string;
   studentId: string;
-  period: string; // YYYY-MM
+  groupId: string | null;
   amount: number;
   dueDate: string; // YYYY-MM-DD
+  createdAt: Date;
 }
 
 export interface Payment {
@@ -170,7 +181,6 @@ export interface Payment {
   studentId: string;
   amount: number;
   method: PaymentMethod;
-  period: string | null;
   paidAt: Date;
   receivedById: string | null;
   note: string | null;
@@ -219,7 +229,7 @@ export interface Contract {
   studentId: string;
   templateId: string;
   language: Lang;
-  monthlyFee: number;
+  price: number;
   startDate: string;
   endDate: string;
   status: ContractStatus;
@@ -227,7 +237,7 @@ export interface Contract {
   otpHash: string | null;
   otpExpiresAt: Date | null;
   otpAttempts: number;
-  /** Only kept in DEMO mode so staff can read the code out to the parent. */
+  /** Only kept in DEMO mode so staff can read the code out to the trainee. */
   otpDemoCode: string | null;
   signedAt: Date | null;
   signedIp: string | null;

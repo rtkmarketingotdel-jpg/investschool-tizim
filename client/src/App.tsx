@@ -12,8 +12,8 @@ const loaders = {
   Dashboard: () => import('@/pages/Dashboard'),
   Students: () => import('@/pages/Students'),
   StudentDetail: () => import('@/pages/StudentDetail'),
-  Classes: () => import('@/pages/Classes'),
-  Academics: () => import('@/pages/Academics'),
+  Groups: () => import('@/pages/Groups'),
+  Courses: () => import('@/pages/Courses'),
   Sms: () => import('@/pages/Sms'),
   Profile: () => import('@/pages/Profile'),
   ProfileSetup: () => import('@/pages/ProfileSetup'),
@@ -26,15 +26,15 @@ const loaders = {
   Debtors: () => import('@/pages/finance/Debtors'),
   Payroll: () => import('@/pages/finance/Payroll'),
   Contracts: () => import('@/pages/finance/Contracts'),
-  ContractClass: () => import('@/pages/finance/ContractClass'),
+  ContractGroup: () => import('@/pages/finance/ContractGroup'),
   PublicContract: () => import('@/pages/PublicContract'),
 };
 const Login = lazy(loaders.Login);
 const Dashboard = lazy(loaders.Dashboard);
 const Students = lazy(loaders.Students);
 const StudentDetail = lazy(loaders.StudentDetail);
-const Classes = lazy(loaders.Classes);
-const Academics = lazy(loaders.Academics);
+const Groups = lazy(loaders.Groups);
+const Courses = lazy(loaders.Courses);
 const Sms = lazy(loaders.Sms);
 const Profile = lazy(loaders.Profile);
 const ProfileSetup = lazy(loaders.ProfileSetup);
@@ -47,7 +47,7 @@ const Payments = lazy(loaders.Payments);
 const Debtors = lazy(loaders.Debtors);
 const Payroll = lazy(loaders.Payroll);
 const Contracts = lazy(loaders.Contracts);
-const ContractClass = lazy(loaders.ContractClass);
+const ContractGroup = lazy(loaders.ContractGroup);
 const PublicContract = lazy(loaders.PublicContract);
 
 const ALL = ['DIRECTOR', 'MANAGER', 'ACCOUNTANT'] as const;
@@ -87,11 +87,11 @@ export default function App() {
             <Route path="/students/:id" element={<StudentDetail />} />
             <Route path="/sms" element={<Sms />} />
             <Route path="/finance/contracts" element={<Contracts />} />
-            <Route path="/finance/contracts/class/:classId" element={<ContractClass />} />
+            <Route path="/finance/contracts/group/:groupId" element={<ContractGroup />} />
           </Route>
           <Route element={<RoleGuard roles={['DIRECTOR', 'MANAGER']} />}>
-            <Route path="/classes" element={<Classes />} />
-            <Route path="/academics" element={<Academics />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/courses" element={<Courses />} />
             <Route path="/staff" element={<Staff />} />
             <Route path="/staff/:id" element={<StaffDetail />} />
             <Route path="/settings" element={<Settings />} />

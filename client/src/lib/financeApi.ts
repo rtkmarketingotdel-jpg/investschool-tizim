@@ -5,8 +5,11 @@ export type PaymentMethod = 'CASH' | 'CARD' | 'CLICK' | 'PAYME' | 'TRANSFER';
 export const PAYMENT_METHODS: PaymentMethod[] = ['CASH', 'CARD', 'CLICK', 'PAYME', 'TRANSFER'];
 
 export interface Dashboard {
-  students: { active: number; newThisMonth: number };
-  classFill: { items: Array<{ id: string; name: string; count: number; capacity: number }>; freeSeats: number };
+  students: { active: number; newThisMonth: number; graduatedThisMonth: number };
+  groupFill: {
+    items: Array<{ id: string; name: string; courseName: string; status: 'PLANNED' | 'ACTIVE'; startDate: string; count: number; capacity: number }>;
+    freeSeats: number;
+  };
   attendance?: {
     total: number;
     came: number;
@@ -17,7 +20,7 @@ export interface Dashboard {
   revenue?: { fact: number; plan: number; changePct: number | null };
   chart?: Array<{ period: string; plan: number; fact: number }>;
   debt?: { total: number; count: number };
-  topDebtors?: Array<{ studentId: string; name: string; className: string | null; debt: number; overdueDays: number }>;
+  topDebtors?: Array<{ studentId: string; name: string; groupName: string | null; debt: number; overdueDays: number }>;
 }
 
 export interface AppNotification {
@@ -34,10 +37,10 @@ export interface Payment {
   id: string;
   studentId: string;
   studentName: string;
-  className: string | null;
+  groupName: string | null;
+  courseName: string | null;
   amount: number;
   method: PaymentMethod;
-  period: string | null;
   paidAt: string;
   receivedByName: string | null;
   note: string | null;
@@ -48,22 +51,26 @@ export interface PaymentsResponse extends Paged<Payment> {
 export interface Debtor {
   studentId: string;
   studentName: string;
-  parentName: string;
-  parentPhone: string;
-  className: string | null;
+  phone: string;
+  status: 'ACTIVE' | 'GRADUATED' | 'LEFT';
+  groupName: string | null;
   debt: number;
   overdueDays: number;
-  oldestPeriod: string | null;
+  /** due date of the oldest unpaid bill */
+  dueDate: string | null;
   lastPaymentAt: string | null;
 }
 export interface DebtorsResponse extends Paged<Debtor> {
   summary: { totalDebt: number; count: number };
 }
 export interface StudentFinance {
+  billed: number;
+  paid: number;
   balance: number;
   debt: number;
+  dueDate: string | null;
   overdueDays: number;
-  timeline: Array<{ kind: 'CHARGE' | 'PAYMENT'; id: string; date: string; period: string | null; amount: number; method: PaymentMethod | null }>;
+  timeline: Array<{ kind: 'CHARGE' | 'PAYMENT'; id: string; date: string; dueDate: string | null; amount: number; method: PaymentMethod | null }>;
 }
 
 export type PayrollStatus = 'DRAFT' | 'APPROVED' | 'PAID';
@@ -113,9 +120,9 @@ export interface ContractRow {
   number: string;
   studentId: string;
   studentName: string;
-  parentName: string;
+  studentPhone: string;
   language: 'uz' | 'ru';
-  monthlyFee: number;
+  price: number;
   startDate: string;
   endDate: string;
   status: ContractStatus;
@@ -141,7 +148,8 @@ export interface Settings {
   lateFinePerMinute: number;
   lateFineMax: number;
   absentFine: number;
-  paymentDueDay: number;
+  /** days after the group start (or a later enrolment) by which the course price is due */
+  paymentDueDays: number;
   contractPrefix: string;
   telegramChatId: string | null;
   smsDebtAutoEnabled: boolean;
@@ -178,13 +186,13 @@ export const financeApi = {
   readAll: () => api.post('/notifications/read-all'),
   readOne: (id: string) => api.post(`/notifications/${id}/read`),
 
-  payments: (p: { from?: string; to?: string; method?: string; classId?: string; page: number; limit: number }) =>
+  payments: (p: { from?: string; to?: string; method?: string; groupId?: string; page: number; limit: number }) =>
     api.get<PaymentsResponse>('/payments', { params: clean(p) }).then((r) => r.data),
-  createPayment: (d: { studentId: string; amount: number; method: PaymentMethod; period: string | null; note: string | null }) =>
+  createPayment: (d: { studentId: string; amount: number; method: PaymentMethod; note: string | null }) =>
     api.post<{ payment: Payment; debt: number }>('/payments', d).then((r) => r.data),
   studentFinance: (id: string) => api.get<StudentFinance>(`/students/${id}/finance`).then((r) => r.data),
 
-  debtors: (p: { q?: string; classId?: string; page: number; limit: number }) =>
+  debtors: (p: { q?: string; groupId?: string; page: number; limit: number }) =>
     api.get<DebtorsResponse>('/debtors', { params: clean(p) }).then((r) => r.data),
 
   payroll: (period: string) =>
@@ -200,18 +208,18 @@ export const financeApi = {
   contracts: (p: { q?: string; status?: string; studentId?: string; page: number; limit: number }) =>
     api.get<Paged<ContractRow>>('/contracts', { params: clean(p) }).then((r) => r.data),
   contractDefaults: (studentId: string) =>
-    api.get<{ monthlyFee: number; className: string | null; parentName: string }>(`/contracts/defaults/${studentId}`).then((r) => r.data),
-  createContract: (d: { studentId: string; templateId: string; monthlyFee: number; startDate: string; endDate: string }) =>
+    api.get<{ price: number; groupName: string | null; courseName: string | null; startDate: string | null; endDate: string | null; phone: string }>(`/contracts/defaults/${studentId}`).then((r) => r.data),
+  createContract: (d: { studentId: string; templateId: string; price: number; startDate: string; endDate: string }) =>
     api.post<ContractRow>('/contracts', d).then((r) => r.data),
   sendContract: (id: string) => api.post<ContractRow>(`/contracts/${id}/send`).then((r) => r.data),
   cancelContract: (id: string) => api.post<ContractRow>(`/contracts/${id}/cancel`).then((r) => r.data),
-  contractClasses: () =>
-    api.get<{ items: Array<{ id: string; name: string; studentCount: number; signed: number; sent: number; draft: number; none: number }> }>('/contracts/classes').then((r) => r.data.items),
-  contractClass: (id: string) =>
+  contractGroups: () =>
+    api.get<{ items: Array<{ id: string; name: string; studentCount: number; signed: number; sent: number; draft: number; none: number }> }>('/contracts/groups').then((r) => r.data.items),
+  contractGroup: (id: string) =>
     api.get<{
-      class: { id: string; name: string };
-      items: Array<{ student: { id: string; fullName: string; parentName: string; parentPhone: string; monthlyFee: number }; contract: ContractRow | null }>;
-    }>(`/contracts/classes/${id}`).then((r) => r.data),
+      group: { id: string; name: string };
+      items: Array<{ student: { id: string; fullName: string; phone: string; price: number }; contract: ContractRow | null }>;
+    }>(`/contracts/groups/${id}`).then((r) => r.data),
   templates: () => api.get<{ items: Template[] }>('/contracts/templates').then((r) => r.data.items),
   saveTemplate: (id: string | null, d: Omit<Template, 'id'>) =>
     (id ? api.put<Template>(`/contracts/templates/${id}`, d) : api.post<Template>('/contracts/templates', d)).then((r) => r.data),
@@ -231,8 +239,8 @@ export const financeApi = {
 
   staffOverview: (id: string, month: string) =>
     api.get<{
-      user: { id: string; fullName: string; phone: string; role: Role; position: string; baseSalary: number; isActive: boolean; isTeacher: boolean; isTutor: boolean; subject: string | null; photoUrl: string | null; branchId: string | null };
-      profile: { achievements: Array<{ id: string; title: string; year: number | null; description: string }>; documents: Array<{ id: string; kind: 'CERTIFICATE' | 'DIPLOMA' | 'OTHER'; title: string; issuer: string | null; year: number | null; fileUrl: string; mime: string }>; completed: boolean; branchName: string | null; hiredAt: string; classesLed: string[]; clubsLed: string[] };
+      user: { id: string; fullName: string; phone: string; role: Role; position: string; baseSalary: number; isActive: boolean; isTeacher: boolean; specialty: string | null; photoUrl: string | null; branchId: string | null };
+      profile: { achievements: Array<{ id: string; title: string; year: number | null; description: string }>; documents: Array<{ id: string; kind: 'CERTIFICATE' | 'DIPLOMA' | 'OTHER'; title: string; issuer: string | null; year: number | null; fileUrl: string; mime: string }>; completed: boolean; branchName: string | null; hiredAt: string; groupsLed: Array<{ id: string; name: string }> };
       month: string;
       attendance: Array<{ id: string; date: string; status: 'ON_TIME' | 'LATE' | 'ABSENT' | 'EXCUSED'; lateMinutes: number; checkInAt: string | null; checkOutAt: string | null }>;
       payrolls: PayrollRow[];

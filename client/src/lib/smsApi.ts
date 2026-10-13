@@ -5,11 +5,11 @@ export type SmsCategory = 'DEBT' | 'GREETING' | 'WARNING' | 'OTHER';
 export const SMS_CATEGORIES: SmsCategory[] = ['DEBT', 'GREETING', 'WARNING', 'OTHER'];
 
 export type Audience =
-  | { kind: 'ALL_PARENTS' }
-  | { kind: 'CLASSES'; classIds: string[] }
+  | { kind: 'ALL_STUDENTS'; includeGraduates: boolean }
+  | { kind: 'GROUPS'; groupIds: string[] }
   | { kind: 'BRANCH'; branchId: string }
   | { kind: 'DEBTORS'; minOverdueDays: number }
-  | { kind: 'STAFF'; scope: 'ALL' | 'TEACHERS' | 'TUTORS'; branchId: string | null }
+  | { kind: 'STAFF'; scope: 'ALL' | 'TEACHERS'; branchId: string | null }
   | { kind: 'NUMBERS'; numbers: string[] };
 
 export interface SmsTemplate {
@@ -101,5 +101,5 @@ export function smsCount(raw: string) {
   return { gsm, length, segments: length === 0 ? 0 : length <= per[0]! ? 1 : Math.ceil(length / per[1]!), limit: per[0]! };
 }
 
-export const PARENT_VARS = ['parentName', 'studentName', 'className', 'debt', 'overdueDays', 'month', 'school'];
+export const STUDENT_VARS = ['name', 'studentName', 'groupName', 'courseName', 'startDate', 'debt', 'overdueDays', 'dueDate', 'school'];
 export const STAFF_VARS = ['name', 'position', 'school'];

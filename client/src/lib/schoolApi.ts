@@ -7,7 +7,7 @@ export interface Paged<T> {
   limit: number;
 }
 
-export type StudentStatus = 'ACTIVE' | 'TRIAL' | 'LEFT';
+export type StudentStatus = 'ACTIVE' | 'GRADUATED' | 'LEFT';
 export type Gender = 'MALE' | 'FEMALE';
 
 export interface Student {
@@ -18,16 +18,17 @@ export interface Student {
   middleName: string | null;
   birthDate: string | null;
   gender: Gender;
-  classId: string | null;
-  className: string | null;
-  parentName: string;
-  parentPhone: string;
-  parentPhone2: string | null;
+  groupId: string | null;
+  groupName: string | null;
+  courseId: string | null;
+  courseName: string | null;
+  phone: string;
+  phone2: string | null;
+  passport: string | null;
+  pinfl: string | null;
   address: string | null;
   district: string | null;
-  isBoarding: boolean;
-  clubs: string[];
-  monthlyFee: number;
+  coursePrice: number;
   discountPercent: number;
   status: StudentStatus;
   enrolledAt: string;
@@ -36,36 +37,45 @@ export interface Student {
   /** null when the current role may not see finances */
   debt: number | null;
 }
-export type StudentInput = Omit<Student, 'id' | 'fullName' | 'className' | 'leftAt' | 'debt'>;
+export type StudentInput = Omit<Student, 'id' | 'fullName' | 'groupName' | 'courseId' | 'courseName' | 'leftAt' | 'debt'>;
 
 export interface StudentFilters {
   q?: string;
   status?: string;
-  classId?: string;
-  boarding?: string;
-  club?: string;
+  groupId?: string;
+  courseId?: string;
   debtor?: string;
   sort?: string;
   page: number;
   limit: number;
 }
 
-export interface SchoolClass {
+export type GroupStatus = 'PLANNED' | 'ACTIVE' | 'FINISHED';
+export interface Group {
   id: string;
   name: string;
-  grade: number;
+  courseId: string;
+  courseName: string;
+  status: GroupStatus;
   capacity: number;
+  startDate: string;
+  endDate: string;
+  days: number[];
+  timeStart: string;
+  timeEnd: string;
+  room: string | null;
   teacherId: string | null;
   teacherName: string | null;
   teacherPhone: string | null;
   teacherPhotoUrl: string | null;
-  boys: number;
-  girls: number;
+  men: number;
+  women: number;
+  graduated: number;
   branchId: string | null;
   studentCount: number;
   freeSeats: number;
 }
-export type ClassInput = Pick<SchoolClass, 'name' | 'grade' | 'capacity' | 'teacherId' | 'branchId'>;
+export type GroupInput = Pick<Group, 'name' | 'courseId' | 'capacity' | 'teacherId' | 'branchId' | 'startDate' | 'endDate' | 'days' | 'timeStart' | 'timeEnd' | 'room'>;
 
 export interface Branch {
   id: string;
@@ -74,33 +84,22 @@ export interface Branch {
   lat: number;
   lng: number;
   radiusM: number;
-  usage: { users: number; classes: number };
+  usage: { users: number; groups: number };
 }
 export type BranchInput = Pick<Branch, 'name' | 'address' | 'lat' | 'lng' | 'radiusM'>;
 
-export interface SubjectPerson {
-  id: string;
-  fullName: string;
-  photoUrl: string | null;
-  position: string;
-  kind: 'teacher' | 'tutor';
-}
-export interface Subject {
+export interface Course {
   id: string;
   name: string;
-  teachers: number;
-  people: SubjectPerson[];
+  durationMonths: number;
+  price: number;
+  description: string | null;
+  teachers: Array<{ id: string; fullName: string; photoUrl: string | null; position: string }>;
+  groups: Array<{ id: string; name: string; status: GroupStatus; startDate: string; endDate: string }>;
+  activeStudents: number;
+  graduates: number;
 }
-export interface Club {
-  id: string;
-  name: string;
-  teacherId: string | null;
-  teacherName: string | null;
-  teacherPhotoUrl: string | null;
-  monthlyFee: number;
-  members: number;
-}
-export type ClubInput = Pick<Club, 'name' | 'teacherId' | 'monthlyFee'>;
+export type CourseInput = Pick<Course, 'name' | 'durationMonths' | 'price' | 'description'>;
 
 export type Role = 'DIRECTOR' | 'MANAGER' | 'ACCOUNTANT' | 'TEACHER';
 export interface StaffMember {
@@ -110,8 +109,7 @@ export interface StaffMember {
   role: Role;
   position: string;
   isTeacher: boolean;
-  isTutor: boolean;
-  subject: string | null;
+  specialty: string | null;
   photoUrl: string | null;
   profileCompletedAt: string | null;
   branchId: string | null;
@@ -120,10 +118,10 @@ export interface StaffMember {
   lateCount: number;
   absentCount: number;
 }
-export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive' | 'isTeacher' | 'isTutor' | 'subject' | 'branchId'> & {
+export type StaffInput = Pick<StaffMember, 'fullName' | 'phone' | 'role' | 'position' | 'baseSalary' | 'isActive' | 'isTeacher' | 'specialty' | 'branchId'> & {
   password?: string;
-  homeroomClassId?: string | null;
-  clubIds?: string[];
+  /** Groups the teacher leads (synced only when sent). */
+  groupIds?: string[];
 };
 
 const clean = <T extends object>(o: T) =>
@@ -137,24 +135,22 @@ export const schoolApi = {
   exportStudents: (f: Omit<StudentFilters, 'page' | 'limit' | 'debtor'>) =>
     api.get<Blob>('/students/export', { params: clean(f), responseType: 'blob' }).then((r) => r.data),
 
-  subjects: () => api.get<{ items: Subject[] }>('/catalog/subjects').then((r) => r.data.items),
-  saveSubject: (id: string | null, name: string) => (id ? api.patch<Subject>(`/catalog/subjects/${id}`, { name }) : api.post<Subject>('/catalog/subjects', { name })).then((r) => r.data),
-  deleteSubject: (id: string) => api.delete(`/catalog/subjects/${id}`),
-  clubs: () => api.get<{ items: Club[] }>('/catalog/clubs').then((r) => r.data.items),
-  saveClub: (id: string | null, d: ClubInput) => (id ? api.patch<Club>(`/catalog/clubs/${id}`, d) : api.post<Club>('/catalog/clubs', d)).then((r) => r.data),
-  deleteClub: (id: string) => api.delete<{ members: number }>(`/catalog/clubs/${id}`).then((r) => r.data),
+  courses: () => api.get<{ items: Course[] }>('/catalog/courses').then((r) => r.data.items),
+  saveCourse: (id: string | null, d: CourseInput) => (id ? api.patch<Course>(`/catalog/courses/${id}`, d) : api.post<Course>('/catalog/courses', d)).then((r) => r.data),
+  deleteCourse: (id: string) => api.delete(`/catalog/courses/${id}`),
 
   branches: () => api.get<{ items: Branch[] }>('/branches').then((r) => r.data.items),
   createBranch: (d: BranchInput) => api.post<Branch>('/branches', d).then((r) => r.data),
   updateBranch: (id: string, d: BranchInput) => api.patch<Branch>(`/branches/${id}`, d).then((r) => r.data),
   deleteBranch: (id: string, moveTo?: string) => api.delete(`/branches/${id}`, { params: moveTo ? { moveTo } : {} }).then((r) => r.data),
-  assignBranch: (id: string, userIds: string[], classIds: string[]) => api.put(`/branches/${id}/assign`, { userIds, classIds }).then((r) => r.data),
+  assignBranch: (id: string, userIds: string[], groupIds: string[]) => api.put(`/branches/${id}/assign`, { userIds, groupIds }).then((r) => r.data),
 
-  classes: () => api.get<{ items: SchoolClass[] }>('/classes').then((r) => r.data.items),
-  createClass: (d: ClassInput) => api.post<SchoolClass>('/classes', d).then((r) => r.data),
-  updateClass: (id: string, d: ClassInput) => api.patch<SchoolClass>(`/classes/${id}`, d).then((r) => r.data),
+  groups: () => api.get<{ items: Group[] }>('/groups').then((r) => r.data.items),
+  createGroup: (d: GroupInput) => api.post<Group>('/groups', d).then((r) => r.data),
+  updateGroup: (id: string, d: GroupInput) => api.patch<Group>(`/groups/${id}`, d).then((r) => r.data),
+  deleteGroup: (id: string) => api.delete(`/groups/${id}`).then(() => null),
 
-  staff: (p: { q?: string; role?: string; active?: string; teacher?: string; tutor?: string; page: number; limit: number }) =>
+  staff: (p: { q?: string; role?: string; active?: string; teacher?: string; page: number; limit: number }) =>
     api.get<Paged<StaffMember>>('/staff', { params: clean(p) }).then((r) => r.data),
   createStaff: (d: StaffInput) =>
     api.post<{ user: StaffMember; tempPassword: string; generated: boolean }>('/staff', d).then((r) => r.data),

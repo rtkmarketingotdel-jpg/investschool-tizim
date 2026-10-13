@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import type { Attendance, AttendanceStatus, Branch, Role, Setting, User } from './types.js';
-import { addDays, atLocal, isoWeekday, localMinutes, toLocalDate } from '../lib/date.js';
-import { haversineM } from '../lib/geo.js';
+import { addDays, atLocal, isoWeekday, toLocalDate } from '../lib/date.js';
 
 // In-memory mock data. Replaced by a real database (hosted in Uzbekistan) later;
 // only the repositories depend on this file.
@@ -21,12 +20,11 @@ const seedUser = (n: number, fullName: string, role: Role, position: string, bas
   role,
   position,
   isTeacher: position.includes('oʻqituvchisi'),
-  isTutor: false,
   photoUrl: null,
   achievements: [],
   documents: [],
   profileCompletedAt: n >= 11 ? new Date('2025-09-05') : null,
-  subject: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
+  specialty: position.includes('oʻqituvchisi') ? position.replace(' oʻqituvchisi', '') : null,
   branchId: SECOND_BRANCH_USERS.has(n) ? 'b2' : 'b1',
   baseSalary,
   language: 'uz',
@@ -49,7 +47,7 @@ export const settings: Setting = {
   lateFinePerMinute: 2000,
   lateFineMax: 50000,
   absentFine: 100000,
-  paymentDueDay: 10,
+  paymentDueDays: 30,
   contractPrefix: 'GS',
   // env default: the settings live in memory (until the real database), so a chat id set in the UI is lost on restart
   telegramChatId: process.env.TELEGRAM_CHAT_ID || null,

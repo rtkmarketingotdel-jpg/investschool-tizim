@@ -10,11 +10,11 @@ import { ContractActions, StatusCell } from '@/components/finance/ContractTable'
 import { ContractDrawer } from '@/components/finance/ContractDrawer';
 import { Avatar, Badge, Button, EmptyState, Skeleton, Table, Td, Th, Thead, Tr } from '@/components/ui';
 
-export default function ContractClass() {
-  const { classId = '' } = useParams();
+export default function ContractGroup() {
+  const { groupId = '' } = useParams();
   const { t } = useTranslation();
   const [target, setTarget] = useState<{ id: string; fullName: string } | null>(null);
-  const { data, isLoading, isError } = useQuery({ queryKey: ['contracts', 'class', classId], queryFn: () => financeApi.contractClass(classId), refetchInterval: 30_000 });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['contracts', 'group', groupId], queryFn: () => financeApi.contractGroup(groupId), refetchInterval: 30_000 });
 
   if (isLoading) return <Skeleton className="h-96" />;
   if (isError || !data) return <EmptyState icon={FileSignature} title={t('errors.NOT_FOUND')} action={<Link to="/finance/contracts" className="text-primary">{t('common.back')}</Link>} />;
@@ -24,7 +24,7 @@ export default function ContractClass() {
   return (
     <div>
       <Link to="/finance/contracts" className="mb-4 inline-flex items-center gap-2 text-text-muted hover:text-text"><ArrowLeft className="h-4 w-4" /> {t('nav.contracts')}</Link>
-      <PageHeader title={data.class.name} subtitle={t('finance.contracts.classSubtitle', { signed, total: data.items.length })} />
+      <PageHeader title={data.group.name} subtitle={t('finance.contracts.groupSubtitle', { signed, total: data.items.length })} />
       {data.items.length === 0 ? (
         <EmptyState icon={FileSignature} title={t('students.empty')} />
       ) : (
@@ -32,8 +32,8 @@ export default function ContractClass() {
           <Thead>
             <tr>
               <Th>{t('finance.payments.student')}</Th>
-              <Th>{t('students.parentName')}</Th>
-              <Th numeric>{t('students.monthlyFee')}</Th>
+              <Th>{t('students.phone')}</Th>
+              <Th numeric>{t('students.toPay')}</Th>
               <Th>{t('finance.contracts.number')}</Th>
               <Th>{t('attendance.statusCol')}</Th>
               <Th>{t('finance.contracts.actions')}</Th>
@@ -43,8 +43,8 @@ export default function ContractClass() {
             {data.items.map(({ student: s, contract: c }) => (
               <Tr key={s.id}>
                 <Td><div className="flex items-center gap-3"><Avatar name={s.fullName} size={40} /><Link to={`/students/${s.id}`} className="hover:text-primary">{s.fullName}</Link></div></Td>
-                <Td className="text-text-muted">{s.parentName}<p className="text-[13px]">{s.parentPhone}</p></Td>
-                <Td numeric>{formatMoney(s.monthlyFee, cur)}</Td>
+                <Td className="whitespace-nowrap text-text-muted">{s.phone}</Td>
+                <Td numeric>{formatMoney(s.price, cur)}</Td>
                 <Td className="whitespace-nowrap">{c?.number ?? '—'}</Td>
                 <Td>{c ? <StatusCell c={c} /> : <Badge>{t('finance.contracts.noContract')}</Badge>}</Td>
                 <Td>

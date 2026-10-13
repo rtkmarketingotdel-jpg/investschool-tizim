@@ -32,18 +32,18 @@ export function BranchesTab({ settings }: { settings: Settings }) {
   const [moveTo, setMoveTo] = useState('');
 
   const del = useMutation({
-    mutationFn: (b: Branch) => schoolApi.deleteBranch(b.id, b.usage.users + b.usage.classes > 0 ? moveTo : undefined),
+    mutationFn: (b: Branch) => schoolApi.deleteBranch(b.id, b.usage.users + b.usage.groups > 0 ? moveTo : undefined),
     onSuccess: () => {
       toast(t('settings.branches.deleted'));
       setRemoving(null);
-      for (const k of ['branches', 'staff', 'classes', 'attendance']) void qc.invalidateQueries({ queryKey: [k] });
+      for (const k of ['branches', 'staff', 'groups', 'attendance']) void qc.invalidateQueries({ queryKey: [k] });
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
   });
 
   const branches = list.data ?? [];
   const others = removing ? branches.filter((b) => b.id !== removing.id) : [];
-  const hasData = !!removing && removing.usage.users + removing.usage.classes > 0;
+  const hasData = !!removing && removing.usage.users + removing.usage.groups > 0;
 
   return (
     <div className="space-y-6">
@@ -74,7 +74,7 @@ export function BranchesTab({ settings }: { settings: Settings }) {
               <dl className="grid grid-cols-3 gap-2 border-t border-border pt-3 text-sm">
                 <div><dt className="text-text-muted">{t('settings.branches.radius')}</dt><dd className="tabular-nums">{b.radiusM} m</dd></div>
                 <div><dt className="text-text-muted">{t('settings.branches.employees')}</dt><dd className="tabular-nums">{b.usage.users}</dd></div>
-                <div><dt className="text-text-muted">{t('settings.branches.classes')}</dt><dd className="tabular-nums">{b.usage.classes}</dd></div>
+                <div><dt className="text-text-muted">{t('settings.branches.groups')}</dt><dd className="tabular-nums">{b.usage.groups}</dd></div>
               </dl>
             </Card>
           ))}

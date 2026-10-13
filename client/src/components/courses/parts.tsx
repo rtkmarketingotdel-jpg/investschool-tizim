@@ -1,20 +1,17 @@
-import { Atom, BookOpen, Calculator, Crown, Dumbbell, FlaskConical, Globe, Landmark, Languages, Laptop, Leaf, Music, Palette, Swords, Trophy, type LucideIcon } from 'lucide-react';
+import { BookOpen, ChefHat, Flame, Hammer, Laptop, Palette, Scissors, Shirt, Sparkles, Wrench, Zap, type LucideIcon } from 'lucide-react';
 import { Avatar } from '../ui';
 
 /** A calm rotating set of tints (theme tokens, so they follow light/dark). */
 const TINTS = ['bg-primary-soft text-primary', 'bg-success/10 text-success', 'bg-warning/10 text-warning', 'bg-danger/10 text-danger'];
 export const tintFor = (name: string) => TINTS[[...name].reduce((n, c) => n + c.charCodeAt(0), 0) % TINTS.length]!;
 
-const SUBJECT_ICONS: Array<[RegExp, LucideIcon]> = [
-  [/matem/i, Calculator], [/fizika/i, Atom], [/kimyo/i, FlaskConical], [/biolog/i, Leaf], [/tarix/i, Landmark], [/geograf/i, Globe],
-  [/til|adabiyot/i, Languages], [/informat/i, Laptop], [/jismoniy/i, Dumbbell], [/tasvir|sanʼat|san'at/i, Palette], [/musiq/i, Music],
+const COURSE_ICONS: Array<[RegExp, LucideIcon]> = [
+  [/tikuv|bichish|швей|портн/i, Shirt], [/sartarosh|барбер|парикмах/i, Scissors], [/oshpaz|qandol|повар|кулин/i, ChefHat],
+  [/payvand|свар/i, Flame], [/elektr|электр/i, Zap], [/kompyuter|dastur|it\b|компьют|программ/i, Laptop],
+  [/dizayn|rassom|дизайн/i, Palette], [/manikyur|kosmet|vizaj|маникюр|космет/i, Sparkles], [/santex|avto|mexanik|сантех|авто|механ/i, Wrench],
+  [/duradgor|qurilish|столяр|строит/i, Hammer],
 ];
-export const subjectIcon = (name: string): LucideIcon => SUBJECT_ICONS.find(([re]) => re.test(name))?.[1] ?? BookOpen;
-
-const CLUB_ICONS: Array<[RegExp, LucideIcon]> = [
-  [/shaxmat/i, Crown], [/taekwondo|karate|kurash/i, Swords], [/mental|arifmet/i, Calculator], [/til/i, Languages], [/raqs|musiq|qoʻshiq/i, Music], [/rasm|san/i, Palette],
-];
-export const clubIcon = (name: string): LucideIcon => CLUB_ICONS.find(([re]) => re.test(name))?.[1] ?? Trophy;
+export const courseIcon = (name: string): LucideIcon => COURSE_ICONS.find(([re]) => re.test(name))?.[1] ?? BookOpen;
 
 /** Overlapping avatars with a "+n" tail. */
 export function AvatarStack({ people, max = 4 }: { people: Array<{ id: string; fullName: string; photoUrl: string | null }>; max?: number }) {

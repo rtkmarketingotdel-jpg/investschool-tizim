@@ -17,25 +17,26 @@ import { cn } from '@/lib/cn';
 const LIMIT = 20;
 
 function reminderText(d: Debtor, lang: 'uz' | 'ru') {
-  const month = d.oldestPeriod ? fmtDay(`${d.oldestPeriod}-01`, lang, 'LLLL') : '';
+  const due = d.dueDate ? fmtDay(d.dueDate, lang, 'dd.MM.yyyy') : '';
   const sum = formatMoney(d.debt, '').trim();
+  const group = d.groupName ? ` (${d.groupName})` : '';
   return lang === 'uz'
-    ? `Hurmatli ${d.parentName}, ${d.studentName} uchun ${month} oyi toʻlovi muddati oʻtdi. Umumiy qarz: ${sum} soʻm. Iltimos, toʻlovni amalga oshiring. — ${brand.name}`
-    : `Уважаемый(ая) ${d.parentName}, срок оплаты за ${month} для ${d.studentName} истёк. Общая задолженность: ${sum} сум. Пожалуйста, произведите оплату. — ${brand.name}`;
+    ? `Hurmatli ${d.studentName}, kurs${group} uchun toʻlov muddati${due ? ` (${due})` : ''} oʻtdi. Qolgan qarz: ${sum} soʻm. Iltimos, toʻlovni amalga oshiring. — ${brand.name}`
+    : `Уважаемый(ая) ${d.studentName}, срок оплаты курса${group}${due ? ` (${due})` : ''} истёк. Остаток долга: ${sum} сум. Пожалуйста, произведите оплату. — ${brand.name}`;
 }
 
 export default function Debtors() {
   const { t, i18n } = useTranslation();
   const [search, setSearch] = useState('');
   const q = useDebounce(search);
-  const [classId, setClassId] = useState('');
+  const [groupId, setGroupId] = useState('');
   const [page, setPage] = useState(1);
   const [target, setTarget] = useState<Debtor | null>(null);
   const [lang, setLang] = useState<'uz' | 'ru'>(i18n.language === 'ru' ? 'ru' : 'uz');
   const [copied, setCopied] = useState(false);
 
-  const list = useQuery({ queryKey: ['debtors', q, classId, page], queryFn: () => financeApi.debtors({ q, classId, page, limit: LIMIT }), placeholderData: keepPreviousData });
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
+  const list = useQuery({ queryKey: ['debtors', q, groupId, page], queryFn: () => financeApi.debtors({ q, groupId, page, limit: LIMIT }), placeholderData: keepPreviousData });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups });
   const cur = t('common.currency');
   const rows = list.data?.items ?? [];
   const text = target ? reminderText(target, lang) : '';
@@ -55,10 +56,10 @@ export default function Debtors() {
       </div>
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="min-w-64 flex-1"><Input aria-label={t('common.search')} placeholder={t('students.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} icon={<Search className="h-4 w-4" />} /></div>
-        <div className="w-[calc(50%-0.375rem)] sm:w-40">
-          <Select aria-label={t('students.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setPage(1); }}>
-            <option value="">{t('students.allClasses')}</option>
-            {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        <div className="w-[calc(50%-0.375rem)] sm:w-48">
+          <Select aria-label={t('students.group')} value={groupId} onChange={(e) => { setGroupId(e.target.value); setPage(1); }}>
+            <option value="">{t('students.allGroups')}</option>
+            {groups.data?.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </Select>
         </div>
       </div>
@@ -75,8 +76,8 @@ export default function Debtors() {
             <Thead>
               <tr>
                 <Th>{t('finance.payments.student')}</Th>
-                <Th>{t('students.class')}</Th>
-                <Th>{t('students.parentPhone')}</Th>
+                <Th>{t('students.group')}</Th>
+                <Th>{t('students.phone')}</Th>
                 <Th numeric>{t('finance.debtors.debt')}</Th>
                 <Th>{t('finance.debtors.overdue')}</Th>
                 <Th>{t('finance.debtors.lastPayment')}</Th>
@@ -86,9 +87,9 @@ export default function Debtors() {
             <tbody>
               {rows.map((d) => (
                 <Tr key={d.studentId}>
-                  <Td><Link to={`/students/${d.studentId}`} className="font-medium hover:text-primary">{d.studentName}</Link><p className="text-[13px] text-text-muted">{d.parentName}</p></Td>
-                  <Td>{d.className ?? '—'}</Td>
-                  <Td>{d.parentPhone}</Td>
+                  <Td><Link to={`/students/${d.studentId}`} className="font-medium hover:text-primary">{d.studentName}</Link>{d.status !== 'ACTIVE' && <p className="text-[13px] text-text-muted">{t(`students.statuses.${d.status}`)}</p>}</Td>
+                  <Td>{d.groupName ?? '—'}</Td>
+                  <Td className="whitespace-nowrap">{d.phone}</Td>
                   <Td numeric className="font-medium text-danger">{formatMoney(d.debt, cur)}</Td>
                   <Td><Badge tone={d.overdueDays > 30 ? 'danger' : 'warning'}>{t('dashboard.days', { count: d.overdueDays })}</Badge></Td>
                   <Td className="text-text-muted">{d.lastPaymentAt ? fmtDay(d.lastPaymentAt.slice(0, 10), i18n.language, 'd MMM yyyy') : '—'}</Td>

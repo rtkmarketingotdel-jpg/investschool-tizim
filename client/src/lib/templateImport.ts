@@ -1,4 +1,4 @@
-export const TEMPLATE_PLACEHOLDERS = ['contractNumber', 'date', 'schoolLegalName', 'schoolInn', 'schoolAddress', 'director', 'parentName', 'parentPhone', 'studentFullName', 'studentBirthDate', 'className', 'monthlyFee', 'monthlyFeeWords', 'startDate', 'endDate'];
+export const TEMPLATE_PLACEHOLDERS = ['contractNumber', 'date', 'schoolLegalName', 'schoolInn', 'schoolAddress', 'director', 'studentFullName', 'studentBirthDate', 'studentPhone', 'studentPassport', 'studentPinfl', 'courseName', 'courseDuration', 'groupName', 'price', 'priceWords', 'paymentDueDate', 'startDate', 'endDate'];
 
 const MAX_BYTES = 2 * 1024 * 1024;
 

@@ -5,8 +5,9 @@ import { ApiError } from '../lib/errors.js';
 import { paginate, pageQuery } from '../lib/pagination.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
-import { classRepo } from '../repositories/classRepo.js';
-import { paymentRepo } from '../repositories/financeRepo.js';
+import { courseRepo } from '../repositories/courseRepo.js';
+import { groupRepo } from '../repositories/groupRepo.js';
+import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
@@ -22,7 +23,6 @@ const createSchema = z.object({
   studentId: z.string().min(1),
   amount: z.number().int().min(1000).max(1_000_000_000),
   method: z.enum(METHODS),
-  period: z.string().regex(/^\d{4}-\d{2}$/).nullable(),
   note: z.string().trim().max(300).nullable(),
 });
 
@@ -31,16 +31,17 @@ const listQuery = z.object({
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   method: z.enum(METHODS).optional(),
-  classId: z.string().optional(),
+  groupId: z.string().optional(),
 });
 
 const localDay = (d: Date) => toLocalDate(d);
 
 async function present(p: Awaited<ReturnType<typeof paymentRepo.findById>> & object) {
   const s = await studentRepo.findById(p.studentId);
-  const cls = s?.classId ? await classRepo.findById(s.classId) : null;
+  const group = s?.groupId ? await groupRepo.findById(s.groupId) : null;
+  const course = group ? await courseRepo.findById(group.courseId) : null;
   const by = p.receivedById ? await userRepo.findById(p.receivedById) : null;
-  return { ...p, studentName: s ? fullName(s) : '—', className: cls?.name ?? null, receivedByName: by?.fullName ?? null };
+  return { ...p, studentName: s ? fullName(s) : '—', groupName: group?.name ?? null, courseName: course?.name ?? null, receivedByName: by?.fullName ?? null };
 }
 
 paymentsRouter.get('/', async (req, res, next) => {
@@ -54,7 +55,7 @@ paymentsRouter.get('/', async (req, res, next) => {
     for (const p of all) {
       const day = localDay(p.paidAt);
       if (day < from || day > to || (q.method && p.method !== q.method)) continue;
-      if (q.classId && (await studentRepo.findById(p.studentId))?.classId !== q.classId) continue;
+      if (q.groupId && (await studentRepo.findById(p.studentId))?.groupId !== q.groupId) continue;
       rows.push(p);
     }
     rows.sort((a, b) => b.paidAt.getTime() - a.paidAt.getTime());
@@ -89,7 +90,11 @@ paymentsRouter.get('/:id/receipt', async (req, res, next) => {
     if (!p) throw new ApiError(404, 'NOT_FOUND');
     const info = await present(p);
     const lang = req.query.lang === 'ru' ? 'ru' : 'uz';
-    const pdf = await receiptPdf(p, info.studentName, info.className, info.receivedByName, lang);
+    // debt left right after this payment (payments up to and including it, in time order)
+    const [bills, paid] = await Promise.all([chargeRepo.byStudent(p.studentId), paymentRepo.byStudent(p.studentId)]);
+    const paidUpTo = paid.filter((x) => x.paidAt <= p.paidAt).reduce((n, x) => n + x.amount, 0);
+    const debtAfter = bills.length ? bills.reduce((n, c) => n + c.amount, 0) - paidUpTo : null;
+    const pdf = await receiptPdf(p, { ...info, debtAfter }, lang);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="receipt-${p.id}.pdf"`);
     res.send(pdf);

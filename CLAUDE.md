@@ -1,4 +1,4 @@
-# School management system (brand-independent)
+# Vocational school (kasb-hunar markazi) management system (brand-independent)
 
 - Work stage by stage (see original spec); stop after each stage and report.
 - Never hardcode the brand name in code: only `brand.config.ts`, locale files and `.env`.
@@ -8,3 +8,5 @@
   repository layer (`server/src/repositories`). Do not add Prisma client/Neon. `server/prisma/schema.prisma`
   is only the reference schema for the future Postgres (hosted in Uzbekistan).
 - Timezone Asia/Tashkent; money is Int so'm.
+- Domain: courses → groups → trainees (`Student` in code, adults, no parent fields). One course bill per trainee
+  (`services/finance.ts` `syncCourseCharge`), paid in instalments; no monthly charges.

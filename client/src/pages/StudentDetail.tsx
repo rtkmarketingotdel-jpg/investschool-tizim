@@ -38,16 +38,22 @@ export default function StudentDetail() {
   const rows: Array<[string, string]> = [
     [t('students.birthDate'), s.birthDate ? fmtDay(s.birthDate, i18n.language, 'd MMMM yyyy') : '—'],
     [t('students.gender'), t(s.gender === 'MALE' ? 'students.male' : 'students.female')],
-    [t('students.parentName'), s.parentName],
-    [t('students.parentPhone'), s.parentPhone],
-    [t('students.parentPhone2'), s.parentPhone2 ?? '—'],
+    [t('students.phone'), s.phone],
+    [t('students.phone2'), s.phone2 ?? '—'],
+    [t('students.passport'), s.passport ?? '—'],
+    [t('students.pinfl'), s.pinfl ?? '—'],
     [t('students.district'), s.district ?? '—'],
     [t('students.address'), s.address ?? '—'],
-    [t('students.boarding'), t(s.isBoarding ? 'common.yes' : 'common.no')],
-    [t('students.clubs'), s.clubs.length ? s.clubs.join(', ') : '—'],
-    [t('students.monthlyFee'), formatMoney(s.monthlyFee, t('common.currency'))],
-    [t('students.discount'), `${s.discountPercent}%`],
+    [t('students.course'), s.courseName ?? '—'],
+    [t('students.group'), s.groupName ?? '—'],
     [t('students.enrolledAt'), fmtDay(s.enrolledAt, i18n.language, 'd MMMM yyyy')],
+    ...(s.leftAt ? [[t('students.leftAt'), fmtDay(s.leftAt, i18n.language, 'd MMMM yyyy')] as [string, string]] : []),
+    ...(seesFinance
+      ? [
+          [t('students.coursePrice'), formatMoney(s.coursePrice, t('common.currency'))] as [string, string],
+          [t('students.discount'), `${s.discountPercent}%`] as [string, string],
+        ]
+      : []),
     [t('students.notes'), s.notes ?? '—'],
   ];
 
@@ -63,7 +69,8 @@ export default function StudentDetail() {
             <h1 className="text-2xl font-medium">{s.fullName}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge tone={statusTone[s.status]}>{t(`students.statuses.${s.status}`)}</Badge>
-              {s.className && <Badge>{s.className}</Badge>}
+              {s.groupName && <Badge>{s.groupName}</Badge>}
+              {s.courseName && <span className="text-sm text-text-muted">{s.courseName}</span>}
             </div>
           </div>
         </div>
@@ -113,12 +120,34 @@ export default function StudentDetail() {
           <Skeleton className="h-48" />
         ) : finance.data ? (
           <div className="space-y-4">
-            <Card className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-text-muted">{t('students.balance')}</span>
-              <span className={finance.data.debt > 0 ? 'text-2xl font-medium tabular-nums text-danger' : 'text-2xl font-medium tabular-nums text-success'}>
-                {finance.data.debt > 0 ? `−${formatMoney(finance.data.debt, t('common.currency'))}` : formatMoney(-finance.data.balance, t('common.currency'))}
-              </span>
-            </Card>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Card>
+                <p className="text-sm text-text-muted">{t('students.billed')}</p>
+                <p className="mt-1 text-xl font-medium tabular-nums">{formatMoney(finance.data.billed, t('common.currency'))}</p>
+              </Card>
+              <Card>
+                <p className="text-sm text-text-muted">{t('students.paid')}</p>
+                <p className="mt-1 text-xl font-medium tabular-nums text-success">{formatMoney(finance.data.paid, t('common.currency'))}</p>
+                {finance.data.billed > 0 && (
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
+                    <div className="h-full rounded-full bg-success" style={{ width: `${Math.min(100, Math.round((finance.data.paid / finance.data.billed) * 100))}%` }} />
+                  </div>
+                )}
+              </Card>
+              <Card>
+                <p className="text-sm text-text-muted">{finance.data.debt > 0 ? t('students.debt') : t('students.balance')}</p>
+                <p className={finance.data.debt > 0 ? 'mt-1 text-xl font-medium tabular-nums text-danger' : 'mt-1 text-xl font-medium tabular-nums text-success'}>
+                  {finance.data.debt > 0 ? formatMoney(finance.data.debt, t('common.currency')) : formatMoney(-finance.data.balance, t('common.currency'))}
+                </p>
+                {finance.data.debt > 0 && finance.data.dueDate && (
+                  <p className={finance.data.overdueDays > 0 ? 'mt-1 text-sm text-danger' : 'mt-1 text-sm text-text-muted'}>
+                    {finance.data.overdueDays > 0
+                      ? t('finance.debtors.overdue', { count: finance.data.overdueDays })
+                      : t('students.dueBy', { date: fmtDay(finance.data.dueDate, i18n.language, 'd MMM yyyy') })}
+                  </p>
+                )}
+              </Card>
+            </div>
             {finance.data.timeline.length === 0 ? (
               <EmptyState icon={Wallet} title={t('common.empty')} />
             ) : (
@@ -128,7 +157,9 @@ export default function StudentDetail() {
                     <li key={`${e.kind}${e.id}`} className="flex items-center gap-4 px-6 py-4">
                       <span className="w-24 shrink-0 text-sm text-text-muted">{fmtDay(e.date, i18n.language, 'd MMM yyyy')}</span>
                       <span className="flex-1">
-                        {e.kind === 'CHARGE' ? t('students.chargeFor', { period: e.period }) : `${t('finance.payments.title')}${e.method ? ` · ${t(`finance.methods.${e.method}`)}` : ''}`}
+                        {e.kind === 'CHARGE'
+                          ? t('students.chargeCourse', { date: e.dueDate ? fmtDay(e.dueDate, i18n.language, 'd MMM yyyy') : '—' })
+                          : `${t('finance.payments.title')}${e.method ? ` · ${t(`finance.methods.${e.method}`)}` : ''}`}
                       </span>
                       <span className={e.kind === 'PAYMENT' ? 'font-medium tabular-nums text-success' : 'font-medium tabular-nums'}>
                         {e.kind === 'PAYMENT' ? '+' : '−'}{formatMoney(e.amount, t('common.currency'))}
@@ -156,7 +187,7 @@ export default function StudentDetail() {
       )}
 
       <StudentDrawer open={editing} student={s} onClose={() => setEditing(false)} />
-      <PaymentDrawer open={paying} onClose={() => setPaying(false)} student={{ id: s.id, fullName: s.fullName, className: s.className, debt: s.debt ?? 0 }} />
+      <PaymentDrawer open={paying} onClose={() => setPaying(false)} student={{ id: s.id, fullName: s.fullName, groupName: s.groupName, debt: s.debt ?? 0 }} />
       <ContractDrawer open={contracting} onClose={() => setContracting(false)} student={{ id: s.id, fullName: s.fullName }} />
     </div>
   );

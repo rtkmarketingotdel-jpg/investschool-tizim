@@ -39,9 +39,9 @@ function DemoCodes() {
   );
 }
 
-function ClassesView() {
+function GroupsView() {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useQuery({ queryKey: ['contracts', 'classes'], queryFn: financeApi.contractClasses, refetchInterval: 30_000 });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['contracts', 'groups'], queryFn: financeApi.contractGroups, refetchInterval: 30_000 });
   if (isLoading) return <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="h-36" />)}</div>;
   if (isError || !data) return <EmptyState icon={FileSignature} title={t('errors.INTERNAL_ERROR')} />;
   return (
@@ -49,7 +49,7 @@ function ClassesView() {
       {data.map((c) => {
         const pct = c.studentCount ? Math.round((c.signed / c.studentCount) * 100) : 0;
         return (
-          <Link key={c.id} to={`/finance/contracts/class/${c.id}`}>
+          <Link key={c.id} to={`/finance/contracts/group/${c.id}`}>
             <Card className="h-full transition hover:bg-surface-muted/60">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-xl font-medium">{c.name}</h2>
@@ -110,18 +110,18 @@ function AllView({ onCreate }: { onCreate: () => void }) {
 
 export default function Contracts() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<'classes' | 'all'>('classes');
+  const [tab, setTab] = useState<'groups' | 'all'>('groups');
   const [drawer, setDrawer] = useState(false);
   return (
     <div className="space-y-6">
       <PageHeader
         title={t('nav.contracts')}
-        subtitle={t('finance.contracts.subtitleClasses')}
+        subtitle={t('finance.contracts.subtitleGroups')}
         action={<Button onClick={() => setDrawer(true)}><Plus className="h-5 w-5" /> {t('finance.contracts.create')}</Button>}
       />
       <DemoCodes />
-      <Tabs value={tab} onChange={setTab} tabs={[{ id: 'classes', label: t('finance.contracts.tabs.classes') }, { id: 'all', label: t('finance.contracts.tabs.all') }]} />
-      {tab === 'classes' ? <ClassesView /> : <AllView onCreate={() => setDrawer(true)} />}
+      <Tabs value={tab} onChange={setTab} tabs={[{ id: 'groups', label: t('finance.contracts.tabs.groups') }, { id: 'all', label: t('finance.contracts.tabs.all') }]} />
+      {tab === 'groups' ? <GroupsView /> : <AllView onCreate={() => setDrawer(true)} />}
       <ContractDrawer open={drawer} onClose={() => setDrawer(false)} />
     </div>
   );

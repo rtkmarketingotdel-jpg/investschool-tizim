@@ -10,8 +10,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { adjustmentRepo, payrollRepo } from '../repositories/financeRepo.js';
 import { branchRepo } from '../repositories/branchRepo.js';
-import { clubRepo } from '../repositories/academicsRepo.js';
-import { classRepo } from '../repositories/classRepo.js';
+import { groupRepo } from '../repositories/groupRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
 import { toPublicUser, userRepo } from '../repositories/userRepo.js';
@@ -28,13 +27,12 @@ const staffSchema = z.object({
   role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']),
   position: z.string().trim().min(1).max(120),
   isTeacher: z.boolean().default(false),
-  isTutor: z.boolean().default(false),
-  subject: z.string().trim().max(60).nullable().default(null),
+  /** Course name the teacher teaches. */
+  specialty: z.string().trim().max(60).nullable().default(null),
   /** Optional login password on creation; generated when omitted. */
   password: z.string().min(8).max(64).optional(),
-  homeroomClassId: z.string().nullable().default(null),
-  /** Clubs a tutor leads (kept in sync only when sent). */
-  clubIds: z.array(z.string()).max(30).optional(),
+  /** Groups a teacher leads (kept in sync only when sent). */
+  groupIds: z.array(z.string()).max(50).optional(),
   branchId: z.string().nullable().default(null),
   baseSalary: z.number().int().min(0).max(100_000_000),
   isActive: z.boolean().default(true),
@@ -47,7 +45,6 @@ const listQuery = z.object({
   role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']).optional(),
   active: z.enum(['true', 'false']).optional(),
   teacher: z.enum(['true']).optional(),
-  tutor: z.enum(['true']).optional(),
 });
 
 /** Only the director may touch (or create) director accounts; a manager manages everyone else. */
@@ -57,13 +54,13 @@ function assertCanManage(actorRole: Role, targetRole: Role, newRole?: Role) {
   if (privileged.includes(targetRole) || (newRole && privileged.includes(newRole))) throw new ApiError(403, 'FORBIDDEN');
 }
 
-const clubsExist = async (ids: string[]) => { const all = await clubRepo.list(); return ids.every((id) => all.some((c) => c.id === id)); };
+const groupsExist = async (ids: string[]) => { const all = await groupRepo.list(); return ids.every((id) => all.some((g) => g.id === id)); };
 
-/** A tutor leads exactly the clubs listed: free the others, take the chosen ones. */
-async function syncClubs(userId: string, clubIds: string[]) {
-  for (const c of await clubRepo.list()) {
-    if (clubIds.includes(c.id)) await clubRepo.update(c.id, { name: c.name, monthlyFee: c.monthlyFee, teacherId: userId });
-    else if (c.teacherId === userId) await clubRepo.update(c.id, { name: c.name, monthlyFee: c.monthlyFee, teacherId: null });
+/** A teacher leads exactly the groups listed: free the others, take the chosen ones. */
+async function syncGroups(userId: string, groupIds: string[]) {
+  for (const g of await groupRepo.list()) {
+    if (groupIds.includes(g.id)) await groupRepo.update(g.id, { teacherId: userId });
+    else if (g.teacherId === userId) await groupRepo.update(g.id, { teacherId: null });
   }
 }
 
@@ -73,7 +70,7 @@ staffRouter.get('/', async (req, res, next) => {
     const term = q.q?.trim().toLowerCase();
     const digits = term?.replace(/\D/g, '');
     const rows = (await userRepo.list())
-      .filter((u) => (!q.role || u.role === q.role) && (!q.teacher || u.isTeacher) && (!q.tutor || u.isTutor) && (q.active === undefined || u.isActive === (q.active === 'true')))
+      .filter((u) => (!q.role || u.role === q.role) && (!q.teacher || u.isTeacher) && (q.active === undefined || u.isActive === (q.active === 'true')))
       .filter((u) => !term || u.fullName.toLowerCase().includes(term) || (!!digits && u.phone.includes(digits)))
       .sort((a, b) => a.fullName.localeCompare(b.fullName));
     const page = paginate(rows, q.page, q.limit);
@@ -105,7 +102,7 @@ staffRouter.get('/:id/overview', async (req, res, next) => {
       seesPay ? adjustmentRepo.forUserPeriod(u.id, month) : [],
     ]);
     const branch = u.branchId ? await branchRepo.findById(u.branchId) : null;
-    const [allClasses, allClubs] = await Promise.all([classRepo.list(), clubRepo.list()]);
+    const allGroups = await groupRepo.list();
     res.json({
       user: toPublicUser(u), month, attendance, payrolls, adjustments, seesPay,
       profile: {
@@ -114,8 +111,7 @@ staffRouter.get('/:id/overview', async (req, res, next) => {
         completed: !!u.profileCompletedAt,
         branchName: branch?.name ?? null,
         hiredAt: u.hiredAt,
-        classesLed: allClasses.filter((c) => c.teacherId === u.id).map((c) => c.name),
-        clubsLed: allClubs.filter((c) => c.teacherId === u.id).map((c) => c.name),
+        groupsLed: allGroups.filter((g) => g.teacherId === u.id).map((g) => ({ id: g.id, name: g.name })),
       },
     });
   } catch (e) {
@@ -128,16 +124,14 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
     const body = req.body as StaffInput;
     assertCanManage(req.user!.role, body.role, body.role);
     if (await userRepo.findByPhone(body.phone)) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
-    const { password, homeroomClassId, clubIds, ...data } = body;
-    if (homeroomClassId && !(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
+    const { password, groupIds, ...data } = body;
     if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
-    if (clubIds && !(await clubsExist(clubIds))) throw new ApiError(400, 'VALIDATION_ERROR');
+    if (groupIds && !(await groupsExist(groupIds))) throw new ApiError(400, 'VALIDATION_ERROR');
     const finalPassword = password ?? generatePassword();
     const user = await userRepo.create({
       ...data,
       isTeacher: data.isTeacher,
-      isTutor: data.isTutor,
-      subject: data.isTeacher || data.isTutor ? data.subject : null,
+      specialty: data.isTeacher ? data.specialty : null,
       photoUrl: null,
       achievements: [],
       documents: [],
@@ -147,8 +141,7 @@ staffRouter.post('/', validateBody(staffSchema), async (req, res, next) => {
       language: 'uz',
       hiredAt: new Date(),
     });
-    if (homeroomClassId) await classRepo.update(homeroomClassId, { teacherId: user.id });
-    if (user.isTutor && clubIds) await syncClubs(user.id, clubIds);
+    if (user.isTeacher && user.role === 'TEACHER' && groupIds) await syncGroups(user.id, groupIds);
     await audit(req.user!.id, 'staff.create', 'user', user.id, { role: user.role, isTeacher: user.isTeacher });
     res.status(201).json({ user: toPublicUser(user), tempPassword: finalPassword, generated: !password });
   } catch (e) {
@@ -163,8 +156,8 @@ staffRouter.patch('/:id', validateBody(staffSchema.partial()), async (req, res, 
     // fields that were not sent keep their current value (nothing is silently reset, a deactivated user stays deactivated)
     const sent = Object.fromEntries(Object.entries(req.body as Partial<StaffInput>).filter(([, v]) => v !== undefined));
     const body = {
-      fullName: target.fullName, phone: target.phone, role: target.role, position: target.position, isTeacher: target.isTeacher, isTutor: target.isTutor,
-      subject: target.subject, branchId: target.branchId, baseSalary: target.baseSalary, isActive: target.isActive, homeroomClassId: null, ...sent,
+      fullName: target.fullName, phone: target.phone, role: target.role, position: target.position, isTeacher: target.isTeacher,
+      specialty: target.specialty, branchId: target.branchId, baseSalary: target.baseSalary, isActive: target.isActive, ...sent,
     } as StaffInput;
     assertCanManage(req.user!.role, target.role, body.role);
     if (target.id === req.user!.id && (!body.isActive || body.role !== target.role)) {
@@ -174,21 +167,16 @@ staffRouter.patch('/:id', validateBody(staffSchema.partial()), async (req, res, 
     if (req.user!.role !== 'DIRECTOR' && target.id === req.user!.id && body.baseSalary !== target.baseSalary) throw new ApiError(403, 'FORBIDDEN');
     const clash = await userRepo.findByPhone(body.phone);
     if (clash && clash.id !== target.id) throw new ApiError(409, 'STAFF_PHONE_EXISTS');
-    const { password: _ignored, homeroomClassId, clubIds, ...data } = body;
+    const { password: _ignored, groupIds, ...data } = body;
     void _ignored;
     // validate everything before the first write
-    if (clubIds && !(await clubsExist(clubIds))) throw new ApiError(400, 'VALIDATION_ERROR');
-    if (homeroomClassId && !(await classRepo.findById(homeroomClassId))) throw new ApiError(400, 'VALIDATION_ERROR');
+    if (groupIds && !(await groupsExist(groupIds))) throw new ApiError(400, 'VALIDATION_ERROR');
     if (data.branchId && !(await branchRepo.findById(data.branchId))) throw new ApiError(400, 'VALIDATION_ERROR');
     const stillTeacher = data.isTeacher && data.isActive && data.role === 'TEACHER';
-    if (!stillTeacher) {
-      // no longer an active teacher: free the classes they led
-      for (const c of await classRepo.list()) if (c.teacherId === target.id) await classRepo.update(c.id, { teacherId: null });
-    }
-    if (homeroomClassId && stillTeacher) await classRepo.update(homeroomClassId, { teacherId: target.id });
-    if (!data.isTutor || !data.isActive) await syncClubs(target.id, []);
-    const updated = await userRepo.update(target.id, { ...data, subject: data.isTeacher || data.isTutor ? data.subject : null });
-    if (updated!.isTutor && clubIds) await syncClubs(target.id, clubIds);
+    // no longer an active teacher: free the groups they led
+    if (!stillTeacher) await syncGroups(target.id, []);
+    else if (groupIds) await syncGroups(target.id, groupIds);
+    const updated = await userRepo.update(target.id, { ...data, specialty: data.isTeacher ? data.specialty : null });
     await audit(req.user!.id, 'staff.update', 'user', target.id);
     res.json({ user: toPublicUser(updated!) });
   } catch (e) {

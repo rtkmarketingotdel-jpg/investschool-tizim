@@ -1,5 +1,5 @@
 import { branches, users } from '../data/mockStore.js';
-import { classes } from '../data/mockStudents.js';
+import { groups } from '../data/mockStudents.js';
 import type { Branch } from '../data/types.js';
 
 let counter = 1;
@@ -25,24 +25,24 @@ export const branchRepo = {
     if (i >= 0) branches.splice(i, 1);
   },
   usage(id: string) {
-    return { users: users.filter((u) => u.branchId === id).length, classes: classes.filter((c) => c.branchId === id).length };
+    return { users: users.filter((u) => u.branchId === id).length, groups: groups.filter((g) => g.branchId === id).length };
   },
-  /** Moves all attached employees/classes to another branch (or detaches them when null). */
+  /** Moves all attached employees/groups to another branch (or detaches them when null). */
   moveData(fromId: string, toId: string | null) {
     users.forEach((u) => u.branchId === fromId && (u.branchId = toId));
-    classes.forEach((c) => c.branchId === fromId && (c.branchId = toId));
+    groups.forEach((g) => g.branchId === fromId && (g.branchId = toId));
   },
-  /** Makes the attached set exactly the given employees/classes. */
-  assign(id: string, userIds: string[], classIds: string[]) {
+  /** Makes the attached set exactly the given employees/groups. */
+  assign(id: string, userIds: string[], groupIds: string[]) {
     const uSet = new Set(userIds);
-    const cSet = new Set(classIds);
+    const gSet = new Set(groupIds);
     users.forEach((u) => {
       if (uSet.has(u.id)) u.branchId = id;
       else if (u.branchId === id) u.branchId = null;
     });
-    classes.forEach((c) => {
-      if (cSet.has(c.id)) c.branchId = id;
-      else if (c.branchId === id) c.branchId = null;
+    groups.forEach((g) => {
+      if (gSet.has(g.id)) g.branchId = id;
+      else if (g.branchId === id) g.branchId = null;
     });
   },
 };

@@ -2,14 +2,14 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { settings } from '../data/mockStore.js';
 import { studentRepo, fullName } from '../repositories/studentRepo.js';
-import { classRepo } from '../repositories/classRepo.js';
+import { groupRepo } from '../repositories/groupRepo.js';
 import { ApiError } from '../lib/errors.js';
 import { paginate, pageQuery } from '../lib/pagination.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { contractRepo, templateRepo } from '../repositories/contractRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
-import { contractPdfFor, freezeContract } from '../services/contracts.js';
+import { contractPdfFor, enrolmentContext, freezeContract } from '../services/contracts.js';
 import { chargeAmount } from '../services/debt.js';
 import { contractPdf, contractValues } from '../services/pdf.js';
 import { env } from '../env.js';
@@ -24,8 +24,8 @@ async function present(c: Contract) {
   const s = await studentRepo.findById(c.studentId);
   const otpActive = !!c.otpDemoCode && !!c.otpExpiresAt && c.otpExpiresAt.getTime() > Date.now();
   return {
-    id: c.id, number: c.number, studentId: c.studentId, studentName: s ? fullName(s) : '—', parentName: s?.parentName ?? '—',
-    language: c.language, monthlyFee: c.monthlyFee, startDate: c.startDate, endDate: c.endDate, status: c.status,
+    id: c.id, number: c.number, studentId: c.studentId, studentName: s ? fullName(s) : '—', studentPhone: s?.phone ?? '—',
+    language: c.language, price: c.price, startDate: c.startDate, endDate: c.endDate, status: c.status,
     publicToken: c.publicToken, createdAt: c.createdAt, signedAt: c.signedAt,
     demoCode: env.demoMode && otpActive ? c.otpDemoCode : null,
   };
@@ -41,14 +41,14 @@ contractsRouter.get('/', async (req, res, next) => {
     const term = q.q?.trim().toLowerCase();
     const all = [...(await contractRepo.all())].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     const presented = await Promise.all(all.filter((c) => (!q.status || c.status === q.status) && (!q.studentId || c.studentId === q.studentId)).map(present));
-    const rows = presented.filter((c) => !term || [c.number, c.studentName, c.parentName].some((v) => v.toLowerCase().includes(term)));
+    const rows = presented.filter((c) => !term || [c.number, c.studentName, c.studentPhone].some((v) => v.toLowerCase().includes(term)));
     res.json(((page) => ({ ...page }))(paginate(rows, q.page, q.limit)));
   } catch (e) {
     next(e);
   }
 });
 
-// ---- classes (contracts grouped by class) ----
+// ---- groups (contracts grouped by group) ----
 const latestByStudent = async () => {
   const map = new Map<string, Contract>();
   for (const c of await contractRepo.all()) {
@@ -59,12 +59,12 @@ const latestByStudent = async () => {
   return map;
 };
 
-contractsRouter.get('/classes', async (_req, res, next) => {
+contractsRouter.get('/groups', async (_req, res, next) => {
   try {
-    const [classes, latest] = await Promise.all([classRepo.list(), latestByStudent()]);
+    const [groups, latest] = await Promise.all([groupRepo.list(), latestByStudent()]);
     const items = [];
-    for (const c of classes) {
-      const list = (await studentRepo.list({ classId: c.id })).filter((s) => s.status !== 'LEFT');
+    for (const c of groups) {
+      const list = (await studentRepo.list({ groupId: c.id })).filter((s) => s.status !== 'LEFT');
       const count = (st: string) => list.filter((s) => latest.get(s.id)?.status === st).length;
       items.push({
         id: c.id, name: c.name, studentCount: list.length,
@@ -78,22 +78,22 @@ contractsRouter.get('/classes', async (_req, res, next) => {
   }
 });
 
-contractsRouter.get('/classes/:classId', async (req, res, next) => {
+contractsRouter.get('/groups/:groupId', async (req, res, next) => {
   try {
-    const cls = await classRepo.findById(req.params.classId!);
-    if (!cls) throw new ApiError(404, 'NOT_FOUND');
+    const group = await groupRepo.findById(req.params.groupId!);
+    if (!group) throw new ApiError(404, 'NOT_FOUND');
     const latest = await latestByStudent();
-    const students = (await studentRepo.list({ classId: cls.id })).filter((s) => s.status !== 'LEFT');
+    const students = (await studentRepo.list({ groupId: group.id })).filter((s) => s.status !== 'LEFT');
     const items = await Promise.all(
       students.map(async (s) => {
         const c = latest.get(s.id);
         return {
-          student: { id: s.id, fullName: fullName(s), parentName: s.parentName, parentPhone: s.parentPhone, monthlyFee: s.monthlyFee },
+          student: { id: s.id, fullName: fullName(s), phone: s.phone, price: chargeAmount(s.coursePrice, s.discountPercent) },
           contract: c ? await present(c) : null,
         };
       }),
     );
-    res.json({ class: { id: cls.id, name: cls.name }, items });
+    res.json({ group: { id: group.id, name: group.name }, items });
   } catch (e) {
     next(e);
   }
@@ -149,10 +149,12 @@ contractsRouter.post('/templates/sample-pdf', validateBody(z.object({ body: z.st
     const { body, language } = req.body as { body: string; language: 'uz' | 'ru' };
     const sample = {
       firstName: language === 'uz' ? 'Azizbek' : 'Азизбек', lastName: language === 'uz' ? 'Karimov' : 'Каримов', middleName: null,
-      birthDate: '2016-05-14', parentName: language === 'uz' ? 'Karimov Rustam' : 'Каримов Рустам', parentPhone: '+998901234567',
+      birthDate: '1998-05-14', phone: '+998901234567', passport: 'AB1234567', pinfl: '31405981234567',
     };
-    const contract = { number: `${settings.contractPrefix}-SAMPLE`, language, monthlyFee: 3_000_000, startDate: '2026-09-01', endDate: '2027-05-31', signedAt: null, signerPhone: null };
-    const values = contractValues(contract, sample as never, '3-A');
+    const contract = { number: `${settings.contractPrefix}-SAMPLE`, language, price: 2_400_000, startDate: '2026-09-05', endDate: '2027-01-04', signedAt: null, signerPhone: null };
+    const values = contractValues(contract, sample as never, {
+      courseName: language === 'uz' ? 'Tikuvchilik' : 'Швейное дело', courseDuration: 4, groupName: 'TK-02', paymentDueDate: '2026-10-05',
+    });
     const pdf = await contractPdf(contract, { body }, values);
     res.setHeader('Content-Type', 'application/pdf');
     res.send(pdf);
@@ -165,7 +167,7 @@ contractsRouter.post('/templates/sample-pdf', validateBody(z.object({ body: z.st
 const createSchema = z.object({
   studentId: z.string().min(1),
   templateId: z.string().min(1),
-  monthlyFee: z.number().int().min(0).max(100_000_000),
+  price: z.number().int().min(0).max(1_000_000_000),
   startDate: z.string().regex(dateRe),
   endDate: z.string().regex(dateRe),
 });
@@ -184,13 +186,16 @@ contractsRouter.post('/', validateBody(createSchema), async (req, res, next) => 
   }
 });
 
-/** Defaults used by the create form: fee after discount and the student's class. */
+/** Defaults used by the create form: price after discount and the dates of the student's group. */
 contractsRouter.get('/defaults/:studentId', async (req, res, next) => {
   try {
     const s = await studentRepo.findById(req.params.studentId!);
     if (!s) throw new ApiError(404, 'NOT_FOUND');
-    const cls = s.classId ? await classRepo.findById(s.classId) : null;
-    res.json({ monthlyFee: chargeAmount(s.monthlyFee, s.discountPercent), className: cls?.name ?? null, parentName: s.parentName });
+    const ctx = await enrolmentContext(s);
+    res.json({
+      price: chargeAmount(s.coursePrice, s.discountPercent), groupName: ctx.groupName, courseName: ctx.courseName,
+      startDate: ctx.group?.startDate ?? null, endDate: ctx.group?.endDate ?? null, phone: s.phone,
+    });
   } catch (e) {
     next(e);
   }

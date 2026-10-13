@@ -1,16 +1,15 @@
 {
   "brand": {
-    "slogan": "Maktab boshqaruvi bir joyda"
+    "slogan": "Kasb-hunar markazi boshqaruvi bir joyda"
   },
   "nav": {
     "main": "Asosiy",
-    "students": "Oʻquvchilar",
+    "students": "Tinglovchilar",
     "staff": "Xodimlar",
     "finance": "Moliya",
     "management": "Boshqaruv",
     "dashboard": "Bosh sahifa",
-    "studentsList": "Oʻquvchilar",
-    "classes": "Sinflar",
+    "studentsList": "Tinglovchilar",
     "staffList": "Xodimlar",
     "attendance": "Davomat",
     "payments": "Tushumlar",
@@ -19,9 +18,10 @@
     "contracts": "Shartnomalar",
     "settings": "Sozlamalar",
     "me": "Mening kabinetim",
-    "academics": "Fanlar va toʻgaraklar",
     "communication": "Aloqa",
-    "sms": "SMS"
+    "sms": "SMS",
+    "groups": "Guruhlar",
+    "courses": "Kurslar"
   },
   "roles": {
     "DIRECTOR": "Direktor",
@@ -39,7 +39,7 @@
     "logout": "Chiqish"
   },
   "topbar": {
-    "search": "Oʻquvchi yoki xodim qidirish...",
+    "search": "Tinglovchi yoki xodim qidirish...",
     "toggleSidebar": "Menyuni ochish/yopish",
     "fullscreen": "Toʻliq ekran",
     "theme": "Mavzuni almashtirish",
@@ -91,14 +91,12 @@
     "ATTENDANCE_NOT_CHECKED_IN": "Avval “Keldim” tugmasini bosing",
     "ATTENDANCE_NOT_WORKDAY": "Bugun ish kuni emas",
     "ATTENDANCE_LOW_ACCURACY": "Joylashuv aniqligi past. Ochiq joyga chiqib qayta urinib koʻring",
-    "ATTENDANCE_OUT_OF_RADIUS": "Siz maktab hududida emassiz: “{{branch}}” filialidan {{distance}} m uzoqdasiz (ruxsat: {{radius}} m). Davomat qabul qilinmadi",
+    "ATTENDANCE_OUT_OF_RADIUS": "Siz markaz hududida emassiz: “{{branch}}” filialidan {{distance}} m uzoqdasiz (ruxsat: {{radius}} m). Davomat qabul qilinmadi",
     "ATTENDANCE_BAD_TIMESTAMP": "Qurilma vaqti notoʻgʻri. Vaqtni tekshirib qayta urinib koʻring",
     "ATTENDANCE_INVALID_PHOTO": "Rasm notoʻgʻri, qayta oling",
     "ATTENDANCE_PHOTO_TOO_LARGE": "Rasm hajmi katta",
     "required": "Toʻldirish shart",
     "phone": "Telefon +998 XXXXXXXXX koʻrinishida boʻlsin",
-    "CLASS_FULL": "Bu sinf toʻlgan",
-    "CLASS_NAME_EXISTS": "Bunday sinf mavjud",
     "STAFF_PHONE_EXISTS": "Bu telefon raqam bilan xodim mavjud",
     "STAFF_CANNOT_MODIFY_SELF": "Oʻzingizning rolingiz yoki holatingizni oʻzgartira olmaysiz",
     "PAYROLL_LOCKED": "Oylik tasdiqlangan, oʻzgartirib boʻlmaydi",
@@ -108,7 +106,7 @@
     "TEMPLATE_IN_USE": "Shablon shartnomalarda ishlatilgan, oʻchirib boʻlmaydi",
     "TELEGRAM_NOT_CONFIGURED": "Telegram bot tokeni yoki chat ID sozlanmagan",
     "BRANCH_LAST": "Oxirgi filialni oʻchirib boʻlmaydi",
-    "BRANCH_HAS_DATA": "Filialga xodim yoki sinflar biriktirilgan",
+    "BRANCH_HAS_DATA": "Filialga xodim yoki guruhlar biriktirilgan",
     "reload": "Sahifani qayta yuklash",
     "ATTENDANCE_NOT_TRACKED": "Direktor davomat qilmaydi",
     "FILE_INVALID_TYPE": "Fayl turi notoʻgʻri (rasm yoki PDF)",
@@ -116,7 +114,7 @@
     "FILE_LIMIT_REACHED": "Hujjatlar soni chegaraga yetdi",
     "PROFILE_PHOTO_REQUIRED": "Avval rasm yuklang",
     "CATALOG_NAME_EXISTS": "Bunday nom allaqachon mavjud",
-    "CATALOG_IN_USE": "Bu fan xodimlarga biriktirilgan, oʻchirib boʻlmaydi",
+    "CATALOG_IN_USE": "Kursga guruhlar yoki oʻqituvchilar biriktirilgan, oʻchirib boʻlmaydi",
     "SMS_BAD_VARIABLE": "Notoʻgʻri oʻzgaruvchi: {{list}}",
     "SMS_EMPTY_TEXT": "Xabar matni boʻsh",
     "SMS_TOO_MANY": "Bir vaqtda juda koʻp xabar",
@@ -125,11 +123,18 @@
     "SMS_BAD_STATE": "Bu amalni hozir bajarib boʻlmaydi",
     "SMS_BAD_PHONE": "Telefon raqam notoʻgʻri",
     "SMS_PROVIDER_ERROR": "SMS provayderi xato qaytardi",
-    "CLASS_CAPACITY_BELOW_OCCUPANCY": "Sinf sigʻimi hozirgi oʻquvchilar sonidan kam boʻlishi mumkin emas",
     "SMS_DELIVERY_FAILED": "SMS yuborilmadi, keyinroq urinib koʻring",
     "INVALID_JSON": "Notoʻgʻri soʻrov formati",
     "PAYLOAD_TOO_LARGE": "Yuborilgan maʼlumot juda katta",
-    "tooLong": "Matn juda uzun"
+    "tooLong": "Matn juda uzun",
+    "passport": "Pasport AB1234567 koʻrinishida boʻlsin",
+    "pinfl": "JSHSHIR 14 ta raqamdan iborat",
+    "GROUP_FULL": "Bu guruh toʻlgan",
+    "GROUP_NAME_EXISTS": "Bunday nomli guruh mavjud",
+    "GROUP_CAPACITY_BELOW_OCCUPANCY": "Guruh sigʻimi hozirgi tinglovchilar sonidan kam boʻlishi mumkin emas",
+    "GROUP_COURSE_LOCKED": "Guruhda tinglovchilar bor: kursni oʻzgartirib boʻlmaydi",
+    "GROUP_NOT_EMPTY": "Guruhda tinglovchilar bor, oʻchirib boʻlmaydi",
+    "GROUP_FINISHED": "Guruh tugagan, unga tinglovchi qoʻshib boʻlmaydi"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",
@@ -198,9 +203,9 @@
     },
     "map": {
       "title": "Bugungi holat xaritasi",
-      "onSite": "Hozir maktabda",
+      "onSite": "Hozir markazda",
       "left": "Bugun ketganlar",
-      "empty": "Hozir maktabda hech kim belgilanmagan",
+      "empty": "Hozir markazda hech kim belgilanmagan",
       "hint": "Nuqta “Keldim” bosilganda paydo boladi va “Ketdim” bosilganda oʻchadi",
       "updated": "yangilandi {{time}}",
       "satellite": "Sputnik",
@@ -235,17 +240,13 @@
     "dayDone": "Bugungi davomat yakunlandi"
   },
   "students": {
-    "subtitle": "Barcha oʻquvchilar · Jami: {{count}}",
-    "add": "Oʻquvchi qoʻshish",
+    "subtitle": "Barcha tinglovchilar · Jami: {{count}}",
+    "add": "Tinglovchi qoʻshish",
     "edit": "Tahrirlash",
-    "created": "Oʻquvchi qoʻshildi",
-    "updated": "Oʻquvchi maʼlumotlari yangilandi",
-    "searchPlaceholder": "Ism yoki telefon boʻyicha qidirish...",
+    "created": "Tinglovchi qoʻshildi",
+    "updated": "Tinglovchi maʼlumotlari yangilandi",
+    "searchPlaceholder": "Ism, telefon yoki pasport boʻyicha qidirish...",
     "allStatuses": "Barcha holatlar",
-    "allClasses": "Barcha sinflar",
-    "boardingAny": "Internat: hammasi",
-    "boardingYes": "Internatda",
-    "boardingNo": "Internatsiz",
     "sort": "Saralash",
     "sortName": "Ism boʻyicha",
     "sortDate": "Sana boʻyicha",
@@ -254,40 +255,31 @@
       "table": "Jadval koʻrinishi",
       "cards": "Kartochka koʻrinishi"
     },
-    "empty": "Oʻquvchilar topilmadi",
+    "empty": "Tinglovchilar topilmadi",
     "fullName": "F.I.Sh.",
     "lastName": "Familiya",
     "firstName": "Ism",
     "middleName": "Otasining ismi",
     "birthDate": "Tugʻilgan sana",
     "gender": "Jinsi",
-    "male": "Oʻgʻil bola",
-    "female": "Qiz bola",
-    "class": "Sinf",
-    "noClass": "Sinfsiz",
+    "male": "Erkak",
+    "female": "Ayol",
     "status": "Holat",
     "statuses": {
-      "ACTIVE": "Faol",
-      "TRIAL": "Sinov kuni",
-      "LEFT": "Ketgan"
+      "ACTIVE": "Oʻqimoqda",
+      "LEFT": "Chiqib ketgan",
+      "GRADUATED": "Bitirgan"
     },
-    "boarding": "Internat",
-    "clubs": "Toʻgaraklar",
-    "enrolledAt": "Qoʻshilgan sana",
-    "parentName": "Ota-ona F.I.Sh.",
-    "parentPhone": "Ota-ona telefoni",
-    "parentPhone2": "Qoʻshimcha telefon",
+    "enrolledAt": "Yozilgan sana",
     "district": "Tuman",
     "address": "Manzil",
-    "monthlyFee": "Oylik toʻlov",
     "discount": "Chegirma (%)",
     "notes": "Izoh",
-    "classFullWarning": "Bu sinf toʻlgan. Saqlashda xatolik chiqadi, boshqa sinf tanlang.",
     "sections": {
-      "student": "Oʻquvchi",
+      "student": "Tinglovchi",
       "study": "Oʻqish",
-      "parent": "Ota-ona",
-      "payment": "Toʻlov"
+      "payment": "Toʻlov",
+      "contacts": "Aloqa"
     },
     "tabs": {
       "info": "Umumiy maʼlumot",
@@ -300,60 +292,24 @@
     "debtOnly": "Faqat qarzdorlar",
     "sortDebt": "Qarz boʻyicha",
     "balance": "Balans",
-    "chargeFor": "{{period}} uchun hisoblangan"
-  },
-  "classes": {
-    "subtitle": "Boʻsh oʻrinlar: {{free}}",
-    "add": "Sinf qoʻshish",
-    "edit": "Sinfni tahrirlash",
-    "created": "Sinf qoʻshildi",
-    "updated": "Sinf yangilandi",
-    "empty": "Sinflar yoʻq",
-    "name": "Sinf nomi",
-    "grade": "Daraja (1–11)",
-    "capacity": "Sigʻim",
-    "teacher": "Sinf rahbari",
-    "noTeacher": "Rahbar tayinlanmagan",
-    "free": "{{count}} boʻsh oʻrin",
-    "full": "Toʻlgan",
-    "subtitleNew": "Maktab sinflari va ularning toʻlganligi · Jami: {{count}}",
-    "search": "Sinf yoki sinf rahbari boʻyicha qidirish...",
-    "level": "Bosqich",
-    "levels": {
-      "all": "Barchasi",
-      "junior": "Boshlangʻich (1–4)",
-      "middle": "Oʻrta (5–9)",
-      "senior": "Yuqori (10–11)"
-    },
-    "onlyFree": "Boʻsh oʻrin borlari",
-    "sort": {
-      "grade": "Sinf boʻyicha",
-      "fill": "Toʻlganlik boʻyicha",
-      "free": "Boʻsh oʻrin boʻyicha"
-    },
-    "groupCount": "{{classes}} sinf · {{students}} oʻquvchi",
-    "stats": {
-      "classes": "Sinflar",
-      "students": "Oʻquvchilar",
-      "fill": "Toʻlganlik",
-      "free": "Boʻsh oʻrinlar",
-      "avg": "Oʻrtacha {{n}} nafar",
-      "ofCapacity": "{{capacity}} oʻrindan",
-      "freeClasses": "{{count}} ta sinfda"
-    },
-    "fill": {
-      "open": "Boʻsh oʻrin bor",
-      "almost": "Deyarli toʻlgan",
-      "full": "Toʻlgan"
-    },
-    "students": "Oʻquvchilar",
-    "boys": "{{count}} oʻgʻil",
-    "girls": "{{count}} qiz",
-    "freeShort": "{{count}} boʻsh",
-    "roster": "Sinf tarkibi",
-    "openStudents": "Oʻquvchilar sahifasi",
-    "emptyRoster": "Bu sinfda oʻquvchilar yoʻq",
-    "noMatch": "Mos sinf topilmadi"
+    "allCourses": "Barcha kurslar",
+    "allGroups": "Barcha guruhlar",
+    "course": "Kurs",
+    "group": "Guruh",
+    "noGroup": "Guruhsiz",
+    "phone": "Telefon",
+    "phone2": "Qoʻshimcha telefon",
+    "passport": "Pasport seriya va raqami",
+    "pinfl": "JSHSHIR",
+    "leftAt": "Chiqib ketgan sana",
+    "coursePrice": "Kurs narxi",
+    "toPay": "Toʻlanadigan summa",
+    "leftPriceHint": "Chiqib ketgan tinglovchidan faqat foydalangan qismi undirilsa, kurs narxini shu summaga tushiring: qarz shunga qarab qayta hisoblanadi.",
+    "groupFullWarning": "Bu guruh toʻlgan. Saqlashda xatolik chiqadi, boshqa guruh tanlang.",
+    "billed": "Kurs narxi",
+    "paid": "Toʻlangan",
+    "dueBy": "Muddat: {{date}}",
+    "chargeCourse": "Kurs uchun hisob · muddat {{date}}"
   },
   "staff": {
     "subtitle": "Barcha xodimlar · Jami: {{count}}",
@@ -385,11 +341,6 @@
     "payrollHistory": "Oyliklar tarixi",
     "addTeacher": "Oʻqituvchi qoʻshish",
     "phoneLogin": "Telefon (login)",
-    "subject": "Fan",
-    "otherSubject": "Boshqa fan…",
-    "customSubject": "Fan nomi",
-    "homeroom": "Sinf rahbari boʻladi",
-    "noHomeroom": "Sinf rahbari emas",
     "type": "Turi",
     "allTypes": "Barcha xodimlar",
     "teachersOnly": "Faqat oʻqituvchilar",
@@ -400,47 +351,45 @@
     "generate": "Yaratish",
     "branch": "Filial",
     "anyBranch": "Istalgan filial",
-    "addTutor": "Repetitor qoʻshish",
-    "tutorsOnly": "Faqat repetitorlar",
     "kind": {
-      "teacher": "Oʻqituvchi",
-      "tutor": "Repetitor"
+      "teacher": "Oʻqituvchi"
     },
     "profileIncomplete": "Profil toʻldirilmagan",
     "about": "Maʼlumotlar",
     "hiredAt": "Ishga kirgan sana",
-    "homeroomOf": "Sinf rahbari",
-    "clubsLed": "Toʻgarak rahbari",
     "nothingYet": "Hali kiritilmagan",
     "types": {
       "manager": "Bosh menejer",
       "teacher": "Oʻqituvchi",
-      "tutor": "Repetitor",
       "accountant": "Hisobchi"
     },
     "delete": "Oʻchirish",
     "deleted": "Xodim oʻchirildi",
-    "deleteConfirm": "“{{name}}” butunlay oʻchirilsinmi? Uning davomat va oylik tarixi ham oʻchadi, sinf va toʻgaraklari boʻshaydi.",
+    "deleteConfirm": "“{{name}}” butunlay oʻchirilsinmi? Uning davomat va oylik tarixi ham oʻchadi, guruhlari boʻshaydi.",
     "roleChoose": "Rol tanlang",
-    "tutorClubs": "Toʻgaraklar (bir nechta tanlash mumkin)",
-    "noClubs": "Toʻgaraklar hali yaratilmagan"
+    "specialty": "Mutaxassislik (kurs)",
+    "otherSpecialty": "Boshqa yoʻnalish…",
+    "customSpecialty": "Yoʻnalish nomi",
+    "groupsLed": "Boshqaradigan guruhlari",
+    "groupsLedHint": "Belgilangan guruhlar shu oʻqituvchiga oʻtadi. * — hozir boshqa oʻqituvchida.",
+    "groupTakenBy": "Hozir: {{name}}",
+    "noGroups": "Ochiq guruhlar yoʻq"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {{name}}!",
-    "activeStudents": "Faol oʻquvchilar",
+    "activeStudents": "Oʻqiyotgan tinglovchilar",
     "newThisMonth": "Shu oy qoʻshilgan: {{count}}",
     "todayAttendance": "Bugungi davomat",
     "lateCount": "Kechikkan: {{count}}",
     "dayOff": "Bugun dam olish kuni",
     "monthRevenue": "Shu oy tushum",
-    "ofPlan": "Reja: {{plan}}",
+    "ofPlan": "Shu oy sotilgan kurslar: {{plan}}",
     "vsLastMonth": "oʻtgan oyga nisbatan",
     "totalDebt": "Umumiy qarzdorlik",
     "debtorsCount": "Qarzdorlar: {{count}}",
     "revenueChart": "Tushum (oxirgi 6 oy)",
-    "plan": "Reja",
-    "fact": "Fakt",
-    "classFill": "Sinflar toʻlganligi",
+    "plan": "Sotilgan kurslar",
+    "fact": "Tushum",
     "freeSeats": "Boʻsh oʻrinlar: {{count}}",
     "problems": "Bugun kelmagan va kechikkan xodimlar",
     "allPresent": "Hammasi vaqtida keldi",
@@ -451,7 +400,11 @@
     },
     "topDebtors": "Eng katta qarzdorlar",
     "noDebtors": "Qarzdorlar yoʻq",
-    "days": "{{count}} kun"
+    "days": "{{count}} kun",
+    "groupFill": "Guruhlar toʻlganligi",
+    "noOpenGroups": "Ochiq guruhlar yoʻq",
+    "startsOn": "{{date}} boshlanadi",
+    "graduatedThisMonth": "Bitirgan: {{count}}"
   },
   "notif": {
     "late": {
@@ -488,17 +441,16 @@
       "TRANSFER": "Bank oʻtkazmasi"
     },
     "payments": {
-      "subtitle": "Oʻquvchilardan tushgan toʻlovlar",
+      "subtitle": "Tinglovchilardan tushgan toʻlovlar",
       "receive": "Toʻlov qabul qilish",
       "created": "Toʻlov qabul qilindi",
       "receipt": "Chek",
-      "student": "Oʻquvchi",
+      "student": "Tinglovchi",
       "change": "Oʻzgartirish",
       "currentDebt": "Joriy qarz",
       "amount": "Summa",
       "method": "Toʻlov usuli",
       "allMethods": "Barcha usullar",
-      "period": "Davr",
       "note": "Izoh",
       "receivedBy": "Qabul qildi",
       "total": "Tanlangan davr tushumi",
@@ -511,7 +463,12 @@
         "month": "Oy",
         "custom": "Oraliq"
       },
-      "title": "Toʻlov"
+      "title": "Toʻlov",
+      "debtLeft": "Qolgan qarz",
+      "fullyPaid": "Kurs toʻliq toʻlandi",
+      "payAll": "Qarzni toʻliq",
+      "payHalf": "Yarmi",
+      "period": "Davr"
     },
     "debtors": {
       "subtitle": "Muddati oʻtgan toʻlovlar",
@@ -527,7 +484,7 @@
     },
     "contracts": {
       "subtitle": "Elektron shartnomalar · Jami: {{count}}",
-      "search": "Raqam, oʻquvchi yoki ota-ona boʻyicha qidirish...",
+      "search": "Raqam, tinglovchi yoki telefon boʻyicha qidirish...",
       "create": "Shartnoma yaratish",
       "createDraft": "Qoralama yaratish",
       "created": "Shartnoma qoralamasi yaratildi",
@@ -545,7 +502,7 @@
         "CANCELLED": "Bekor"
       },
       "viewPdf": "PDF koʻrish",
-      "send": "Ota-onaga yuborish",
+      "send": "Tinglovchiga yuborish",
       "copyLink": "Havolani nusxalash",
       "cancel": "Bekor qilish",
       "cancelConfirm": "{{number}} shartnomani bekor qilasizmi?",
@@ -553,15 +510,15 @@
       "sentCopied": "Yuborildi. Havola nusxalandi",
       "linkCopied": "Havola nusxalandi",
       "demoCode": "Demo kod",
-      "subtitleClasses": "Shartnomalar sinflar boʻyicha",
       "tabs": {
-        "classes": "Sinflar",
-        "all": "Barcha shartnomalar"
+        "all": "Barcha shartnomalar",
+        "groups": "Guruhlar"
       },
-      "students": "{{count}} oʻquvchi",
+      "students": "{{count}} tinglovchi",
       "noContract": "Shartnoma yoʻq",
-      "classSubtitle": "Imzolangan: {{signed}} / {{total}} oʻquvchi",
-      "activeCodes": "Faol tasdiqlash kodlari (demo rejim). Kodni ota-onaga ayting:"
+      "activeCodes": "Faol tasdiqlash kodlari (demo rejim). Kodni tinglovchiga ayting:",
+      "subtitleGroups": "Shartnomalar guruhlar boʻyicha",
+      "groupSubtitle": "Imzolangan: {{signed}} / {{total}} tinglovchi"
     },
     "payroll": {
       "subtitle": "Xodimlar oyliklari va jarima/bonuslar",
@@ -602,10 +559,10 @@
     }
   },
   "settings": {
-    "subtitle": "Maktab, davomat, moliya va tizim sozlamalari",
+    "subtitle": "Markaz, davomat, moliya va tizim sozlamalari",
     "saved": "Saqlandi",
     "tabs": {
-      "location": "Maktab joylashuvi",
+      "location": "Markaz joylashuvi",
       "work": "Ish vaqti va jarimalar",
       "payments": "Toʻlovlar",
       "users": "Foydalanuvchilar",
@@ -615,7 +572,7 @@
       "branches": "Filiallar"
     },
     "location": {
-      "hint": "Xodimlar davomatini maktab joylashuviga nisbatan tekshirish uchun koordinata va radiusni kiriting. Maktabda turib “Hozirgi joylashuvimni olish” tugmasini bosing.",
+      "hint": "Xodimlar davomatini markaz joylashuviga nisbatan tekshirish uchun koordinata va radiusni kiriting. Markazda turib “Hozirgi joylashuvimni olish” tugmasini bosing.",
       "lat": "Kenglik (lat)",
       "lng": "Uzunlik (lng)",
       "radius": "Radius (metr)",
@@ -646,7 +603,8 @@
     "payments": {
       "dueDay": "Toʻlov muddati (oyning kuni)",
       "prefix": "Shartnoma prefiksi",
-      "hint": "Yangi shartnomalar shu prefiks bilan raqamlanadi. Qarz muddati har oyning belgilangan kunidan hisoblanadi."
+      "hint": "Kurs narxi tinglovchi guruhga yozilganda bitta hisob boʻlib yoziladi va bir yoʻla yoki boʻlib toʻlanadi. Muddat guruh boshlangan (yoki keyinroq yozilgan) kundan hisoblanadi; shundan keyin qarz “muddati oʻtgan” boʻladi.",
+      "dueDays": "Toʻlov muddati (guruh boshlanganidan keyin, kun)"
     },
     "users": {
       "deactivate": "Faolsizlantirish",
@@ -691,13 +649,13 @@
       "dark": "Tungi"
     },
     "branches": {
-      "hint": "Maktabning har bir filialini belgilang. Xodim davomatni faqat oʻz filiali hududida (yoki filial biriktirilmagan boʻlsa, istalgan filialda) qila oladi.",
+      "hint": "Markazning har bir filialini belgilang. Xodim davomatni faqat oʻz filiali hududida (yoki filial biriktirilmagan boʻlsa, istalgan filialda) qila oladi.",
       "add": "Filial qoʻshish",
       "edit": "Filialni tahrirlash",
       "delete": "Filialni oʻchirish",
       "deleted": "Filial oʻchirildi",
       "deleteConfirm": "“{{name}}” filialini oʻchirasizmi?",
-      "hasData": "Biriktirilgan: {{users}} xodim, {{classes}} sinf. Ularni qayerga koʻchiramiz?",
+      "hasData": "Biriktirilgan: {{users}} xodim, {{groups}} guruh. Ularni qayerga koʻchiramiz?",
       "moveTo": "Maʼlumotlarni koʻchirish",
       "detach": "Biriktirishni olib tashlash",
       "empty": "Filiallar yoʻq",
@@ -709,58 +667,14 @@
       "useMine": "Hozirgi joylashuvim",
       "pickHint": "Xaritani bosib joylashuvni belgilashingiz ham mumkin.",
       "employees": "Xodimlar",
-      "classes": "Sinflar",
       "assignHint": "Belgilanganlar shu filialga biriktiriladi.",
       "saved": "Filial saqlandi",
       "rules": "Davomat qoidalari",
       "enforce": "Filial radiusidan tashqarida davomatni rad etish",
       "enforceHint": "Oʻchiq boʻlsa, masofa yoziladi, lekin davomat rad etilmaydi (sinov uchun).",
-      "accuracy": "Maksimal GPS xatoligi (metr)"
+      "accuracy": "Maksimal GPS xatoligi (metr)",
+      "groups": "Guruhlar"
     }
-  },
-  "academics": {
-    "subtitle": "Fanlar, toʻgaraklar va repetitorlar",
-    "tabs": {
-      "subjects": "Fanlar",
-      "clubs": "Toʻgaraklar",
-      "tutors": "Repetitorlar"
-    },
-    "addSubject": "Fan qoʻshish",
-    "editSubject": "Fanni tahrirlash",
-    "addClub": "Toʻgarak qoʻshish",
-    "editClub": "Toʻgarakni tahrirlash",
-    "name": "Nomi",
-    "teachers": "Oʻqituvchilar soni",
-    "club": "Toʻgarak",
-    "leader": "Rahbar",
-    "fee": "Oylik narx",
-    "members": "Oʻquvchilar",
-    "saved": "Saqlandi",
-    "deleted": "Oʻchirildi",
-    "deleteConfirm": "“{{name}}” fanini oʻchirasizmi?",
-    "deleteClubConfirm": "“{{name}}” toʻgaragini oʻchirasizmi? Unga yozilgan {{count}} oʻquvchidan ham olib tashlanadi.",
-    "tutorsHint": "Repetitor — alohida fan boʻyicha individual dars beradigan xodim. Kartani bossangiz, batafsil maʼlumot ochiladi.",
-    "noTutors": "Repetitorlar yoʻq",
-    "search": "Qidirish...",
-    "stats": {
-      "teachers": "Oʻqituvchilar",
-      "members": "Toʻgaraklarga yozilganlar"
-    },
-    "whoTeaches": "Bu fanni kim oʻqitadi",
-    "teachersCount": "{{count}} oʻqituvchi",
-    "tutorsCount": "{{count}} repetitor",
-    "noTeacher": "Oʻqituvchi biriktirilmagan",
-    "noTeacherHint": "Bu fan uchun oʻqituvchi qoʻshing: xodim yaratishda shu fanni tanlang.",
-    "noSubjects": "Hali fanlar qoʻshilmagan",
-    "noClubs": "Hali toʻgaraklar qoʻshilmagan",
-    "noMatch": "Hech narsa topilmadi",
-    "clubMembers": "Yozilgan oʻquvchilar",
-    "membersShort": "oʻquvchi",
-    "feePerMonth": "{{fee}} / oy",
-    "free": "Bepul",
-    "noLeader": "Rahbar tayinlanmagan",
-    "noMembers": "Hali hech kim yozilmagan",
-    "noMembersHint": "Oʻquvchi kartasida toʻgarakni belgilang, shunda shu yerda koʻrinadi."
   },
   "profile": {
     "title": "Mening profilim",
@@ -838,9 +752,7 @@
       "OTHER": "Boshqa"
     },
     "audience": {
-      "ALL_PARENTS": "Barcha ota-onalar",
-      "CLASSES": "Tanlangan sinflar ota-onalari",
-      "BRANCH": "Filial ota-onalari",
+      "BRANCH": "Filial tinglovchilari",
       "DEBTORS": "Qarzdorlar",
       "STAFF": "Xodimlar",
       "NUMBERS": "Raqamlarni qoʻlda kiritish",
@@ -849,15 +761,18 @@
       "minOverdue": "Muddati kamida (kun) oʻtganlar",
       "staffAll": "Barcha xodimlar",
       "staffTeachers": "Oʻqituvchilar",
-      "staffTutors": "Repetitorlar",
       "numbersLabel": "Telefon raqamlar (probel, vergul yoki yangi qator bilan)",
-      "bothPhones": "Ikkala telefon raqamga yuborish (agar ikkinchisi bor boʻlsa)"
+      "bothPhones": "Ikkala telefon raqamga yuborish (agar ikkinchisi bor boʻlsa)",
+      "ALL_STUDENTS": "Barcha oʻqiyotgan tinglovchilar",
+      "ALL_STUDENTS_GRAD": "Tinglovchilar va bitiruvchilar",
+      "GROUPS": "Tanlangan guruhlar",
+      "includeGraduates": "Bitiruvchilarga ham yuborish"
     },
     "audienceCount": {
-      "CLASSES": "{{count}} ta sinf ota-onalari",
       "DEBTORS": "Qarzdorlar (≥ {{count}} kun)",
-      "STUDENTS": "{{count}} ta oʻquvchi ota-onasi",
-      "NUMBERS": "{{count}} ta raqam"
+      "STUDENTS": "{{count}} ta tinglovchi",
+      "NUMBERS": "{{count}} ta raqam",
+      "GROUPS": "{{count}} ta guruh"
     },
     "holidays": {
       "navruz": "Navroʻz",
@@ -934,11 +849,13 @@
       "add": "Shablon qoʻshish",
       "edit": "Shablonni tahrirlash",
       "saved": "Shablon saqlandi",
-      "deleteConfirm": "“{{name}}” shablonini oʻchirasizmi?"
+      "deleteConfirm": "“{{name}}” shablonini oʻchirasizmi?",
+      "deleted": "Oʻchirildi",
+      "name": "Nomi"
     },
     "auto": {
       "title": "Qarzdorlarga avtomatik eslatma",
-      "hint": "Yoqilsa, har kuni soat 10:00 da muddati oʻtgan qarzdorlarga tanlangan shablon yuboriladi. Bir oʻquvchiga takroran eslatma belgilangan kundan keyin ketadi.",
+      "hint": "Yoqilsa, har kuni soat 10:00 da muddati oʻtgan qarzdorlarga tanlangan shablon yuboriladi. Bir tinglovchiga takroran eslatma belgilangan kundan keyin ketadi.",
       "enable": "Avtomatik eslatmani yoqish",
       "minOverdue": "Muddati oʻtgan (kun) dan boshlab",
       "every": "Takror eslatma (kun)",
@@ -955,33 +872,8 @@
   "me": {
     "tabs": {
       "attendance": "Davomat",
-      "class": "Mening sinfim",
-      "classes": "Sinflarim ({{count}})",
-      "clubs": "Toʻgaraklarim",
-      "salary": "Oylik"
-    },
-    "class": {
-      "none": "Sizga sinf biriktirilmagan",
-      "noneHint": "Sinf rahbari etib tayinlanganingizda, sinf tarkibi shu yerda koʻrinadi. Maktab maʼmuriyatiga murojaat qiling.",
-      "switch": "Sinfni tanlash",
-      "students": "oʻquvchi",
-      "fill": "Toʻlganlik",
-      "contracts": "Imzolangan shartnomalar",
-      "unsigned": "Shartnomasi imzolanmagan",
-      "search": "Oʻquvchi, ota-ona yoki telefon boʻyicha...",
-      "allContracts": "Barcha shartnomalar",
-      "onlyUnsigned": "Imzolanmaganlar",
-      "copyPhones": "Telefonlarni nusxalash",
-      "boy": "Oʻgʻil bola",
-      "girl": "Qiz bola",
-      "age": "{{count}} yosh",
-      "add": "Oʻquvchi qoʻshish",
-      "addStudent": "{{name}} sinfiga oʻquvchi qoʻshish"
-    },
-    "clubs": {
-      "none": "Siz toʻgarak rahbari emassiz",
-      "noneHint": "Toʻgarak rahbari etib tayinlansangiz, yozilgan oʻquvchilar shu yerda koʻrinadi.",
-      "members": "{{count}} oʻquvchi"
+      "salary": "Oylik",
+      "groups": "Guruhlarim ({{count}})"
     },
     "salary": {
       "thisMonth": "Joriy oy",
@@ -991,6 +883,138 @@
       "adjustments": "Jarima va bonuslar (joriy oy)",
       "noAdjustments": "Bu oy jarima ham, bonus ham yoʻq",
       "history": "Oldingi oylar"
+    },
+    "group": {
+      "none": "Sizga guruh biriktirilmagan",
+      "noneHint": "Guruhga oʻqituvchi etib tayinlanganingizda, guruh tarkibi shu yerda koʻrinadi. Markaz maʼmuriyatiga murojaat qiling.",
+      "switch": "Guruhni tanlash",
+      "fill": "Toʻlganlik",
+      "contracts": "Imzolangan shartnomalar",
+      "unsigned": "Shartnomasi imzolanmagan",
+      "search": "Tinglovchi yoki telefon boʻyicha...",
+      "allContracts": "Barcha shartnomalar",
+      "onlyUnsigned": "Imzolanmaganlar",
+      "copyPhones": "Telefonlarni nusxalash",
+      "age": "{{count}} yosh",
+      "add": "Tinglovchi qoʻshish",
+      "addStudent": "{{name}} guruhiga tinglovchi qoʻshish"
+    }
+  },
+  "groups": {
+    "subtitle": "Kurs guruhlari, jadval va toʻlganlik · Jami: {{count}}",
+    "add": "Guruh ochish",
+    "edit": "Guruhni tahrirlash",
+    "created": "Guruh ochildi",
+    "updated": "Guruh yangilandi",
+    "deleted": "Guruh oʻchirildi",
+    "deleteConfirm": "“{{name}}” guruhini oʻchirasizmi? Faqat tinglovchisi yoʻq guruhni oʻchirish mumkin.",
+    "empty": "Hali guruhlar yoʻq",
+    "noMatch": "Mos guruh topilmadi",
+    "search": "Guruh, kurs yoki oʻqituvchi boʻyicha qidirish...",
+    "name": "Guruh nomi",
+    "course": "Kurs",
+    "capacity": "Sigʻim",
+    "teacher": "Oʻqituvchi",
+    "noTeacher": "Oʻqituvchi tayinlanmagan",
+    "startDate": "Boshlanish sanasi",
+    "endDate": "Tugash sanasi",
+    "period": "Oʻqish muddati",
+    "endByCourse": "Tugash sanasini kurs davomiyligi boʻyicha qoʻyish ({{count}} oy)",
+    "endAfterStart": "Tugash boshlanishdan keyin boʻlsin",
+    "courseLockedHint": "Guruhda tinglovchilar bor: kursni oʻzgartirib boʻlmaydi.",
+    "days": "Dars kunlari",
+    "daysRequired": "Kamida bitta kunni tanlang",
+    "timeStart": "Boshlanishi",
+    "timeEnd": "Tugashi",
+    "room": "Xona",
+    "daysShort": {
+      "1": "Du",
+      "2": "Se",
+      "3": "Cho",
+      "4": "Pa",
+      "5": "Ju",
+      "6": "Sha",
+      "7": "Ya"
+    },
+    "status": "Holat",
+    "allStatuses": "Barchasi",
+    "statuses": {
+      "ACTIVE": "Davom etmoqda",
+      "PLANNED": "Rejada",
+      "FINISHED": "Tugagan"
+    },
+    "statusesPlural": {
+      "ACTIVE": "Davom etayotganlar",
+      "PLANNED": "Rejadagilar",
+      "FINISHED": "Tugaganlar"
+    },
+    "onlyFree": "Boʻsh oʻrin borlari",
+    "sort": {
+      "start": "Boshlanish sanasi",
+      "fill": "Toʻlganlik",
+      "free": "Boʻsh oʻrin"
+    },
+    "fill": {
+      "open": "Boʻsh oʻrin bor",
+      "almost": "Deyarli toʻlgan",
+      "full": "Toʻlgan"
+    },
+    "free": "{{count}} boʻsh oʻrin",
+    "freeShort": "{{count}} boʻsh",
+    "full": "Toʻlgan",
+    "graduatedShort": "{{count}} bitirdi",
+    "students": "Tinglovchilar",
+    "studentsShort": "tinglovchi",
+    "men": "{{count}} erkak",
+    "women": "{{count}} ayol",
+    "roster": "Guruh tarkibi",
+    "openStudents": "Tinglovchilar sahifasi",
+    "emptyRoster": "Bu guruhda tinglovchilar yoʻq",
+    "sectionCount": "{{groups}} guruh · {{students}} tinglovchi",
+    "stats": {
+      "active": "Davom etayotgan guruhlar",
+      "planned": "Rejada: {{count}}",
+      "students": "Tinglovchilar",
+      "ofCapacity": "{{capacity}} oʻrindan",
+      "fill": "Toʻlganlik",
+      "free": "Boʻsh oʻrinlar",
+      "freeHint": "Davom etayotgan va rejadagi guruhlarda"
+    }
+  },
+  "courses": {
+    "subtitle": "Kasb kurslari: narx, davomiylik, oʻqituvchilar va guruhlar",
+    "add": "Kurs qoʻshish",
+    "edit": "Kursni tahrirlash",
+    "saved": "Saqlandi",
+    "deleted": "Oʻchirildi",
+    "deleteConfirm": "“{{name}}” kursini oʻchirasizmi?",
+    "empty": "Hali kurslar qoʻshilmagan",
+    "noMatch": "Hech narsa topilmadi",
+    "search": "Kurs qidirish...",
+    "details": "Batafsil",
+    "name": "Kurs nomi",
+    "namePlaceholder": "Masalan: Tikuvchilik",
+    "duration": "Davomiyligi (oy)",
+    "price": "Kurs narxi",
+    "description": "Qisqacha tavsif",
+    "priceHint": "Yangi narx faqat yangi yoziladigan tinglovchilarga qoʻllanadi: yozilganlar kelishilgan narxda qoladi.",
+    "months_one": "{{count}} oy",
+    "months_other": "{{count}} oy",
+    "groupsRunning": "Guruhlar",
+    "studying": "Oʻqimoqda",
+    "graduates": "Bitirgan",
+    "graduatesCount": "{{count}} bitiruvchi",
+    "teachers": "Oʻqituvchilar",
+    "teachersCount": "{{count}} oʻqituvchi",
+    "noTeacher": "Oʻqituvchi biriktirilmagan",
+    "noTeacherHint": "Xodim qoʻshishda mutaxassislik sifatida shu kursni tanlang.",
+    "noGroups": "Bu kurs boʻyicha guruh ochilmagan",
+    "openGroups": "Guruhlar sahifasi",
+    "stats": {
+      "courses": "Kurslar",
+      "running": "Davom etayotgan guruhlar",
+      "studying": "Oʻqiyotganlar",
+      "graduates": "Bitiruvchilar"
     }
   }
 }

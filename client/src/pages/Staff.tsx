@@ -25,18 +25,18 @@ export default function Staff() {
   const [role, setRole] = useState('');
   const [active, setActive] = useState('');
   const [page, setPage] = useState(1);
-  const [drawer, setDrawer] = useState<{ open: boolean; member: StaffMember | null; kind: 'teacher' | 'tutor' | 'staff' }>({ open: false, member: null, kind: 'staff' });
+  const [drawer, setDrawer] = useState<{ open: boolean; member: StaffMember | null; kind: 'teacher' | 'staff' }>({ open: false, member: null, kind: 'staff' });
   const [type, setType] = useState('');
   const [secret, setSecret] = useState<{ name: string; phone: string; password: string } | null>(null);
   const [resetTarget, setResetTarget] = useState<StaffMember | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<StaffMember | null>(null);
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
-  // /staff?add=tutor|teacher opens the matching add drawer (used by the Academics page)
+  // /staff?add=teacher opens the matching add drawer (used by the Courses page)
   const [params, setParams] = useSearchParams();
   useEffect(() => {
     const k = params.get('add');
-    if (k === 'tutor' || k === 'teacher' || k === 'staff') {
+    if (k === 'teacher' || k === 'staff') {
       setDrawer({ open: true, member: null, kind: k });
       setParams({}, { replace: true });
     }
@@ -46,7 +46,7 @@ export default function Staff() {
   const branchName = new Map((branches.data ?? []).map((b) => [b.id, b.name]));
   const list = useQuery({
     queryKey: ['staff', q, role, active, type, page],
-    queryFn: () => schoolApi.staff({ q, role, active, teacher: type === 'teacher' ? 'true' : undefined, tutor: type === 'tutor' ? 'true' : undefined, page, limit: LIMIT }),
+    queryFn: () => schoolApi.staff({ q, role, active, teacher: type === 'teacher' ? 'true' : undefined, page, limit: LIMIT }),
     placeholderData: keepPreviousData,
   });
 
@@ -65,7 +65,7 @@ export default function Staff() {
       setDeleteTarget(null);
       toast(t('staff.deleted'));
       void qc.invalidateQueries({ queryKey: ['staff'] });
-      void qc.invalidateQueries({ queryKey: ['classes'] });
+      void qc.invalidateQueries({ queryKey: ['groups'] });
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
   });
@@ -102,7 +102,6 @@ export default function Staff() {
           <Select aria-label={t('staff.type')} value={type} onChange={(e) => { setType(e.target.value); setPage(1); }}>
             <option value="">{t('staff.allTypes')}</option>
             <option value="teacher">{t('staff.teachersOnly')}</option>
-            <option value="tutor">{t('staff.tutorsOnly')}</option>
           </Select>
         </div>
         <div className="w-[calc(50%-0.375rem)] sm:w-44">
@@ -162,7 +161,7 @@ export default function Staff() {
                   <Td>
                     {canManage(m) && (
                       <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                        <button aria-label={t('staff.edit')} onClick={() => setDrawer({ open: true, member: m, kind: m.isTeacher ? 'teacher' : m.isTutor ? 'tutor' : 'staff' })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
+                        <button aria-label={t('staff.edit')} onClick={() => setDrawer({ open: true, member: m, kind: m.isTeacher ? 'teacher' : 'staff' })} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><Pencil className="h-4 w-4" /></button>
                         <button aria-label={t('staff.resetPassword')} onClick={() => setResetTarget(m)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted"><KeyRound className="h-4 w-4" /></button>
                         {m.id !== user?.id && m.role !== 'DIRECTOR' && <button aria-label={t('staff.delete')} onClick={() => setDeleteTarget(m)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted hover:text-danger"><Trash2 className="h-4 w-4" /></button>}
                       </div>

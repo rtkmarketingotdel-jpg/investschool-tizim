@@ -1,14 +1,16 @@
 import bcrypt from 'bcryptjs';
 import { randomInt } from 'node:crypto';
 import { env } from '../env.js';
-import type { Contract } from '../data/types.js';
+import type { Contract, Student } from '../data/types.js';
 import { ApiError } from '../lib/errors.js';
-import { classRepo } from '../repositories/classRepo.js';
+import { chargeRepo } from '../repositories/financeRepo.js';
+import { courseRepo } from '../repositories/courseRepo.js';
+import { groupRepo } from '../repositories/groupRepo.js';
 import { contractRepo, templateRepo } from '../repositories/contractRepo.js';
 import { audit, notifyRoles } from '../repositories/notificationRepo.js';
 import { studentRepo } from '../repositories/studentRepo.js';
 import { brand } from '../brand.config.js';
-import { contractPdf, contractValues, parseBlocks, renderTemplate } from './pdf.js';
+import { contractPdf, contractValues, parseBlocks, renderTemplate, type ContractContext } from './pdf.js';
 import { sendSms, smsConfigured } from './sms.js';
 import { sendTelegram } from './telegram.js';
 import { contractSignedMessage, otpMessage } from './telegramText.js';
@@ -16,15 +18,22 @@ import { contractSignedMessage, otpMessage } from './telegramText.js';
 const OTP_TTL_MS = 5 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
+/** Course, group and due date of the student's enrolment (shown in the contract and its create form). */
+export async function enrolmentContext(student: Student): Promise<ContractContext & { group: Awaited<ReturnType<typeof groupRepo.findById>> }> {
+  const group = student.groupId ? await groupRepo.findById(student.groupId) : null;
+  const course = group ? await courseRepo.findById(group.courseId) : null;
+  const [bill] = await chargeRepo.byStudent(student.id);
+  return { group, groupName: group?.name ?? null, courseName: course?.name ?? null, courseDuration: course?.durationMonths ?? null, paymentDueDate: bill?.dueDate ?? null };
+}
+
 async function context(c: Contract) {
   const [student, template] = await Promise.all([studentRepo.findById(c.studentId), templateRepo.findById(c.templateId)]);
   if (!student || !template) throw new ApiError(404, 'NOT_FOUND');
   if (c.snapshot) return { student, template: { body: c.snapshot.body }, values: c.snapshot.values };
-  const cls = student.classId ? await classRepo.findById(student.classId) : null;
-  return { student, template: { body: template.body }, values: contractValues(c, student, cls?.name ?? null, c.createdAt) };
+  return { student, template: { body: template.body }, values: contractValues(c, student, await enrolmentContext(student), c.createdAt) };
 }
 
-/** Freezes the contract text when it is sent to the parent. */
+/** Freezes the contract text when it is sent to the trainee. */
 export async function freezeContract(c: Contract) {
   const { template, values } = await context(c);
   return contractRepo.update(c.id, { snapshot: { body: template.body, values }, status: 'SENT' });
@@ -46,12 +55,12 @@ export async function requestOtp(c: Contract) {
   if (c.otpExpiresAt && c.otpExpiresAt.getTime() - OTP_TTL_MS + 30_000 > Date.now()) throw new ApiError(429, 'OTP_TOO_SOON');
   const code = String(randomInt(100000, 1000000));
   const { student } = await context(c);
-  const sms = smsConfigured() && (await sendSms(student.parentPhone, `${brand.name}: ${code}`));
+  const sms = smsConfigured() && (await sendSms(student.phone, `${brand.name}: ${code}`));
   await contractRepo.update(c.id, {
     otpHash: await bcrypt.hash(code, 8), otpExpiresAt: new Date(Date.now() + OTP_TTL_MS), otpAttempts: 0,
     otpDemoCode: sms ? null : env.demoMode ? code : null,
   });
-  if (!sms && !env.demoMode) throw new ApiError(502, 'SMS_DELIVERY_FAILED'); // outside demo mode the code must only reach the parent
+  if (!sms && !env.demoMode) throw new ApiError(502, 'SMS_DELIVERY_FAILED'); // outside demo mode the code must only reach the trainee
   if (!sms) {
     // DEMO mode: staff read the code from the contracts table / bell and the Telegram group.
     await notifyRoles(['DIRECTOR', 'MANAGER', 'ACCOUNTANT'], 'notif.otp', { number: c.number, code }, '/finance/contracts');
@@ -70,7 +79,7 @@ export async function signContract(c: Contract, code: string, meta: { ip: string
   if (!(await bcrypt.compare(code, c.otpHash))) throw new ApiError(400, 'OTP_INVALID');
   const { student } = await context(c);
   const signed = (await contractRepo.update(c.id, {
-    status: 'SIGNED', signedAt: new Date(), signedIp: meta.ip, signedUserAgent: meta.userAgent, signerPhone: student.parentPhone,
+    status: 'SIGNED', signedAt: new Date(), signedIp: meta.ip, signedUserAgent: meta.userAgent, signerPhone: student.phone,
     otpHash: null, otpExpiresAt: null, otpDemoCode: null,
   }))!;
   await audit(null, 'contract.sign', 'contract', c.id, { ip: meta.ip });

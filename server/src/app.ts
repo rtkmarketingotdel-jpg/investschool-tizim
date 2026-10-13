@@ -9,7 +9,7 @@ import { branchesRouter } from './routes/branches.js';
 import { smsRouter } from './routes/sms.js';
 import { profileRouter } from './routes/profile.js';
 import { catalogRouter } from './routes/catalog.js';
-import { classesRouter } from './routes/classes.js';
+import { groupsRouter } from './routes/groups.js';
 import { staffRouter } from './routes/staff.js';
 import { studentsRouter } from './routes/students.js';
 import { contractsRouter } from './routes/contracts.js';
@@ -35,7 +35,7 @@ export function createApp() {
   app.use('/api/me', meRouter);
   app.use('/api/attendance', attendanceRouter);
   app.use('/api/students', studentsRouter);
-  app.use('/api/classes', classesRouter);
+  app.use('/api/groups', groupsRouter);
   app.use('/api/staff', staffRouter);
   app.use('/api/catalog', catalogRouter);
   app.use('/api/profile', profileRouter);

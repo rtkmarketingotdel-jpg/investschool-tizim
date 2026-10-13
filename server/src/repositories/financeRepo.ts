@@ -11,13 +11,14 @@ export const chargeRepo = {
   async all() {
     return charges;
   },
-  async exists(studentId: string, period: string) {
-    return charges.some((c) => c.studentId === studentId && c.period === period);
-  },
-  async create(data: Omit<StudentCharge, 'id'>) {
-    const rec = { id: nid('ch'), ...data };
+  async create(data: Omit<StudentCharge, 'id' | 'createdAt'>) {
+    const rec = { id: nid('ch'), createdAt: new Date(), ...data };
     charges.push(rec);
     return rec;
+  },
+  async update(id: string, patch: Partial<Omit<StudentCharge, 'id' | 'studentId'>>) {
+    const rec = charges.find((c) => c.id === id);
+    return rec ? Object.assign(rec, patch) : null;
   },
 };
 

@@ -19,25 +19,24 @@ const schema = z.object({
   phone: z.string().regex(/^\+998\d{9}$/, 'errors.phone'),
   role: z.enum(['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'TEACHER']),
   position: z.string().trim().max(120, 'errors.tooLong'),
-  subject: z.string(),
-  customSubject: z.string(),
-  homeroomClassId: z.string(),
+  specialty: z.string(),
+  customSpecialty: z.string(),
   branchId: z.string(),
   baseSalary: z.number({ invalid_type_error: 'errors.required' }).int().min(0),
   isActive: z.boolean(),
 });
 type FormValues = z.infer<typeof schema>;
 
-const empty: FormValues = { fullName: '', phone: '', role: 'TEACHER', position: '', subject: '', customSubject: '', homeroomClassId: '', branchId: '', baseSalary: 4_000_000, isActive: true };
+const empty: FormValues = { fullName: '', phone: '', role: 'TEACHER', position: '', specialty: '', customSpecialty: '', branchId: '', baseSalary: 4_000_000, isActive: true };
 const OTHER = '__other';
-type StaffType = 'manager' | 'accountant' | 'teacher' | 'tutor';
-const toType = (k: string): StaffType => (k === 'teacher' || k === 'tutor' || k === 'accountant' ? k : 'manager');
+type StaffType = 'manager' | 'accountant' | 'teacher';
+const toType = (k: string): StaffType => (k === 'teacher' || k === 'accountant' ? k : 'manager');
 
 interface Props {
   open: boolean;
   member: StaffMember | null;
-  /** What "add" creates: a teacher (subject-based) or any other employee. */
-  kind: 'teacher' | 'tutor' | 'staff';
+  /** What "add" creates: a teacher (course-based) or any other employee. */
+  kind: 'teacher' | 'staff';
   onClose: () => void;
   onCreated: (creds: { name: string; phone: string; password: string }) => void;
 }
@@ -49,58 +48,57 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
   const qc = useQueryClient();
   // The employee type can be changed at any time (e.g. a plain employee becomes a teacher): the cabinet follows it.
   const [type, setType] = useState<StaffType>(toType(kind));
-  const [clubIds, setClubIds] = useState<string[]>([]);
+  const [groupIds, setGroupIds] = useState<string[]>([]);
   const isTeacher = type === 'teacher';
-  const isTutor = type === 'tutor';
-  const hasSubject = isTeacher || isTutor;
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState(false);
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open && isTeacher });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups, enabled: open && isTeacher });
   const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches, enabled: open });
-  const clubsQ = useQuery({ queryKey: ['clubs'], queryFn: schoolApi.clubs, enabled: open && isTutor });
-  const subjectsQ = useQuery({ queryKey: ['subjects'], queryFn: schoolApi.subjects, enabled: open && hasSubject });
-  const subjectNames = (subjectsQ.data ?? []).map((s) => s.name);
+  const coursesQ = useQuery({ queryKey: ['courses'], queryFn: schoolApi.courses, enabled: open && isTeacher });
+  const courseNames = (coursesQ.data ?? []).map((c) => c.name);
+  // finished groups are history: offer only the ones the teacher still leads
+  const groupOptions = (groups.data ?? []).filter((g) => g.status !== 'FINISHED' || groupIds.includes(g.id));
 
   const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: empty });
   useEffect(() => {
     if (!open) return;
     setCopied(false);
-    setType(member ? (member.isTeacher ? 'teacher' : member.isTutor ? 'tutor' : member.role === 'ACCOUNTANT' ? 'accountant' : 'manager') : toType(kind));
-    setClubIds([]);
+    setType(member ? (member.isTeacher ? 'teacher' : member.role === 'ACCOUNTANT' ? 'accountant' : 'manager') : toType(kind));
+    setGroupIds([]);
     setPassword(member ? '' : generatePassword());
     if (!member) return reset(empty);
-    const known = member.subject && (subjectsQ.data ?? []).some((x) => x.name === member.subject);
+    const known = member.specialty && (coursesQ.data ?? []).some((x) => x.name === member.specialty);
     reset({
       fullName: member.fullName, phone: member.phone, role: member.role, position: member.position,
-      subject: member.subject ? (known ? member.subject : OTHER) : '', customSubject: member.subject && !known ? member.subject : '',
-      homeroomClassId: '', branchId: member.branchId ?? '', baseSalary: member.baseSalary, isActive: member.isActive,
+      specialty: member.specialty ? (known ? member.specialty : OTHER) : '', customSpecialty: member.specialty && !known ? member.specialty : '',
+      branchId: member.branchId ?? '', baseSalary: member.baseSalary, isActive: member.isActive,
     });
-  }, [open, member, kind, reset, subjectsQ.data]);
+  }, [open, member, kind, reset, coursesQ.data]);
 
   useEffect(() => {
-    if (open && member && clubsQ.data) setClubIds(clubsQ.data.filter((c) => c.teacherId === member.id).map((c) => c.id));
-  }, [open, member, clubsQ.data]);
+    if (open && member && groups.data) setGroupIds(groups.data.filter((g) => g.teacherId === member.id).map((g) => g.id));
+  }, [open, member, groups.data]);
 
-  const subject = watch('subject');
+  const specialty = watch('specialty');
   const passwordError = !member && password.length > 0 && password.length < 8;
 
   const save = useMutation({
     mutationFn: async (v: FormValues) => {
-      const subj = hasSubject ? (v.subject === OTHER ? v.customSubject.trim() : v.subject) || null : null;
+      const spec = isTeacher ? (v.specialty === OTHER ? v.customSpecialty.trim() : v.specialty) || null : null;
       const body = {
         fullName: v.fullName, phone: v.phone, role: member?.role === 'DIRECTOR' ? ('DIRECTOR' as Role) : type === 'manager' ? ('MANAGER' as Role) : type === 'accountant' ? ('ACCOUNTANT' as Role) : ('TEACHER' as Role), baseSalary: v.baseSalary, isActive: v.isActive,
-        isTeacher, isTutor, subject: subj,
-        position: subj && isTeacher ? `${subj} oʻqituvchisi` : subj && isTutor ? `${subj} repetitori` : v.position,
-        homeroomClassId: isTeacher && v.homeroomClassId ? v.homeroomClassId : null,
+        isTeacher, specialty: spec,
+        position: spec ? `${spec} oʻqituvchisi` : v.position,
         branchId: v.branchId || null,
-        ...(isTutor ? { clubIds } : {}),
+        // the list is known only once the groups are loaded; without it the server keeps the current assignment
+        ...(isTeacher && groups.data ? { groupIds } : {}),
       };
       if (member) return schoolApi.updateStaff(member.id, body).then(() => null);
       return schoolApi.createStaff({ ...body, password: password || undefined });
     },
     onSuccess: (res, v) => {
       void qc.invalidateQueries({ queryKey: ['staff'] });
-      void qc.invalidateQueries({ queryKey: ['classes'] });
+      void qc.invalidateQueries({ queryKey: ['groups'] });
       if (res) onCreated({ name: v.fullName, phone: v.phone, password: res.tempPassword });
       else toast(t('staff.updated'));
       onClose();
@@ -110,8 +108,8 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
 
   const err = (k: keyof FormValues) => (errors[k]?.message ? t(errors[k]!.message as string) : undefined);
   const locked = !!member && user?.role !== 'DIRECTOR' && member.role === 'DIRECTOR';
-  const needsSubject = hasSubject && (!subject || (subject === OTHER && !watch('customSubject').trim()));
-  const needsPosition = !hasSubject && !watch('position').trim();
+  const needsSpecialty = isTeacher && (!specialty || (specialty === OTHER && !watch('customSpecialty').trim()));
+  const needsPosition = !isTeacher && !watch('position').trim();
   const title = member ? t('staff.edit') : t('staff.add');
 
   return (
@@ -125,39 +123,34 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
             <option value="teacher">{t('staff.types.teacher')}</option>
             <option value="manager">{t('staff.types.manager')}</option>
             <option value="accountant">{t('staff.types.accountant')}</option>
-            <option value="tutor">{t('staff.types.tutor')}</option>
           </Select>
         )}
 
-        {hasSubject ? (
+        {isTeacher ? (
           <>
-            <Select label={`${t('staff.subject')} *`} {...register('subject')}>
+            <Select label={`${t('staff.specialty')} *`} {...register('specialty')}>
               <option value="">—</option>
-              {subjectNames.map((s) => <option key={s} value={s}>{s}</option>)}
-              <option value={OTHER}>{t('staff.otherSubject')}</option>
+              {courseNames.map((c) => <option key={c} value={c}>{c}</option>)}
+              <option value={OTHER}>{t('staff.otherSpecialty')}</option>
             </Select>
-            {subject === OTHER && <Input label={t('staff.customSubject')} {...register('customSubject')} />}
-            {isTutor && (
-              <div>
-                <span className="mb-1.5 block text-sm">{t('staff.tutorClubs')}</span>
-                <div className="flex flex-wrap gap-2">
-                  {(clubsQ.data ?? []).map((c) => {
-                    const on = clubIds.includes(c.id);
-                    return (
-                      <button key={c.id} type="button" aria-pressed={on} onClick={() => setClubIds(on ? clubIds.filter((x) => x !== c.id) : [...clubIds, c.id])}
-                        className={`rounded-full border px-4 py-2 text-sm transition ${on ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text-muted hover:bg-surface-muted'}`}>
-                        {c.name}
-                      </button>
-                    );
-                  })}
-                  {clubsQ.data?.length === 0 && <p className="text-sm text-text-muted">{t('staff.noClubs')}</p>}
-                </div>
+            {specialty === OTHER && <Input label={t('staff.customSpecialty')} {...register('customSpecialty')} />}
+            <div>
+              <span className="mb-1.5 block text-sm">{t('staff.groupsLed')}</span>
+              <div className="flex flex-wrap gap-2">
+                {groupOptions.map((g) => {
+                  const on = groupIds.includes(g.id);
+                  const taken = !on && g.teacherId && g.teacherId !== member?.id ? g.teacherName : null;
+                  return (
+                    <button key={g.id} type="button" aria-pressed={on} title={taken ? t('staff.groupTakenBy', { name: taken }) : g.courseName} onClick={() => setGroupIds(on ? groupIds.filter((x) => x !== g.id) : [...groupIds, g.id])}
+                      className={`rounded-full border px-4 py-2 text-sm transition ${on ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text-muted hover:bg-surface-muted'}`}>
+                      {g.name}{taken ? ' *' : ''}
+                    </button>
+                  );
+                })}
+                {groups.data && groupOptions.length === 0 && <p className="text-sm text-text-muted">{t('staff.noGroups')}</p>}
               </div>
-            )}
-            {isTeacher && <Select label={t('staff.homeroom')} {...register('homeroomClassId')}>
-              <option value="">{t('staff.noHomeroom')}</option>
-              {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}{c.teacherName ? ` · ${c.teacherName}` : ''}</option>)}
-            </Select>}
+              <p className="mt-1.5 text-xs text-text-muted">{t('staff.groupsLedHint')}</p>
+            </div>
           </>
         ) : (
           <Input label={t('staff.position')} error={err('position')} {...register('position')} />
@@ -188,7 +181,7 @@ export function StaffDrawer({ open, member, kind, onClose, onCreated }: Props) {
 
         <div className="flex gap-3 pt-4">
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">{t('common.cancel')}</Button>
-          <Button type="submit" loading={save.isPending} disabled={locked || needsSubject || needsPosition || passwordError} className="flex-1">{t('common.save')}</Button>
+          <Button type="submit" loading={save.isPending} disabled={locked || needsSpecialty || needsPosition || passwordError} className="flex-1">{t('common.save')}</Button>
         </div>
       </form>
     </Drawer>

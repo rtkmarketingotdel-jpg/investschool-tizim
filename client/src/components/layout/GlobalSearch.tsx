@@ -53,7 +53,7 @@ export function GlobalSearch() {
             <button key={x.id} onClick={() => go(`/students/${x.id}`)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-surface-muted">
               <GraduationCap className="h-4 w-4 text-text-muted" />
               <span className="flex-1 truncate">{x.fullName}</span>
-              <span className="text-xs text-text-muted">{x.className}</span>
+              <span className="text-xs text-text-muted">{x.groupName}</span>
             </button>
           ))}
           {st.map((x) => (

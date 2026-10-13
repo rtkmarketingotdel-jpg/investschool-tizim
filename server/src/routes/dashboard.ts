@@ -5,7 +5,8 @@ import { toLocalDate } from '../lib/date.js';
 import { addMonths } from '../lib/period.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { attendanceRepo } from '../repositories/attendanceRepo.js';
-import { classRepo } from '../repositories/classRepo.js';
+import { courseRepo } from '../repositories/courseRepo.js';
+import { groupRepo, groupStatus } from '../repositories/groupRepo.js';
 import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
 import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
@@ -21,15 +22,25 @@ dashboardRouter.get('/', async (req, res, next) => {
     const seesAttendance = role === 'DIRECTOR' || role === 'MANAGER';
     const today = toLocalDate();
     const period = today.slice(0, 7);
+    const groupsById = new Map((await groupRepo.list()).map((g) => [g.id, g]));
 
     const active = students.filter((s) => s.status === 'ACTIVE');
     const out: Record<string, unknown> = {
-      students: { active: active.length, newThisMonth: students.filter((s) => s.status !== 'LEFT' && s.enrolledAt.startsWith(period)).length },
+      students: {
+        active: active.length,
+        newThisMonth: students.filter((s) => s.status !== 'LEFT' && s.enrolledAt.startsWith(period)).length,
+        graduatedThisMonth: students.filter((s) => s.status === 'GRADUATED' && (s.groupId ? groupsById.get(s.groupId)?.endDate.startsWith(period) : false)).length,
+      },
     };
 
+    // running and upcoming groups: how full they are (finished groups no longer take trainees)
     const occ = await studentRepo.occupancy();
-    const classFill = (await classRepo.list()).map((c) => ({ id: c.id, name: c.name, count: occ.get(c.id) ?? 0, capacity: c.capacity }));
-    out.classFill = { items: classFill, freeSeats: classFill.reduce((n, c) => n + Math.max(0, c.capacity - c.count), 0) };
+    const courseName = new Map((await courseRepo.list()).map((c) => [c.id, c.name]));
+    const groupFill = [...groupsById.values()]
+      .filter((g) => groupStatus(g, today) !== 'FINISHED')
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))
+      .map((g) => ({ id: g.id, name: g.name, courseName: courseName.get(g.courseId) ?? '—', status: groupStatus(g, today), startDate: g.startDate, count: occ.get(g.id) ?? 0, capacity: g.capacity }));
+    out.groupFill = { items: groupFill, freeSeats: groupFill.reduce((n, g) => n + Math.max(0, g.capacity - g.count), 0) };
 
     if (seesAttendance) {
       const users = (await userRepo.list()).filter((u) => u.isActive && u.role !== 'DIRECTOR');
@@ -56,7 +67,8 @@ dashboardRouter.get('/', async (req, res, next) => {
     if (seesFinance) {
       const [charges, payments, debts] = await Promise.all([chargeRepo.all(), paymentRepo.all(), debtMap()]);
       const factOf = (p: string) => payments.filter((x) => toLocalDate(x.paidAt).startsWith(p)).reduce((s, x) => s + x.amount, 0);
-      const planOf = (p: string) => charges.filter((c) => c.period === p).reduce((s, c) => s + c.amount, 0);
+      // "sold": course bills opened in the month (enrolments), against the money actually received
+      const planOf = (p: string) => charges.filter((c) => toLocalDate(c.createdAt).startsWith(p)).reduce((s, c) => s + c.amount, 0);
       const fact = factOf(period);
       const prev = factOf(addMonths(period, -1));
       out.revenue = { fact, plan: planOf(period), changePct: prev > 0 ? Math.round(((fact - prev) / prev) * 100) : null };
@@ -69,7 +81,7 @@ dashboardRouter.get('/', async (req, res, next) => {
       out.topDebtors = await Promise.all(
         debtors.sort((a, b) => b[1].debt - a[1].debt).slice(0, 5).map(async ([id, d]) => {
           const s = (await studentRepo.findById(id))!;
-          return { studentId: id, name: fullName(s), className: s.classId ? ((await classRepo.findById(s.classId))?.name ?? null) : null, debt: d.debt, overdueDays: d.overdueDays };
+          return { studentId: id, name: fullName(s), groupName: s.groupId ? (groupsById.get(s.groupId)?.name ?? null) : null, debt: d.debt, overdueDays: d.overdueDays };
         }),
       );
     }

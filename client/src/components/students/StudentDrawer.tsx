@@ -9,9 +9,9 @@ import { DISTRICTS } from '@/lib/constants';
 import { errorCode } from '@/lib/api';
 import { schoolApi, type Student, type StudentInput } from '@/lib/schoolApi';
 import { todayLocal } from '@/lib/dates';
-import { cn } from '@/lib/cn';
+import { formatMoney } from '@/lib/format';
 import { Button, Drawer, Input, Select, useToast } from '../ui';
-import { Checkbox, FormSection, Textarea } from '../FormBits';
+import { FormSection, Textarea } from '../FormBits';
 import { PhoneInput } from '../PhoneInput';
 
 const phone = z.string().regex(/^\+998\d{9}$/, 'errors.phone');
@@ -21,46 +21,49 @@ const schema = z.object({
   middleName: z.string().max(60, 'errors.tooLong'),
   birthDate: z.string(),
   gender: z.enum(['MALE', 'FEMALE']),
-  classId: z.string(),
-  parentName: z.string().trim().min(1, 'errors.required').max(120, 'errors.tooLong'),
-  parentPhone: phone,
-  parentPhone2: z.string().refine((v) => v === '' || /^\+998\d{9}$/.test(v), 'errors.phone'),
+  phone,
+  phone2: z.string().refine((v) => v === '' || /^\+998\d{9}$/.test(v), 'errors.phone'),
+  passport: z.string().refine((v) => v.trim() === '' || /^[A-Za-z]{2}\s?\d{7}$/.test(v.trim()), 'errors.passport'),
+  pinfl: z.string().refine((v) => v.trim() === '' || /^\d{14}$/.test(v.trim()), 'errors.pinfl'),
   district: z.string(),
   address: z.string().max(500, 'errors.tooLong'),
-  isBoarding: z.boolean(),
-  clubs: z.array(z.string()),
-  monthlyFee: z.number({ invalid_type_error: 'errors.required' }).int().min(0),
+  courseId: z.string(),
+  groupId: z.string(),
+  coursePrice: z.number({ invalid_type_error: 'errors.required' }).int().min(0),
   discountPercent: z.number({ invalid_type_error: 'errors.required' }).int().min(0).max(100),
-  status: z.enum(['ACTIVE', 'TRIAL', 'LEFT']),
+  status: z.enum(['ACTIVE', 'GRADUATED', 'LEFT']),
   enrolledAt: z.string().min(1, 'errors.required'),
   notes: z.string().max(500, 'errors.tooLong'),
 });
 type FormValues = z.infer<typeof schema>;
 
 const empty = (): FormValues => ({
-  lastName: '', firstName: '', middleName: '', birthDate: '', gender: 'MALE', classId: '',
-  parentName: '', parentPhone: '', parentPhone2: '', district: '', address: '', isBoarding: false,
-  clubs: [], monthlyFee: 3_000_000, discountPercent: 0, status: 'ACTIVE', enrolledAt: todayLocal(), notes: '',
+  lastName: '', firstName: '', middleName: '', birthDate: '', gender: 'MALE', phone: '', phone2: '', passport: '', pinfl: '',
+  district: '', address: '', courseId: '', groupId: '', coursePrice: 0, discountPercent: 0, status: 'ACTIVE', enrolledAt: todayLocal(), notes: '',
 });
 
 const fromStudent = (s: Student): FormValues => ({
-  lastName: s.lastName, firstName: s.firstName, middleName: s.middleName ?? '', birthDate: s.birthDate ?? '',
-  gender: s.gender, classId: s.classId ?? '', parentName: s.parentName, parentPhone: s.parentPhone,
-  parentPhone2: s.parentPhone2 ?? '', district: s.district ?? '', address: s.address ?? '', isBoarding: s.isBoarding,
-  clubs: s.clubs, monthlyFee: s.monthlyFee, discountPercent: s.discountPercent, status: s.status,
+  lastName: s.lastName, firstName: s.firstName, middleName: s.middleName ?? '', birthDate: s.birthDate ?? '', gender: s.gender,
+  phone: s.phone, phone2: s.phone2 ?? '', passport: s.passport ?? '', pinfl: s.pinfl ?? '', district: s.district ?? '', address: s.address ?? '',
+  courseId: s.courseId ?? '', groupId: s.groupId ?? '', coursePrice: s.coursePrice, discountPercent: s.discountPercent, status: s.status,
   enrolledAt: s.enrolledAt, notes: s.notes ?? '',
 });
 
-const toInput = (v: FormValues): StudentInput => ({
-  ...v,
-  middleName: v.middleName || null,
-  birthDate: v.birthDate || null,
-  classId: v.classId || null,
-  parentPhone2: v.parentPhone2 || null,
-  district: v.district || null,
-  address: v.address || null,
-  notes: v.notes || null,
-});
+const toInput = ({ courseId: _course, ...v }: FormValues): StudentInput => {
+  void _course; // the course follows from the group
+  return {
+    ...v,
+    middleName: v.middleName || null,
+    birthDate: v.birthDate || null,
+    groupId: v.groupId || null,
+    phone2: v.phone2 || null,
+    passport: v.passport.replace(/\s/g, '').toUpperCase() || null,
+    pinfl: v.pinfl.trim() || null,
+    district: v.district || null,
+    address: v.address || null,
+    notes: v.notes || null,
+  };
+};
 
 interface Props {
   open: boolean;
@@ -73,10 +76,10 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes, enabled: open });
-  const clubsQ = useQuery({ queryKey: ['clubs'], queryFn: schoolApi.clubs, enabled: open });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups, enabled: open });
+  const courses = useQuery({ queryKey: ['courses'], queryFn: schoolApi.courses, enabled: open });
 
-  const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({
+  const { register, control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: empty(),
   });
@@ -91,19 +94,42 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
       toast(t(student ? 'students.updated' : 'students.created'));
       void qc.invalidateQueries({ queryKey: ['students'] });
       void qc.invalidateQueries({ queryKey: ['student', s.id] });
-      void qc.invalidateQueries({ queryKey: ['classes'] });
+      void qc.invalidateQueries({ queryKey: ['groups'] });
       onSaved?.(s);
       onClose();
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
   });
 
-  const classId = watch('classId');
+  const courseId = watch('courseId');
+  const groupId = watch('groupId');
   const status = watch('status');
-  const chosen = classes.data?.find((c) => c.id === classId);
-  const isCurrent = !!student && student.classId === classId && student.status !== 'LEFT';
-  const classFull = !!chosen && chosen.freeSeats === 0 && !isCurrent && status !== 'LEFT';
+  const price = watch('coursePrice');
+  const discount = watch('discountPercent');
+  // a new trainee joins a running or upcoming group; an existing one keeps showing their (maybe finished) group
+  const groupOptions = (groups.data ?? []).filter(
+    (g) => (!courseId || g.courseId === courseId) && (g.status !== 'FINISHED' || g.id === student?.groupId),
+  );
+  const chosen = groups.data?.find((g) => g.id === groupId);
+  const isCurrent = !!student && student.groupId === groupId && student.status !== 'LEFT';
+  const groupFull = !!chosen && chosen.freeSeats === 0 && !isCurrent && status !== 'LEFT';
   const err = (k: keyof FormValues) => (errors[k]?.message ? t(errors[k]!.message as string) : undefined);
+
+  /** Picking a group fixes the course; for a new enrolment the price starts at the course price. */
+  const pickGroup = (id: string) => {
+    setValue('groupId', id);
+    const g = groups.data?.find((x) => x.id === id);
+    if (!g) return;
+    setValue('courseId', g.courseId);
+    const coursePrice = courses.data?.find((c) => c.id === g.courseId)?.price;
+    if (coursePrice !== undefined && (!student || student.groupId !== id)) setValue('coursePrice', coursePrice);
+  };
+  const pickCourse = (id: string) => {
+    setValue('courseId', id);
+    if (chosen && chosen.courseId !== id) setValue('groupId', '');
+    const coursePrice = courses.data?.find((c) => c.id === id)?.price;
+    if (coursePrice !== undefined && !student) setValue('coursePrice', coursePrice);
+  };
 
   return (
     <Drawer open={open} onClose={onClose} title={t(student ? 'students.edit' : 'students.add')}>
@@ -119,76 +145,22 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
               <option value="FEMALE">{t('students.female')}</option>
             </Select>
           </div>
-        </FormSection>
-
-        <FormSection title={t('students.sections.study')}>
           <div className="grid grid-cols-2 gap-4">
-            <Select label={t('students.class')} {...register('classId')}>
-              <option value="">{t('students.noClass')}</option>
-              {classes.data?.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} · {t('classes.free', { count: c.freeSeats })}
-                </option>
-              ))}
-            </Select>
-            <Select label={t('students.status')} {...register('status')}>
-              <option value="ACTIVE">{t('students.statuses.ACTIVE')}</option>
-              <option value="TRIAL">{t('students.statuses.TRIAL')}</option>
-              <option value="LEFT">{t('students.statuses.LEFT')}</option>
-            </Select>
-          </div>
-          {classFull && (
-            <p role="alert" className="flex items-center gap-2 rounded-xl bg-[#FEF3C7] px-4 py-3 text-sm text-[#B45309] dark:bg-amber-500/15 dark:text-amber-400">
-              <AlertTriangle className="h-4 w-4 shrink-0" /> {t('students.classFullWarning')}
-            </p>
-          )}
-          <Input type="date" label={t('students.enrolledAt')} error={err('enrolledAt')} {...register('enrolledAt')} />
-          <Controller
-            control={control}
-            name="isBoarding"
-            render={({ field }) => <Checkbox label={t('students.boarding')} checked={field.value} onChange={field.onChange} />}
-          />
-          <div>
-            <span className="mb-1.5 block text-sm font-medium">{t('students.clubs')}</span>
-            <Controller
-              control={control}
-              name="clubs"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-2">
-                  {(clubsQ.data ?? []).map((club) => club.name).concat(field.value.filter((n) => !(clubsQ.data ?? []).some((c) => c.name === n))).map((c) => {
-                    const on = field.value.includes(c);
-                    return (
-                      <button
-                        key={c}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() => field.onChange(on ? field.value.filter((x) => x !== c) : [...field.value, c])}
-                        className={cn(
-                          'rounded-full border px-4 py-2 text-sm font-medium transition',
-                          on ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text-muted hover:bg-surface-muted',
-                        )}
-                      >
-                        {c}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
+            <Input label={t('students.passport')} placeholder="AB1234567" maxLength={10} error={err('passport')} {...register('passport')} />
+            <Input label={t('students.pinfl')} inputMode="numeric" maxLength={14} error={err('pinfl')} {...register('pinfl')} />
           </div>
         </FormSection>
 
-        <FormSection title={t('students.sections.parent')}>
-          <Input label={t('students.parentName')} error={err('parentName')} {...register('parentName')} />
+        <FormSection title={t('students.sections.contacts')}>
           <Controller
             control={control}
-            name="parentPhone"
-            render={({ field }) => <PhoneInput label={t('students.parentPhone')} value={field.value} onChange={field.onChange} error={err('parentPhone')} />}
+            name="phone"
+            render={({ field }) => <PhoneInput label={t('students.phone')} value={field.value} onChange={field.onChange} error={err('phone')} />}
           />
           <Controller
             control={control}
-            name="parentPhone2"
-            render={({ field }) => <PhoneInput label={t('students.parentPhone2')} value={field.value} onChange={field.onChange} error={err('parentPhone2')} />}
+            name="phone2"
+            render={({ field }) => <PhoneInput label={t('students.phone2')} value={field.value} onChange={field.onChange} error={err('phone2')} />}
           />
           <Select label={t('students.district')} {...register('district')}>
             <option value="">—</option>
@@ -199,11 +171,49 @@ export function StudentDrawer({ open, student, onClose, onSaved }: Props) {
           <Input label={t('students.address')} {...register('address')} />
         </FormSection>
 
+        <FormSection title={t('students.sections.study')}>
+          <div className="grid grid-cols-2 gap-4">
+            <Select label={t('students.course')} value={courseId} onChange={(e) => pickCourse(e.target.value)}>
+              <option value="">—</option>
+              {courses.data?.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </Select>
+            <Select label={t('students.group')} value={groupId} onChange={(e) => pickGroup(e.target.value)}>
+              <option value="">{t('students.noGroup')}</option>
+              {groupOptions.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name} · {t(`groups.statuses.${g.status}`)} · {t('groups.free', { count: g.freeSeats })}
+                </option>
+              ))}
+            </Select>
+          </div>
+          {groupFull && (
+            <p role="alert" className="flex items-center gap-2 rounded-xl bg-[#FEF3C7] px-4 py-3 text-sm text-[#B45309] dark:bg-amber-500/15 dark:text-amber-400">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> {t('students.groupFullWarning')}
+            </p>
+          )}
+          <div className="grid grid-cols-2 gap-4">
+            <Select label={t('students.status')} {...register('status')}>
+              <option value="ACTIVE">{t('students.statuses.ACTIVE')}</option>
+              <option value="GRADUATED">{t('students.statuses.GRADUATED')}</option>
+              <option value="LEFT">{t('students.statuses.LEFT')}</option>
+            </Select>
+            <Input type="date" label={t('students.enrolledAt')} error={err('enrolledAt')} {...register('enrolledAt')} />
+          </div>
+        </FormSection>
+
         <FormSection title={t('students.sections.payment')}>
           <div className="grid grid-cols-2 gap-4">
-            <Input type="number" min={0} step={100000} label={t('students.monthlyFee')} error={err('monthlyFee')} {...register('monthlyFee', { valueAsNumber: true })} />
+            <Input type="number" min={0} step={100000} label={t('students.coursePrice')} error={err('coursePrice')} {...register('coursePrice', { valueAsNumber: true })} />
             <Input type="number" min={0} max={100} label={t('students.discount')} error={err('discountPercent')} {...register('discountPercent', { valueAsNumber: true })} />
           </div>
+          {Number.isFinite(price) && Number.isFinite(discount) && (
+            <p className="text-sm text-text-muted">
+              {t('students.toPay')}: <span className="font-medium text-text">{formatMoney(Math.round((price * (100 - discount)) / 100), t('common.currency'))}</span>
+            </p>
+          )}
+          {status === 'LEFT' && <p className="text-sm text-text-muted">{t('students.leftPriceHint')}</p>}
           <Textarea label={t('students.notes')} {...register('notes')} />
         </FormSection>
 

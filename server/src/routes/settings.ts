@@ -25,7 +25,7 @@ const patchSchema = z
     lateFinePerMinute: z.number().int().min(0).max(10_000_000),
     lateFineMax: z.number().int().min(0).max(100_000_000),
     absentFine: z.number().int().min(0).max(100_000_000),
-    paymentDueDay: z.number().int().min(1).max(28),
+    paymentDueDays: z.number().int().min(0).max(365),
     contractPrefix: z.string().trim().regex(/^[A-Za-z0-9]{1,6}$/),
     telegramChatId: z.string().trim().max(64).nullable(),
     smsDebtAutoEnabled: z.boolean(),

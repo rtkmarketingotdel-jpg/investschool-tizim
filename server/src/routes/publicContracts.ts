@@ -13,7 +13,7 @@ publicContractsRouter.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 60, stand
 
 async function byToken(token: string) {
   const c = await contractRepo.findByToken(token);
-  // DRAFT and CANCELLED contracts are not exposed to parents.
+  // DRAFT and CANCELLED contracts are not exposed to the trainee.
   if (!c || c.status === 'DRAFT' || c.status === 'CANCELLED') throw new ApiError(404, 'NOT_FOUND');
   return c;
 }

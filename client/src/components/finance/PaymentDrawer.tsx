@@ -6,7 +6,6 @@ import { errorCode } from '@/lib/api';
 import { financeApi, openPdf, PAYMENT_METHODS, type Payment, type PaymentMethod } from '@/lib/financeApi';
 import { schoolApi } from '@/lib/schoolApi';
 import { formatMoney } from '@/lib/format';
-import { todayLocal } from '@/lib/dates';
 import { useDebounce } from '@/lib/useDebounce';
 import { Avatar, Button, Drawer, Input, Select, useToast } from '../ui';
 import { Textarea } from '../FormBits';
@@ -14,7 +13,7 @@ import { Textarea } from '../FormBits';
 interface Chosen {
   id: string;
   fullName: string;
-  className: string | null;
+  groupName: string | null;
   debt: number;
 }
 
@@ -34,9 +33,8 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
   const q = useDebounce(search.trim(), 300);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PaymentMethod>('CASH');
-  const [period, setPeriod] = useState('');
   const [note, setNote] = useState('');
-  const [done, setDone] = useState<Payment | null>(null);
+  const [done, setDone] = useState<{ payment: Payment; debt: number } | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -45,7 +43,6 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
     setAmount(student && student.debt > 0 ? String(student.debt) : '');
     setSearch('');
     setMethod('CASH');
-    setPeriod(todayLocal().slice(0, 7));
     setNote('');
     setDone(null);
     setError('');
@@ -53,14 +50,15 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
 
   const results = useQuery({
     queryKey: ['payment-student-search', q],
-    queryFn: () => schoolApi.students({ q, page: 1, limit: 6, status: 'ACTIVE' }),
+    // graduates and drop-outs can still pay off what they owe
+    queryFn: () => schoolApi.students({ q, page: 1, limit: 6 }),
     enabled: open && !chosen && q.length >= 2,
   });
 
   const pay = useMutation({
-    mutationFn: () => financeApi.createPayment({ studentId: chosen!.id, amount: Number(amount), method, period: period || null, note: note.trim() || null }),
+    mutationFn: () => financeApi.createPayment({ studentId: chosen!.id, amount: Number(amount), method, note: note.trim() || null }),
     onSuccess: (r) => {
-      setDone(r.payment);
+      setDone(r);
       toast(t('finance.payments.created'));
       for (const k of ['payments', 'debtors', 'students', 'student', 'dashboard']) void qc.invalidateQueries({ queryKey: [k] });
     },
@@ -77,10 +75,13 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
         <div className="flex flex-col items-center gap-4 py-10 text-center">
           <CheckCircle2 className="h-14 w-14 text-success" />
           <h3 className="text-xl font-medium">{t('finance.payments.created')}</h3>
-          <p className="text-text-muted">{done.studentName} · {formatMoney(done.amount, cur)}</p>
+          <p className="text-text-muted">{done.payment.studentName} · {formatMoney(done.payment.amount, cur)}</p>
+          <p className={done.debt > 0 ? 'text-sm text-danger' : 'text-sm text-success'}>
+            {done.debt > 0 ? `${t('finance.payments.debtLeft')}: ${formatMoney(done.debt, cur)}` : t('finance.payments.fullyPaid')}
+          </p>
           <div className="flex w-full gap-3 pt-4">
             <Button variant="secondary" className="flex-1" onClick={onClose}>{t('common.close')}</Button>
-            <Button className="flex-1" onClick={() => void openPdf(`/payments/${done.id}/receipt?lang=${i18n.language}`)}>
+            <Button className="flex-1" onClick={() => void openPdf(`/payments/${done.payment.id}/receipt?lang=${i18n.language}`)}>
               <Printer className="h-5 w-5" /> {t('finance.payments.receipt')}
             </Button>
           </div>
@@ -99,7 +100,7 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
               <Avatar name={chosen.fullName} size={44} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{chosen.fullName}</p>
-                <p className="text-sm text-text-muted">{chosen.className ?? '—'}</p>
+                <p className="text-sm text-text-muted">{chosen.groupName ?? '—'}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-text-muted">{t('finance.payments.currentDebt')}</p>
@@ -122,13 +123,13 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-surface-muted"
                       onClick={() => {
                         const debt = s.debt ?? 0;
-                        setChosen({ id: s.id, fullName: s.fullName, className: s.className, debt });
+                        setChosen({ id: s.id, fullName: s.fullName, groupName: s.groupName, debt });
                         setAmount(debt > 0 ? String(debt) : '');
                       }}
                     >
                       <Avatar name={`${s.firstName} ${s.lastName}`} size={36} />
                       <span className="flex-1 truncate">{s.fullName}</span>
-                      <span className="text-sm text-text-muted">{s.className}</span>
+                      <span className="text-sm text-text-muted">{s.groupName}</span>
                     </button>
                   </li>
                 ))}
@@ -138,10 +139,21 @@ export function PaymentDrawer({ open, onClose, student }: Props) {
           )}
 
           <Input type="number" min={1000} step={1000} label={`${t('finance.payments.amount')} (${cur})`} value={amount} onChange={(e) => setAmount(e.target.value)} />
+          {chosen && chosen.debt > 0 && (
+            <div className="-mt-2 flex flex-wrap gap-2">
+              {[1, 0.5].map((part) => {
+                const v = Math.round((chosen.debt * part) / 1000) * 1000;
+                return (
+                  <button key={part} type="button" onClick={() => setAmount(String(v))} className="rounded-full border border-border px-3 py-1 text-sm text-text-muted hover:bg-surface-muted">
+                    {part === 1 ? t('finance.payments.payAll') : t('finance.payments.payHalf')} · {formatMoney(v, cur)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <Select label={t('finance.payments.method')} value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
             {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
           </Select>
-          <Input type="month" label={t('finance.payments.period')} value={period} onChange={(e) => setPeriod(e.target.value)} />
           <Textarea label={t('finance.payments.note')} value={note} onChange={(e) => setNote(e.target.value)} />
           {error && <p role="alert" className="text-sm text-danger">{error}</p>}
           <div className="flex gap-3 pt-2">

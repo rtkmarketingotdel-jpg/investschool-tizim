@@ -45,7 +45,6 @@ export default function StaffDetail() {
             <Badge>{t(`roles.${user.role}`)}</Badge>
             <Badge tone={user.isActive ? 'success' : 'danger'}>{t(user.isActive ? 'staff.active' : 'staff.inactive')}</Badge>
             {user.isTeacher && <Badge>{t('staff.kind.teacher')}</Badge>}
-            {user.isTutor && <Badge>{t('staff.kind.tutor')}</Badge>}
             {!profile.completed && <Badge tone="warning">{t('staff.profileIncomplete')}</Badge>}
           </div>
         </div>
@@ -59,11 +58,10 @@ export default function StaffDetail() {
             {([
               [t('staff.phone'), user.phone],
               [t('staff.position'), user.position],
-              [t('staff.subject'), user.subject ?? '—'],
+              [t('staff.specialty'), user.specialty ?? '—'],
               [t('staff.branch'), profile.branchName ?? t('staff.anyBranch')],
               [t('staff.hiredAt'), fmtDay(profile.hiredAt.slice(0, 10), i18n.language, 'd MMMM yyyy')],
-              [t('staff.homeroomOf'), profile.classesLed.length ? profile.classesLed.join(', ') : '—'],
-              [t('staff.clubsLed'), profile.clubsLed.length ? profile.clubsLed.join(', ') : '—'],
+              [t('staff.groupsLed'), profile.groupsLed.length ? profile.groupsLed.map((g) => g.name).join(', ') : '—'],
             ] as Array<[string, string]>).map(([k, v]) => (
               <div key={k} className="flex justify-between gap-3"><dt className="text-text-muted">{k}</dt><dd className="text-right">{v}</dd></div>
             ))}

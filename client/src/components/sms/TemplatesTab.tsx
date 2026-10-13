@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { MessageSquareText, Pencil, Plus, Trash2 } from 'lucide-react';
 import { errorCode } from '@/lib/api';
-import { PARENT_VARS, SMS_CATEGORIES, smsApi, type SmsTemplate } from '@/lib/smsApi';
+import { STUDENT_VARS, SMS_CATEGORIES, smsApi, type SmsTemplate } from '@/lib/smsApi';
 import { useAuth } from '@/context/AuthContext';
 import { Badge, Button, Card, EmptyState, Input, Modal, Select, Skeleton, useToast } from '../ui';
 import { MessageEditor } from './MessageEditor';
@@ -25,9 +25,9 @@ export function TemplatesTab() {
     mutationFn: () => smsApi.saveTemplate(draft!.id, { name: draft!.name.trim(), category: draft!.category, language: draft!.language, body: draft!.body }),
     onSuccess: () => { toast(t('sms.templates.saved')); setDraft(null); done(); }, onError: fail,
   });
-  const del = useMutation({ mutationFn: (id: string) => smsApi.deleteTemplate(id), onSuccess: () => { toast(t('academics.deleted')); done(); }, onError: fail });
+  const del = useMutation({ mutationFn: (id: string) => smsApi.deleteTemplate(id), onSuccess: () => { toast(t('sms.templates.deleted')); done(); }, onError: fail });
   const valid = !!draft && draft.name.trim().length >= 2 && draft.body.trim().length >= 5;
-  const vars = PARENT_VARS.filter((v) => canFinance || !['debt', 'overdueDays', 'month'].includes(v)).concat('name', 'position');
+  const vars = STUDENT_VARS.filter((v) => canFinance || !['debt', 'overdueDays', 'dueDate'].includes(v)).concat('position');
 
   return (
     <div className="space-y-6">
@@ -63,7 +63,7 @@ export function TemplatesTab() {
       <Modal open={!!draft} onClose={() => setDraft(null)} title={t(draft?.id ? 'sms.templates.edit' : 'sms.templates.add')}>
         {draft && (
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (valid) save.mutate(); }}>
-            <Input label={t('academics.name')} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
+            <Input label={t('sms.templates.name')} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
             <div className="grid grid-cols-2 gap-3">
               <Select label={t('sms.compose.type')} value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as Draft['category'] })}>
                 {SMS_CATEGORIES.filter((c) => canFinance || c !== 'DEBT').map((c) => <option key={c} value={c}>{t(`sms.categories.${c}`)}</option>)}

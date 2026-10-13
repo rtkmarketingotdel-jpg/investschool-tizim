@@ -1,28 +1,29 @@
 import { toLocalDate } from '../lib/date.js';
-import { dueDateFor } from '../lib/period.js';
 import { settings } from '../data/mockStore.js';
 import type { Student } from '../data/types.js';
-import { students } from '../data/mockStudents.js';
 import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
-import { chargeAmount, computeDebt, type DebtInfo } from './debt.js';
+import { groupRepo } from '../repositories/groupRepo.js';
+import { chargeAmount, computeDebt, courseDueDate, type DebtInfo } from './debt.js';
 
-/** Creates the monthly charge for every ACTIVE student; the (student, period) uniqueness makes it idempotent. */
-export async function generateMonthlyCharges(period: string): Promise<number> {
-  let created = 0;
-  for (const s of students) {
-    if (s.status !== 'ACTIVE' || (await chargeRepo.exists(s.id, period))) continue;
-    await chargeRepo.create({
-      studentId: s.id, period, amount: chargeAmount(s.monthlyFee, s.discountPercent), dueDate: dueDateFor(period, settings.paymentDueDay),
+/**
+ * Keeps the single course bill in line with the student: it is created once the student is ACTIVE in a group,
+ * and afterwards its amount follows the agreed price and discount (also after leaving, so a refund or
+ * a reduced price for a drop-out is entered by editing the price). Idempotent.
+ */
+export async function syncCourseCharge(s: Student) {
+  const [existing] = await chargeRepo.byStudent(s.id);
+  const amount = chargeAmount(s.coursePrice, s.discountPercent);
+  const group = s.groupId ? await groupRepo.findById(s.groupId) : null;
+  if (existing) {
+    await chargeRepo.update(existing.id, {
+      amount,
+      groupId: group?.id ?? existing.groupId,
+      dueDate: group ? courseDueDate(group.startDate, s.enrolledAt, settings.paymentDueDays) : existing.dueDate,
     });
-    created++;
+    return;
   }
-  return created;
-}
-
-/** Bills one student for the current month (a student enrolled mid-month would otherwise wait for the 1st). Idempotent. */
-export async function generateChargeFor(s: Student, period = toLocalDate().slice(0, 7)) {
-  if (s.status !== 'ACTIVE' || s.monthlyFee <= 0 || (await chargeRepo.exists(s.id, period))) return;
-  await chargeRepo.create({ studentId: s.id, period, amount: chargeAmount(s.monthlyFee, s.discountPercent), dueDate: dueDateFor(period, settings.paymentDueDay) });
+  if (s.status !== 'ACTIVE' || !group || amount <= 0) return;
+  await chargeRepo.create({ studentId: s.id, groupId: group.id, amount, dueDate: courseDueDate(group.startDate, s.enrolledAt, settings.paymentDueDays) });
 }
 
 /** Debt for every student in one pass (avoids N+1 over the arrays). */

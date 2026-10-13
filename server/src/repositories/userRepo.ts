@@ -1,7 +1,6 @@
-import { clubs } from '../data/mockAcademics.js';
 import { adjustments, notifications, payrolls } from '../data/mockFinance.js';
 import { attendances, users } from '../data/mockStore.js';
-import { classes } from '../data/mockStudents.js';
+import { groups } from '../data/mockStudents.js';
 import type { PublicUser, User } from '../data/types.js';
 
 export const toPublicUser = (user: User): PublicUser => {
@@ -35,15 +34,14 @@ export const userRepo = {
     Object.assign(user, patch);
     return user;
   },
-  /** Deletes the account together with its attendance/payroll history and frees the classes and clubs it led. */
+  /** Deletes the account together with its attendance/payroll history and frees the groups it led. */
   async remove(id: string) {
     const i = users.findIndex((u) => u.id === id);
     if (i < 0) return false;
     users.splice(i, 1);
     const drop = <T extends { userId: string }>(arr: T[]) => { for (let k = arr.length - 1; k >= 0; k--) if (arr[k]!.userId === id) arr.splice(k, 1); };
     drop(attendances); drop(adjustments); drop(payrolls); drop(notifications);
-    for (const c of classes) if (c.teacherId === id) c.teacherId = null;
-    for (const c of clubs) if (c.teacherId === id) c.teacherId = null;
+    for (const g of groups) if (g.teacherId === id) g.teacherId = null;
     return true;
   },
 };

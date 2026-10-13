@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { users } from '../data/mockStore.js';
-import { classes } from '../data/mockStudents.js';
+import { groups } from '../data/mockStudents.js';
 import { ApiError } from '../lib/errors.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
@@ -36,7 +36,7 @@ branchesRouter.get('/:id/members', requireRole('DIRECTOR', 'MANAGER'), async (re
     if (!b) throw new ApiError(404, 'NOT_FOUND');
     res.json({
       users: users.filter((u) => u.isActive).map((u) => ({ id: u.id, fullName: u.fullName, position: u.position, branchId: u.branchId })),
-      classes: classes.map((c) => ({ id: c.id, name: c.name, branchId: c.branchId })),
+      groups: groups.map((g) => ({ id: g.id, name: g.name, branchId: g.branchId })),
     });
   } catch (e) {
     next(e);
@@ -64,14 +64,14 @@ branchesRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(sc
   }
 });
 
-const assignSchema = z.object({ userIds: z.array(z.string()), classIds: z.array(z.string()) });
+const assignSchema = z.object({ userIds: z.array(z.string()), groupIds: z.array(z.string()) });
 branchesRouter.put('/:id/assign', requireRole('DIRECTOR', 'MANAGER'), validateBody(assignSchema), async (req, res, next) => {
   try {
     const b = await branchRepo.findById(req.params.id!);
     if (!b) throw new ApiError(404, 'NOT_FOUND');
     const body = req.body as z.infer<typeof assignSchema>;
-    branchRepo.assign(b.id, body.userIds, body.classIds);
-    await audit(req.user!.id, 'branch.assign', 'branch', b.id, { users: body.userIds.length, classes: body.classIds.length });
+    branchRepo.assign(b.id, body.userIds, body.groupIds);
+    await audit(req.user!.id, 'branch.assign', 'branch', b.id, { users: body.userIds.length, groups: body.groupIds.length });
     res.json(present(b));
   } catch (e) {
     next(e);
@@ -86,7 +86,7 @@ branchesRouter.delete('/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, re
     const all = await branchRepo.list();
     if (all.length <= 1) throw new ApiError(409, 'BRANCH_LAST');
     const usage = branchRepo.usage(b.id);
-    if (usage.users + usage.classes > 0) {
+    if (usage.users + usage.groups > 0) {
       const moveTo = String(req.query.moveTo ?? '');
       if (!moveTo) throw new ApiError(409, 'BRANCH_HAS_DATA', usage);
       if (moveTo !== 'none') {

@@ -1,13 +1,13 @@
 import { randomBytes } from 'node:crypto';
 import { attendances, settings, users } from './mockStore.js';
-import { students } from './mockStudents.js';
+import { groups, students } from './mockStudents.js';
 import type {
   AuditLog, Contract, ContractTemplate, Notification, Payment, PaymentMethod, Payroll, PayrollAdjustment, StudentCharge,
 } from './types.js';
 import { TEMPLATE_RU, TEMPLATE_UZ } from './contractTemplates.js';
-import { toLocalDate } from '../lib/date.js';
-import { addMonths, dueDateFor } from '../lib/period.js';
-import { chargeAmount } from '../services/debt.js';
+import { addDays, toLocalDate } from '../lib/date.js';
+import { addMonths, daysBetween } from '../lib/period.js';
+import { chargeAmount, courseDueDate } from '../services/debt.js';
 import { computePayroll, lateFine } from '../services/payrollCalc.js';
 
 let seed = 99;
@@ -25,40 +25,45 @@ export const payments: Payment[] = [];
 export const adjustments: PayrollAdjustment[] = [];
 export const payrolls: Payroll[] = [];
 export const contractTemplates: ContractTemplate[] = [
-  { id: 't1', name: 'Taʼlim xizmatlari shartnomasi (uz)', language: 'uz', body: TEMPLATE_UZ, isDefault: true },
-  { id: 't2', name: 'Договор об образовательных услугах (ru)', language: 'ru', body: TEMPLATE_RU, isDefault: true },
+  { id: 't1', name: 'Kasbga oʻqitish shartnomasi (uz)', language: 'uz', body: TEMPLATE_UZ, isDefault: true },
+  { id: 't2', name: 'Договор о профессиональном обучении (ru)', language: 'ru', body: TEMPLATE_RU, isDefault: true },
 ];
 export const contracts: Contract[] = [];
 export const notifications: Notification[] = [];
 export const auditLogs: AuditLog[] = [];
 
-// ---- charges and payments (deterministic; enrolment spread gives a growth trend) ----
+// ---- course bills and instalments (deterministic) ----
 const METHODS: PaymentMethod[] = ['CASH', 'CARD', 'CLICK', 'PAYME', 'TRANSFER'];
-const startWeights = [0.55, 0.67, 0.77, 0.85, 0.93, 1];
-const accountant = users.find((u) => u.role === 'MANAGER') ?? users[0]!;
+const accountant = users.find((u) => u.role === 'ACCOUNTANT') ?? users[0]!;
+const at = (day: string) => new Date(`${day}T${String(9 + Math.floor(rnd() * 8)).padStart(2, '0')}:${String(Math.floor(rnd() * 60)).padStart(2, '0')}:00+05:00`);
 
-for (const s of students.filter((x) => x.status === 'ACTIVE')) {
-  const r0 = rnd();
-  const start = startWeights.findIndex((w) => r0 <= w);
-  const mine = periods.slice(start);
-  const amount = chargeAmount(s.monthlyFee, s.discountPercent);
-  for (const p of mine) {
-    charges.push({ id: id('ch'), studentId: s.id, period: p, amount, dueDate: dueDateFor(p, settings.paymentDueDay) });
-  }
+for (const s of students) {
+  const g = groups.find((x) => x.id === s.groupId);
+  if (!g) continue;
   const r = rnd();
-  const unpaidMonths = r < 0.08 ? 1 + Math.floor(rnd() * 3) : 0;
-  const partial = r >= 0.08 && r < 0.2;
-  mine.forEach((p, i) => {
-    const fromEnd = mine.length - 1 - i;
-    if (fromEnd < unpaidMonths) return;
-    const isLast = fromEnd === 0;
-    const day = Math.min(1 + Math.floor(rnd() * 10), Number(today.slice(8)));
+  // share of the price paid so far: most pay in full (often in 2-3 parts), some still owe
+  const share = s.status === 'LEFT' ? pick([0, 0.3, 0.5]) : s.status === 'GRADUATED' ? (r < 0.92 ? 1 : 0.7) : r < 0.1 ? 0 : r < 0.35 ? 0.5 : 1;
+  if (s.status === 'LEFT') {
+    // a drop-out's price is cut to what they used, as the manager would do when they leave
+    s.coursePrice = Math.round((chargeAmount(s.coursePrice, s.discountPercent) * share) / 1000) * 1000;
+    s.discountPercent = 0;
+    if (!s.coursePrice) continue;
+  }
+  const amount = chargeAmount(s.coursePrice, s.discountPercent);
+  const dueDate = courseDueDate(g.startDate, s.enrolledAt, settings.paymentDueDays);
+  charges.push({ id: id('ch'), studentId: s.id, groupId: g.id, amount, dueDate, createdAt: new Date(`${s.enrolledAt}T10:00:00+05:00`) });
+  const last = s.leftAt ?? (g.endDate < today ? g.endDate : today);
+  const span = Math.max(0, daysBetween(s.enrolledAt, last));
+  let rest = s.status === 'LEFT' ? amount : Math.round((amount * share) / 1000) * 1000;
+  const parts = rest >= 2_000_000 && rnd() < 0.6 ? 3 : rest > 0 && rnd() < 0.6 ? 2 : 1;
+  for (let k = 0; k < parts && rest > 0; k++) {
+    const sum = k === parts - 1 ? rest : Math.round(rest / (parts - k) / 100_000) * 100_000;
     payments.push({
-      id: id('pay'), studentId: s.id, amount: partial && isLast ? Math.round(amount / 2 / 1000) * 1000 : amount,
-      method: pick(METHODS), period: p, paidAt: new Date(`${p}-${String(day).padStart(2, '0')}T10:00:00+05:00`),
+      id: id('pay'), studentId: s.id, amount: sum, method: pick(METHODS), paidAt: at(addDays(s.enrolledAt, Math.floor((span * k) / parts))),
       receivedById: accountant.id, note: null,
     });
-  });
+    rest -= sum;
+  }
 }
 
 // ---- attendance fines for the mock history ----
@@ -103,20 +108,24 @@ for (const p of periods) {
 let seq = 1;
 const prefix = settings.contractPrefix;
 const year = today.slice(0, 4);
-for (const s of students.filter((x) => x.status === 'ACTIVE')) {
+for (const s of students.filter((x) => x.status !== 'LEFT')) {
+  const g = groups.find((x) => x.id === s.groupId);
+  if (!g) continue;
   const r = rnd();
-  if (r > 0.82) continue;
-  const status = r < 0.7 ? 'SIGNED' : r < 0.78 ? 'SENT' : 'DRAFT';
+  const finished = s.status === 'GRADUATED';
+  if (r > (finished ? 0.95 : 0.85)) continue;
+  const status = finished || r < 0.7 ? 'SIGNED' : r < 0.78 ? 'SENT' : 'DRAFT';
   const language = rnd() < 0.85 ? 'uz' : 'ru';
-  const signedAt = new Date(`2026-0${8 + Math.floor(rnd() * 2)}-${String(1 + Math.floor(rnd() * 27)).padStart(2, '0')}T11:00:00+05:00`);
+  const createdAt = new Date(`${s.enrolledAt}T10:00:00+05:00`);
+  const signedAt = new Date(createdAt.getTime() + (1 + Math.floor(rnd() * 3)) * 86_400_000);
   contracts.push({
     id: id('ct'), number: `${prefix}-${year}-${String(seq++).padStart(4, '0')}`, studentId: s.id,
-    templateId: language === 'uz' ? 't1' : 't2', language, monthlyFee: chargeAmount(s.monthlyFee, s.discountPercent),
-    startDate: '2026-09-01', endDate: '2027-05-31', status, publicToken: randomBytes(16).toString('hex'),
+    templateId: language === 'uz' ? 't1' : 't2', language, price: chargeAmount(s.coursePrice, s.discountPercent),
+    startDate: g.startDate, endDate: g.endDate, status, publicToken: randomBytes(16).toString('hex'),
     otpHash: null, otpExpiresAt: null, otpAttempts: 0, otpDemoCode: null,
     signedAt: status === 'SIGNED' ? signedAt : null, signedIp: status === 'SIGNED' ? '84.54.72.10' : null,
     signedUserAgent: status === 'SIGNED' ? 'Mozilla/5.0 (Linux; Android 13)' : null,
-    signerPhone: status === 'SIGNED' ? s.parentPhone : null, snapshot: null, createdAt: new Date('2026-08-20T10:00:00+05:00'),
+    signerPhone: status === 'SIGNED' ? s.phone : null, snapshot: null, createdAt,
   });
 }
 export const nextContractSeq = () => seq++;

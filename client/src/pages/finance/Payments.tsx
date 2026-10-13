@@ -27,7 +27,7 @@ export default function Payments() {
   const [preset, setPreset] = useState<Preset>('month');
   const [custom, setCustom] = useState({ from: shift(today, -29), to: today });
   const [method, setMethod] = useState('');
-  const [classId, setClassId] = useState('');
+  const [groupId, setGroupId] = useState('');
   const [page, setPage] = useState(1);
   const [drawer, setDrawer] = useState(false);
 
@@ -39,11 +39,11 @@ export default function Payments() {
   }, [preset, today, custom]);
 
   const list = useQuery({
-    queryKey: ['payments', range, method, classId, page],
-    queryFn: () => financeApi.payments({ ...range, method, classId, page, limit: LIMIT }),
+    queryKey: ['payments', range, method, groupId, page],
+    queryFn: () => financeApi.payments({ ...range, method, groupId, page, limit: LIMIT }),
     placeholderData: keepPreviousData,
   });
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups });
   const cur = t('common.currency');
   const rows = list.data?.items ?? [];
 
@@ -99,10 +99,10 @@ export default function Payments() {
             {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
           </Select>
         </div>
-        <div className="w-[calc(50%-0.375rem)] sm:w-40">
-          <Select aria-label={t('students.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setPage(1); }}>
-            <option value="">{t('students.allClasses')}</option>
-            {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        <div className="w-[calc(50%-0.375rem)] sm:w-48">
+          <Select aria-label={t('students.group')} value={groupId} onChange={(e) => { setGroupId(e.target.value); setPage(1); }}>
+            <option value="">{t('students.allGroups')}</option>
+            {groups.data?.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </Select>
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function Payments() {
               <tr>
                 <Th>{t('attendance.date')}</Th>
                 <Th>{t('finance.payments.student')}</Th>
-                <Th>{t('students.class')}</Th>
+                <Th>{t('students.group')}</Th>
                 <Th numeric>{t('finance.payments.amount')}</Th>
                 <Th>{t('finance.payments.method')}</Th>
                 <Th>{t('finance.payments.receivedBy')}</Th>
@@ -133,7 +133,7 @@ export default function Payments() {
                 <Tr key={p.id}>
                   <Td className="whitespace-nowrap">{fmtDay(p.paidAt.slice(0, 10), i18n.language, 'd MMM yyyy')}</Td>
                   <Td className="font-medium">{p.studentName}</Td>
-                  <Td>{p.className ?? '—'}</Td>
+                  <Td>{p.groupName ?? '—'}{p.courseName && <p className="text-[13px] text-text-muted">{p.courseName}</p>}</Td>
                   <Td numeric className="font-medium">{formatMoney(p.amount, cur)}</Td>
                   <Td>{t(`finance.methods.${p.method}`)}</Td>
                   <Td className="text-text-muted">{p.receivedByName ?? '—'}</Td>

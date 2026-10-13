@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { BedDouble, Download, Eye, LayoutGrid, List, Plus, Search, GraduationCap } from 'lucide-react';
+import { Download, Eye, LayoutGrid, List, Plus, Search, GraduationCap } from 'lucide-react';
 import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi, type Student, type StudentStatus } from '@/lib/schoolApi';
 import { fmtDay } from '@/lib/dates';
@@ -15,7 +15,7 @@ import { Pagination } from '@/components/Pagination';
 import { StudentDrawer } from '@/components/students/StudentDrawer';
 import { Avatar, Badge, Button, Card, EmptyState, Input, Select, Skeleton, Table, Td, Th, Thead, Tr, type BadgeTone } from '@/components/ui';
 
-export const statusTone: Record<StudentStatus, BadgeTone> = { ACTIVE: 'success', TRIAL: 'warning', LEFT: 'danger' };
+export const statusTone: Record<StudentStatus, BadgeTone> = { ACTIVE: 'success', GRADUATED: 'info', LEFT: 'danger' };
 const LIMIT = 20;
 
 export default function Students() {
@@ -30,8 +30,8 @@ export default function Students() {
   const [drawer, setDrawer] = useState<{ open: boolean; student: Student | null }>({ open: false, student: null });
 
   const status = params.get('status') ?? '';
-  const classId = params.get('classId') ?? '';
-  const boarding = params.get('boarding') ?? '';
+  const groupId = params.get('groupId') ?? '';
+  const courseId = params.get('courseId') ?? '';
   const debtor = seesFinance ? (params.get('debtor') ?? '') : '';
   const sort = params.get('sort') ?? 'name';
   const page = Number(params.get('page') ?? 1);
@@ -48,15 +48,18 @@ export default function Students() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  const filters = { q: params.get('q') ?? '', status, classId, boarding, debtor, sort };
+  const filters = { q: params.get('q') ?? '', status, groupId, courseId, debtor, sort };
   const list = useQuery({
     queryKey: ['students', filters, page],
     queryFn: () => schoolApi.students({ ...filters, page, limit: LIMIT }),
     placeholderData: keepPreviousData,
   });
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups });
+  const courses = useQuery({ queryKey: ['courses'], queryFn: schoolApi.courses });
+  // the group list follows the chosen course
+  const groupOptions = (groups.data ?? []).filter((g) => !courseId || g.courseId === courseId);
 
-  const exportCsv = async () => downloadBlob(await schoolApi.exportStudents({ q: filters.q, status, classId, boarding, sort: sort === 'debt' ? 'name' : sort }), 'students.csv');
+  const exportCsv = async () => downloadBlob(await schoolApi.exportStudents({ q: filters.q, status, groupId, courseId, sort: sort === 'debt' ? 'name' : sort }), 'students.csv');
   const rows = list.data?.items ?? [];
 
   return (
@@ -86,24 +89,36 @@ export default function Students() {
         <div className="w-[calc(50%-0.375rem)] sm:w-48">
           <Select aria-label={t('students.status')} value={status} onChange={(e) => setParam('status', e.target.value)}>
             <option value="">{t('students.allStatuses')}</option>
-            {(['ACTIVE', 'TRIAL', 'LEFT'] as const).map((s) => (
+            {(['ACTIVE', 'GRADUATED', 'LEFT'] as const).map((s) => (
               <option key={s} value={s}>{t(`students.statuses.${s}`)}</option>
             ))}
           </Select>
         </div>
-        <div className="w-[calc(50%-0.375rem)] sm:w-36">
-          <Select aria-label={t('students.class')} value={classId} onChange={(e) => setParam('classId', e.target.value)}>
-            <option value="">{t('students.allClasses')}</option>
-            {classes.data?.map((c) => (
+        <div className="w-[calc(50%-0.375rem)] sm:w-48">
+          <Select
+            aria-label={t('students.course')}
+            value={courseId}
+            onChange={(e) => {
+              const next = new URLSearchParams(params);
+              if (e.target.value) next.set('courseId', e.target.value);
+              else next.delete('courseId');
+              next.delete('groupId');
+              next.delete('page');
+              setParams(next, { replace: true });
+            }}
+          >
+            <option value="">{t('students.allCourses')}</option>
+            {courses.data?.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </Select>
         </div>
-        <div className="w-[calc(50%-0.375rem)] sm:w-48">
-          <Select aria-label={t('students.boarding')} value={boarding} onChange={(e) => setParam('boarding', e.target.value)}>
-            <option value="">{t('students.boardingAny')}</option>
-            <option value="true">{t('students.boardingYes')}</option>
-            <option value="false">{t('students.boardingNo')}</option>
+        <div className="w-[calc(50%-0.375rem)] sm:w-36">
+          <Select aria-label={t('students.group')} value={groupId} onChange={(e) => setParam('groupId', e.target.value)}>
+            <option value="">{t('students.allGroups')}</option>
+            {groupOptions.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
           </Select>
         </div>
         {seesFinance && (
@@ -157,10 +172,9 @@ export default function Students() {
                 <tr>
                   <Th className="w-16">№</Th>
                   <Th>{t('students.fullName')}</Th>
-                  <Th>{t('students.class')}</Th>
+                  <Th>{t('students.group')}</Th>
                   <Th>{t('students.status')}</Th>
-                  <Th>{t('students.boarding')}</Th>
-                  <Th numeric>{t('students.monthlyFee')}</Th>
+                  <Th numeric>{t('students.coursePrice')}</Th>
                   {seesFinance && <Th numeric>{t('students.debt')}</Th>}
                   <Th>{t('students.enrolledAt')}</Th>
                   <Th className="w-16"><span className="sr-only">{t('common.details')}</span></Th>
@@ -175,15 +189,17 @@ export default function Students() {
                         <Avatar name={`${s.firstName} ${s.lastName}`} />
                         <div>
                           <p className="font-medium">{s.fullName}</p>
-                          <p className="text-[13px] text-text-muted">{s.parentPhone}</p>
+                          <p className="text-[13px] text-text-muted">{s.phone}</p>
                         </div>
                       </Link>
                     </Td>
-                    <Td>{s.className ?? '—'}</Td>
+                    <Td>
+                      <p>{s.groupName ?? '—'}</p>
+                      {s.courseName && <p className="text-[13px] text-text-muted">{s.courseName}</p>}
+                    </Td>
                     <Td><Badge tone={statusTone[s.status]}>{t(`students.statuses.${s.status}`)}</Badge></Td>
-                    <Td>{s.isBoarding ? <BedDouble aria-label={t('students.boarding')} className="h-5 w-5 text-primary" /> : <span className="text-text-muted">—</span>}</Td>
                     <Td numeric>
-                      {formatMoney(s.monthlyFee, t('common.currency'))}
+                      {formatMoney(s.coursePrice, t('common.currency'))}
                       {s.discountPercent > 0 && <p className="text-[13px] text-text-muted">−{s.discountPercent}%</p>}
                     </Td>
                     {seesFinance && (
@@ -208,15 +224,14 @@ export default function Students() {
                     <Avatar name={`${s.firstName} ${s.lastName}`} />
                     <div className="min-w-0">
                       <p className="truncate font-medium">{s.fullName}</p>
-                      <p className="text-[13px] text-text-muted">{s.parentPhone}</p>
+                      <p className="text-[13px] text-text-muted">{s.phone}</p>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <Badge tone={statusTone[s.status]}>{t(`students.statuses.${s.status}`)}</Badge>
-                    {s.className && <span className="text-sm text-text-muted">{s.className}</span>}
-                    {s.isBoarding && <BedDouble className="h-4 w-4 text-primary" />}
+                    {s.groupName && <span className="text-sm text-text-muted">{s.groupName} · {s.courseName}</span>}
                   </div>
-                  <p className="mt-3 font-medium tabular-nums">{formatMoney(s.monthlyFee, t('common.currency'))}</p>
+                  <p className="mt-3 font-medium tabular-nums">{formatMoney(s.coursePrice, t('common.currency'))}</p>
                   {s.debt ? <p className="text-sm font-medium text-danger">{t('students.debt')}: {formatMoney(s.debt, t('common.currency'))}</p> : null}
                 </Card>
               </Link>

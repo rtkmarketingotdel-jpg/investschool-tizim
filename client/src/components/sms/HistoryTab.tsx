@@ -13,10 +13,11 @@ const LIMIT = 15;
 
 export function useAudienceLabel() {
   const { t } = useTranslation();
-  // labels come from the server as "KIND" or "KIND:argument" (e.g. "CLASSES:3", "STAFF:TEACHERS")
+  // labels come from the server as "KIND" or "KIND:argument" (e.g. "GROUPS:3", "STAFF:TEACHERS", "ALL_STUDENTS:GRAD")
   return (label: string) => {
     const [kind, arg] = label.split(':');
-    if (kind === 'STAFF') return t(`sms.audience.staff${arg === 'TEACHERS' ? 'Teachers' : arg === 'TUTORS' ? 'Tutors' : 'All'}`);
+    if (kind === 'STAFF') return t(`sms.audience.staff${arg === 'TEACHERS' ? 'Teachers' : 'All'}`);
+    if (kind === 'ALL_STUDENTS') return t(arg === 'GRAD' ? 'sms.audience.ALL_STUDENTS_GRAD' : 'sms.audience.ALL_STUDENTS');
     if (arg !== undefined) return t(`sms.audienceCount.${kind}`, { count: Number(arg) });
     return t(`sms.audience.${kind}`);
   };

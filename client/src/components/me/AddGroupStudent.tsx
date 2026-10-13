@@ -6,9 +6,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { DISTRICTS } from '@/lib/constants';
 import { errorCode } from '@/lib/api';
-import { addClassStudent } from '@/lib/meApi';
+import { addGroupStudent } from '@/lib/meApi';
 import { Button, Drawer, Input, Select, useToast } from '../ui';
-import { Checkbox, FormSection } from '../FormBits';
+import { FormSection } from '../FormBits';
 import { PhoneInput } from '../PhoneInput';
 
 const phone = z.string().regex(/^\+998\d{9}$/, 'errors.phone');
@@ -18,25 +18,23 @@ const schema = z.object({
   middleName: z.string().max(60, 'errors.tooLong'),
   birthDate: z.string(),
   gender: z.enum(['MALE', 'FEMALE']),
-  parentName: z.string().trim().min(1, 'errors.required').max(120, 'errors.tooLong'),
-  parentPhone: phone,
-  parentPhone2: z.string().refine((v) => v === '' || /^\+998\d{9}$/.test(v), 'errors.phone'),
+  phone,
+  phone2: z.string().refine((v) => v === '' || /^\+998\d{9}$/.test(v), 'errors.phone'),
   district: z.string(),
   address: z.string().max(500, 'errors.tooLong'),
-  isBoarding: z.boolean(),
 });
 type FormValues = z.infer<typeof schema>;
-const empty: FormValues = { lastName: '', firstName: '', middleName: '', birthDate: '', gender: 'MALE', parentName: '', parentPhone: '', parentPhone2: '', district: '', address: '', isBoarding: false };
+const empty: FormValues = { lastName: '', firstName: '', middleName: '', birthDate: '', gender: 'MALE', phone: '', phone2: '', district: '', address: '' };
 
 interface Props {
   open: boolean;
-  classId: string;
-  className: string;
+  groupId: string;
+  groupName: string;
   onClose: () => void;
 }
 
-/** Homeroom teacher adds a student to their own class (no money fields: management sets the fee later). */
-export function AddClassStudent({ open, classId, className, onClose }: Props) {
+/** A teacher enrols a trainee into their own group (no money fields: the course price applies, management sets discounts). */
+export function AddGroupStudent({ open, groupId, groupName, onClose }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
@@ -44,15 +42,15 @@ export function AddClassStudent({ open, classId, className, onClose }: Props) {
   useEffect(() => { if (open) reset(empty); }, [open, reset]);
 
   const save = useMutation({
-    mutationFn: (v: FormValues) => addClassStudent(classId, {
-      ...v, middleName: v.middleName || null, birthDate: v.birthDate || null, parentPhone2: v.parentPhone2 || null,
+    mutationFn: (v: FormValues) => addGroupStudent(groupId, {
+      ...v, middleName: v.middleName || null, birthDate: v.birthDate || null, phone2: v.phone2 || null,
       district: v.district || null, address: v.address || null,
     }),
     onSuccess: () => {
       toast(t('students.created'));
       void qc.invalidateQueries({ queryKey: ['me', 'teaching'] });
       void qc.invalidateQueries({ queryKey: ['students'] });
-      void qc.invalidateQueries({ queryKey: ['classes'] });
+      void qc.invalidateQueries({ queryKey: ['groups'] });
       onClose();
     },
     onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
@@ -60,7 +58,7 @@ export function AddClassStudent({ open, classId, className, onClose }: Props) {
   const err = (k: keyof FormValues) => (errors[k]?.message ? t(errors[k]!.message as string) : undefined);
 
   return (
-    <Drawer open={open} onClose={onClose} title={t('me.class.addStudent', { name: className })}>
+    <Drawer open={open} onClose={onClose} title={t('me.group.addStudent', { name: groupName })}>
       <form onSubmit={handleSubmit((v) => save.mutate(v))} className="space-y-8" noValidate>
         <FormSection title={t('students.sections.student')}>
           <Input label={t('students.lastName')} error={err('lastName')} {...register('lastName')} />
@@ -73,12 +71,10 @@ export function AddClassStudent({ open, classId, className, onClose }: Props) {
               <option value="FEMALE">{t('students.female')}</option>
             </Select>
           </div>
-          <Controller control={control} name="isBoarding" render={({ field }) => <Checkbox label={t('students.boarding')} checked={field.value} onChange={field.onChange} />} />
         </FormSection>
-        <FormSection title={t('students.sections.parent')}>
-          <Input label={t('students.parentName')} error={err('parentName')} {...register('parentName')} />
-          <Controller control={control} name="parentPhone" render={({ field }) => <PhoneInput label={t('students.parentPhone')} value={field.value} onChange={field.onChange} error={err('parentPhone')} />} />
-          <Controller control={control} name="parentPhone2" render={({ field }) => <PhoneInput label={t('students.parentPhone2')} value={field.value} onChange={field.onChange} error={err('parentPhone2')} />} />
+        <FormSection title={t('students.sections.contacts')}>
+          <Controller control={control} name="phone" render={({ field }) => <PhoneInput label={t('students.phone')} value={field.value} onChange={field.onChange} error={err('phone')} />} />
+          <Controller control={control} name="phone2" render={({ field }) => <PhoneInput label={t('students.phone2')} value={field.value} onChange={field.onChange} error={err('phone2')} />} />
           <Select label={t('students.district')} {...register('district')}>
             <option value="">—</option>
             {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}

@@ -46,7 +46,14 @@ export interface ContractValues {
   [key: string]: string;
 }
 
-export function contractValues(c: Pick<Contract, 'number' | 'language' | 'monthlyFee' | 'startDate' | 'endDate'>, student: Student, className: string | null, on: Date = new Date()): ContractValues {
+export interface ContractContext {
+  courseName: string | null;
+  courseDuration: number | null;
+  groupName: string | null;
+  paymentDueDate: string | null;
+}
+
+export function contractValues(c: Pick<Contract, 'number' | 'language' | 'price' | 'startDate' | 'endDate'>, student: Student, ctx: ContractContext, on: Date = new Date()): ContractValues {
   return {
     contractNumber: c.number,
     date: fmtDateDMY(on),
@@ -54,13 +61,17 @@ export function contractValues(c: Pick<Contract, 'number' | 'language' | 'monthl
     schoolInn: brand.inn,
     schoolAddress: brand.address,
     director: brand.director,
-    parentName: student.parentName,
-    parentPhone: student.parentPhone,
     studentFullName: `${student.lastName} ${student.firstName}${student.middleName ? ` ${student.middleName}` : ''}`,
     studentBirthDate: student.birthDate ? fmtDateDMY(student.birthDate) : '—',
-    className: className ?? '—',
-    monthlyFee: fmtMoney(c.monthlyFee),
-    monthlyFeeWords: numberToWords(c.monthlyFee, c.language),
+    studentPhone: student.phone,
+    studentPassport: student.passport ?? '—',
+    studentPinfl: student.pinfl ?? '—',
+    courseName: ctx.courseName ?? '—',
+    courseDuration: ctx.courseDuration ? String(ctx.courseDuration) : '—',
+    groupName: ctx.groupName ?? '—',
+    price: fmtMoney(c.price),
+    priceWords: numberToWords(c.price, c.language),
+    paymentDueDate: fmtDateDMY(ctx.paymentDueDate ?? c.endDate),
     startDate: fmtDateDMY(c.startDate),
     endDate: fmtDateDMY(c.endDate),
   };
@@ -89,8 +100,8 @@ export function parseBlocks(text: string): ContractBlock[] {
 }
 
 const L = {
-  uz: { title: 'TAʼLIM XIZMATLARI SHARTNOMASI', no: '№', signed: 'Elektron tasdiqlangan', phone: 'telefon', unsigned: 'Imzolanmagan qoralama' },
-  ru: { title: 'ДОГОВОР ОБ ОБРАЗОВАТЕЛЬНЫХ УСЛУГАХ', no: '№', signed: 'Электронно подтверждено', phone: 'телефон', unsigned: 'Неподписанный черновик' },
+  uz: { title: 'KASBGA OʻQITISH SHARTNOMASI', no: '№', signed: 'Elektron tasdiqlangan', phone: 'telefon', unsigned: 'Imzolanmagan qoralama' },
+  ru: { title: 'ДОГОВОР О ПРОФЕССИОНАЛЬНОМ ОБУЧЕНИИ', no: '№', signed: 'Электронно подтверждено', phone: 'телефон', unsigned: 'Неподписанный черновик' },
 } satisfies Record<Lang, Record<string, string>>;
 
 export function contractPdf(contract: Pick<Contract, 'number' | 'language' | 'signedAt' | 'signerPhone'>, template: Pick<ContractTemplate, 'body'>, values: ContractValues): Promise<Buffer> {
@@ -127,11 +138,20 @@ export function contractPdf(contract: Pick<Contract, 'number' | 'language' | 'si
 }
 
 const RCPT = {
-  uz: { title: 'TOʻLOV CHEKI', student: 'Oʻquvchi', cls: 'Sinf', amount: 'Summa', words: 'Soʻz bilan', method: 'Usul', period: 'Davr', by: 'Qabul qildi', thanks: 'Rahmat!', currency: 'soʻm', methods: { CASH: 'Naqd', CARD: 'Karta', CLICK: 'Click', PAYME: 'Payme', TRANSFER: 'Bank oʻtkazmasi' } },
-  ru: { title: 'КВИТАНЦИЯ ОБ ОПЛАТЕ', student: 'Ученик', cls: 'Класс', amount: 'Сумма', words: 'Прописью', method: 'Способ', period: 'Период', by: 'Принял', thanks: 'Спасибо!', currency: 'сум', methods: { CASH: 'Наличные', CARD: 'Карта', CLICK: 'Click', PAYME: 'Payme', TRANSFER: 'Банковский перевод' } },
+  uz: { title: 'TOʻLOV CHEKI', student: 'Tinglovchi', group: 'Guruh', course: 'Kurs', amount: 'Summa', words: 'Soʻz bilan', method: 'Usul', left: 'Qoldiq qarz', by: 'Qabul qildi', thanks: 'Rahmat!', currency: 'soʻm', methods: { CASH: 'Naqd', CARD: 'Karta', CLICK: 'Click', PAYME: 'Payme', TRANSFER: 'Bank oʻtkazmasi' } },
+  ru: { title: 'КВИТАНЦИЯ ОБ ОПЛАТЕ', student: 'Слушатель', group: 'Группа', course: 'Курс', amount: 'Сумма', words: 'Прописью', method: 'Способ', left: 'Остаток долга', by: 'Принял', thanks: 'Спасибо!', currency: 'сум', methods: { CASH: 'Наличные', CARD: 'Карта', CLICK: 'Click', PAYME: 'Payme', TRANSFER: 'Банковский перевод' } },
 } as const;
 
-export function receiptPdf(payment: Payment, studentName: string, className: string | null, receivedBy: string | null, lang: Lang): Promise<Buffer> {
+export interface ReceiptInfo {
+  studentName: string;
+  courseName: string | null;
+  groupName: string | null;
+  receivedByName: string | null;
+  /** Debt left after this payment; omitted for older receipts where it would be misleading. */
+  debtAfter: number | null;
+}
+
+export function receiptPdf(payment: Payment, info: ReceiptInfo, lang: Lang): Promise<Buffer> {
   const l = RCPT[lang];
   const row = (k: string, v: string): Content => ({ columns: [{ text: pdfText(k), width: 70, color: '#64748B' }, { text: pdfText(v), bold: true }], margin: [0, 2, 0, 2] });
   return render({
@@ -141,13 +161,14 @@ export function receiptPdf(payment: Payment, studentName: string, className: str
       { text: pdfText(`${brand.address} · ${brand.phone}`), fontSize: 8, color: '#64748B', alignment: 'center', margin: [0, 2, 0, 8] },
       { text: pdfText(`${l.title} № ${payment.id.replace(/\D/g, '').padStart(6, '0')}`), bold: true, alignment: 'center', margin: [0, 0, 0, 2] },
       { text: fmtDateTime(payment.paidAt), alignment: 'center', fontSize: 9, color: '#64748B', margin: [0, 0, 0, 10] },
-      row(l.student, studentName),
-      row(l.cls, className ?? '—'),
-      row(l.period, payment.period ?? '—'),
+      row(l.student, info.studentName),
+      row(l.course, info.courseName ?? '—'),
+      row(l.group, info.groupName ?? '—'),
       row(l.method, l.methods[payment.method]),
       row(l.amount, `${fmtMoney(payment.amount)} ${l.currency}`),
       { text: pdfText(`${l.words}: ${moneyToWords(payment.amount, lang)}`), fontSize: 9, italics: true, margin: [0, 6, 0, 8] },
-      row(l.by, receivedBy ?? '—'),
+      ...(info.debtAfter !== null ? [row(l.left, `${fmtMoney(Math.max(0, info.debtAfter))} ${l.currency}`)] : []),
+      row(l.by, info.receivedByName ?? '—'),
       { text: pdfText(l.thanks), alignment: 'center', margin: [0, 12, 0, 0], color: '#64748B' },
     ],
   });

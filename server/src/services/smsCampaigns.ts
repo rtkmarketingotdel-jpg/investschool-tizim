@@ -7,7 +7,8 @@ import type { Lang, SmsCampaign, SmsCategory, SmsMessage, Student } from '../dat
 import { toLocalDate } from '../lib/date.js';
 import { ApiError } from '../lib/errors.js';
 import { isValidPhone, normalizeSms, renderVars, smsInfo, templateVars, toPhone } from '../lib/smsText.js';
-import { classRepo } from '../repositories/classRepo.js';
+import { courseRepo } from '../repositories/courseRepo.js';
+import { groupRepo } from '../repositories/groupRepo.js';
 import { audit, notifyRoles } from '../repositories/notificationRepo.js';
 import { fullName } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
@@ -15,12 +16,12 @@ import { debtMap } from './finance.js';
 import { deliverSms } from './sms.js';
 
 export type Audience =
-  | { kind: 'ALL_PARENTS' }
-  | { kind: 'CLASSES'; classIds: string[] }
+  | { kind: 'ALL_STUDENTS'; includeGraduates: boolean }
+  | { kind: 'GROUPS'; groupIds: string[] }
   | { kind: 'BRANCH'; branchId: string }
   | { kind: 'DEBTORS'; minOverdueDays: number }
   | { kind: 'STUDENTS'; studentIds: string[] }
-  | { kind: 'STAFF'; scope: 'ALL' | 'TEACHERS' | 'TUTORS'; branchId: string | null }
+  | { kind: 'STAFF'; scope: 'ALL' | 'TEACHERS'; branchId: string | null }
   | { kind: 'NUMBERS'; numbers: string[] };
 
 export interface Recipient {
@@ -31,22 +32,17 @@ export interface Recipient {
 }
 
 const MAX_MESSAGES = 5000;
-const PARENT_VARS = ['parentName', 'studentName', 'className', 'debt', 'overdueDays', 'month', 'school'];
+const STUDENT_VARS = ['name', 'studentName', 'groupName', 'courseName', 'startDate', 'debt', 'overdueDays', 'dueDate', 'school'];
 const STAFF_VARS = ['name', 'position', 'school'];
-const DEBT_VARS = ['debt', 'overdueDays', 'month'];
-const PER_STUDENT_VARS = ['studentName', 'className', ...DEBT_VARS];
+const DEBT_VARS = ['debt', 'overdueDays', 'dueDate'];
 
 const fmt = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-const MONTHS: Record<Lang, string[]> = {
-  uz: ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'],
-  ru: ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'],
-};
-const monthName = (period: string | null, lang: Lang) => (period ? (MONTHS[lang][Number(period.slice(5, 7)) - 1] ?? '') : '');
+const dmy = (d: string | null) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}` : '');
 
 export const usesFinance = (text: string, audience: Audience) =>
   audience.kind === 'DEBTORS' || templateVars(text).some((v) => DEBT_VARS.includes(v));
 
-/** Resolves an audience to concrete recipients. Parent audiences are one row per (parent phone, student). */
+/** Resolves an audience to concrete recipients: one row per (phone, trainee). */
 export async function resolveAudience(audience: Audience, opts: { bothPhones: boolean; lang: Lang }): Promise<Recipient[]> {
   const school = brand.name;
   if (audience.kind === 'NUMBERS') {
@@ -58,18 +54,21 @@ export async function resolveAudience(audience: Audience, opts: { bothPhones: bo
   }
   if (audience.kind === 'STAFF') {
     const users = (await userRepo.list()).filter(
-      (u) => u.isActive && (audience.scope === 'ALL' || (audience.scope === 'TEACHERS' ? u.isTeacher : u.isTutor)) && (!audience.branchId || u.branchId === audience.branchId),
+      (u) => u.isActive && (audience.scope === 'ALL' || u.isTeacher) && (!audience.branchId || u.branchId === audience.branchId),
     );
     return users.map((u) => ({ phone: u.phone, name: u.fullName, studentId: null, vars: { name: u.fullName.split(' ')[1] ?? u.fullName, position: u.position, school } }));
   }
 
-  const [debts, classes] = await Promise.all([debtMap(), classRepo.list()]);
-  const className = new Map(classes.map((c) => [c.id, c.name]));
+  const [debts, groups, courses] = await Promise.all([debtMap(), groupRepo.list(), courseRepo.list()]);
+  const groupById = new Map(groups.map((g) => [g.id, g]));
+  const courseName = new Map(courses.map((c) => [c.id, c.name]));
+  // graduates are reached only when asked for (alumni news) or when they still owe money
   let list: Student[] = students.filter((s) => s.status !== 'LEFT');
-  if (audience.kind === 'CLASSES') list = list.filter((s) => s.classId && audience.classIds.includes(s.classId));
+  if (audience.kind === 'ALL_STUDENTS' && !audience.includeGraduates) list = list.filter((s) => s.status === 'ACTIVE');
+  if (audience.kind === 'GROUPS') list = list.filter((s) => s.groupId && audience.groupIds.includes(s.groupId));
   if (audience.kind === 'BRANCH') {
-    const ids = new Set(classes.filter((c) => c.branchId === audience.branchId).map((c) => c.id));
-    list = list.filter((s) => s.classId && ids.has(s.classId));
+    const ids = new Set(groups.filter((g) => g.branchId === audience.branchId).map((g) => g.id));
+    list = list.filter((s) => s.status === 'ACTIVE' && s.groupId && ids.has(s.groupId));
   }
   if (audience.kind === 'STUDENTS') list = list.filter((s) => audience.studentIds.includes(s.id));
   if (audience.kind === 'DEBTORS') {
@@ -80,12 +79,14 @@ export async function resolveAudience(audience: Audience, opts: { bothPhones: bo
   }
   return list.flatMap((s) => {
     const d = debts.get(s.id);
+    const g = s.groupId ? groupById.get(s.groupId) : undefined;
     const vars = {
-      parentName: s.parentName, studentName: fullName(s), className: (s.classId && className.get(s.classId)) || '',
-      debt: fmt(Math.max(0, d?.debt ?? 0)), overdueDays: String(d?.overdueDays ?? 0), month: monthName(d?.oldestPeriod ?? null, opts.lang), school,
+      name: s.firstName, studentName: fullName(s), groupName: g?.name ?? '', courseName: (g && courseName.get(g.courseId)) || '',
+      startDate: dmy(g?.startDate ?? null), debt: fmt(Math.max(0, d?.debt ?? 0)), overdueDays: String(d?.overdueDays ?? 0),
+      dueDate: dmy(d?.oldestDueDate ?? null), school,
     };
-    const phones = [s.parentPhone, ...(opts.bothPhones && s.parentPhone2 ? [s.parentPhone2] : [])];
-    return phones.map((phone) => ({ phone, name: s.parentName, studentId: s.id, vars }));
+    const phones = [s.phone, ...(opts.bothPhones && s.phone2 ? [s.phone2] : [])];
+    return phones.map((phone) => ({ phone, name: fullName(s), studentId: s.id, vars }));
   });
 }
 
@@ -99,12 +100,13 @@ export interface Prepared {
 /** Renders the text for every recipient, drops invalid/duplicate numbers and counts the SMS parts. */
 export async function prepare(text: string, audience: Audience, opts: { bothPhones: boolean; lang: Lang }): Promise<Prepared> {
   const used = templateVars(text);
-  const allowed = audience.kind === 'STAFF' ? STAFF_VARS : audience.kind === 'NUMBERS' ? ['school'] : PARENT_VARS;
+  const allowed = audience.kind === 'STAFF' ? STAFF_VARS : audience.kind === 'NUMBERS' ? ['school'] : STUDENT_VARS;
   const bad = used.filter((v) => !allowed.includes(v));
   if (bad.length) throw new ApiError(400, 'SMS_BAD_VARIABLE', { variables: bad });
   if (!normalizeSms(text)) throw new ApiError(400, 'SMS_EMPTY_TEXT');
 
-  const perStudent = used.some((v) => PER_STUDENT_VARS.includes(v));
+  // a trainee has their own phone, so every personalised text is per phone; only a shared phone (relatives) gets one copy per trainee
+  const perStudent = used.some((v) => v !== 'school');
   const recipients = await resolveAudience(audience, opts);
   const seen = new Set<string>();
   const out: Prepared['messages'] = [];

@@ -56,8 +56,8 @@ export function ContractTable({ rows }: { rows: ContractRow[] }) {
         <tr>
           <Th>{t('finance.contracts.number')}</Th>
           <Th>{t('finance.payments.student')}</Th>
-          <Th>{t('students.parentName')}</Th>
-          <Th numeric>{t('students.monthlyFee')}</Th>
+          <Th>{t('students.phone')}</Th>
+          <Th numeric>{t('students.coursePrice')}</Th>
           <Th>{t('finance.contracts.term')}</Th>
           <Th>{t('attendance.statusCol')}</Th>
           <Th>{t('finance.contracts.actions')}</Th>
@@ -68,8 +68,8 @@ export function ContractTable({ rows }: { rows: ContractRow[] }) {
           <Tr key={c.id}>
             <Td className="whitespace-nowrap">{c.number}</Td>
             <Td>{c.studentName}</Td>
-            <Td className="text-text-muted">{c.parentName}</Td>
-            <Td numeric>{formatMoney(c.monthlyFee, cur)}</Td>
+            <Td className="whitespace-nowrap text-text-muted">{c.studentPhone}</Td>
+            <Td numeric>{formatMoney(c.price, cur)}</Td>
             <Td className="whitespace-nowrap text-sm text-text-muted">{fmtDay(c.startDate, i18n.language, 'dd.MM.yy')} – {fmtDay(c.endDate, i18n.language, 'dd.MM.yy')}</Td>
             <Td><StatusCell c={c} /></Td>
             <Td><ContractActions c={c} /></Td>

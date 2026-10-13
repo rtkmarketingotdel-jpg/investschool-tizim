@@ -18,12 +18,12 @@ const CATEGORIES = ['DEBT', 'GREETING', 'WARNING', 'OTHER'] as const;
 const phone = z.string().min(1).max(30); // bad numbers are counted as "skipped" by the preview, not rejected
 
 const audienceSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('ALL_PARENTS') }),
-  z.object({ kind: z.literal('CLASSES'), classIds: z.array(z.string()).min(1).max(50) }),
+  z.object({ kind: z.literal('ALL_STUDENTS'), includeGraduates: z.boolean().default(false) }),
+  z.object({ kind: z.literal('GROUPS'), groupIds: z.array(z.string()).min(1).max(50) }),
   z.object({ kind: z.literal('BRANCH'), branchId: z.string() }),
   z.object({ kind: z.literal('DEBTORS'), minOverdueDays: z.number().int().min(0).max(365).default(0) }),
   z.object({ kind: z.literal('STUDENTS'), studentIds: z.array(z.string()).min(1).max(500) }),
-  z.object({ kind: z.literal('STAFF'), scope: z.enum(['ALL', 'TEACHERS', 'TUTORS']), branchId: z.string().nullable().default(null) }),
+  z.object({ kind: z.literal('STAFF'), scope: z.enum(['ALL', 'TEACHERS']), branchId: z.string().nullable().default(null) }),
   z.object({ kind: z.literal('NUMBERS'), numbers: z.array(phone).min(1).max(200) }),
 ]);
 
@@ -36,7 +36,8 @@ const composeSchema = z.object({
 
 function audienceLabel(a: Audience): string {
   switch (a.kind) {
-    case 'CLASSES': return `CLASSES:${a.classIds.length}`;
+    case 'GROUPS': return `GROUPS:${a.groupIds.length}`;
+    case 'ALL_STUDENTS': return a.includeGraduates ? 'ALL_STUDENTS:GRAD' : 'ALL_STUDENTS';
     case 'DEBTORS': return `DEBTORS:${a.minOverdueDays}`;
     case 'STUDENTS': return `STUDENTS:${a.studentIds.length}`;
     case 'STAFF': return `STAFF:${a.scope}`;
@@ -107,7 +108,7 @@ smsRouter.delete('/templates/:id', async (req, res, next) => {
   }
 });
 
-/** Free-number and staff audiences are for the director and chief manager only (an accountant texts parents/debtors). */
+/** Free-number and staff audiences are for the director and chief manager only (an accountant texts trainees/debtors). */
 function assertAudience(role: string, kind: string) {
   if ((kind === 'NUMBERS' || kind === 'STAFF') && role === 'ACCOUNTANT') throw new ApiError(403, 'FORBIDDEN');
 }

@@ -1,4 +1,4 @@
-import { students } from '../data/mockStudents.js';
+import { groups, students } from '../data/mockStudents.js';
 import type { Student, StudentStatus } from '../data/types.js';
 
 let counter = students.length + 1;
@@ -6,10 +6,9 @@ let counter = students.length + 1;
 export interface StudentFilter {
   q?: string;
   status?: StudentStatus;
-  classId?: string;
-  boarding?: boolean;
-  /** exact club name from the catalog */
-  club?: string;
+  groupId?: string;
+  /** any group of this course */
+  courseId?: string;
   sort?: 'name' | 'date';
 }
 
@@ -19,15 +18,16 @@ export const studentRepo = {
   async list(f: StudentFilter) {
     const q = f.q?.trim().toLowerCase();
     const digits = q?.replace(/\D/g, '');
+    const ofCourse = f.courseId ? new Set(groups.filter((g) => g.courseId === f.courseId).map((g) => g.id)) : null;
     const rows = students.filter((s) => {
       if (f.status && s.status !== f.status) return false;
-      if (f.classId && s.classId !== f.classId) return false;
-      if (f.boarding !== undefined && s.isBoarding !== f.boarding) return false;
-      if (f.club && !s.clubs.includes(f.club)) return false;
+      if (f.groupId && s.groupId !== f.groupId) return false;
+      if (ofCourse && !(s.groupId && ofCourse.has(s.groupId))) return false;
       if (q) {
         const byName = fullName(s).toLowerCase().includes(q);
-        const byPhone = !!digits && (s.parentPhone.includes(digits) || (s.parentPhone2 ?? '').includes(digits));
-        if (!byName && !byPhone) return false;
+        const byPhone = !!digits && (s.phone.includes(digits) || (s.phone2 ?? '').includes(digits));
+        const byDoc = !!s.passport && s.passport.toLowerCase().includes(q.replace(/\s/g, ''));
+        if (!byName && !byPhone && !byDoc) return false;
       }
       return true;
     });
@@ -41,11 +41,11 @@ export const studentRepo = {
   async findById(id: string) {
     return students.find((s) => s.id === id) ?? null;
   },
-  /** Seats taken per class (ACTIVE + TRIAL). */
+  /** Seats taken per group (everyone who did not leave, graduates included). */
   async occupancy() {
     const map = new Map<string, number>();
     for (const s of students) {
-      if (s.classId && s.status !== 'LEFT') map.set(s.classId, (map.get(s.classId) ?? 0) + 1);
+      if (s.groupId && s.status !== 'LEFT') map.set(s.groupId, (map.get(s.groupId) ?? 0) + 1);
     }
     return map;
   },

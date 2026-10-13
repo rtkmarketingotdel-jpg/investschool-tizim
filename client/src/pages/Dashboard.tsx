@@ -64,7 +64,7 @@ export default function Dashboard() {
       <PageHeader title={t('nav.dashboard')} subtitle={t('dashboard.welcome', { name: user?.fullName.split(' ')[1] ?? user?.fullName })} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Kpi icon={GraduationCap} title={t('dashboard.activeStudents')} value={String(data.students.active)} sub={t('dashboard.newThisMonth', { count: data.students.newThisMonth })} />
+        <Kpi icon={GraduationCap} title={t('dashboard.activeStudents')} value={String(data.students.active)} sub={[t('dashboard.newThisMonth', { count: data.students.newThisMonth }), data.students.graduatedThisMonth ? t('dashboard.graduatedThisMonth', { count: data.students.graduatedThisMonth }) : ''].filter(Boolean).join(' · ')} />
         {data.attendance && (
           <Kpi
             icon={CalendarCheck}
@@ -126,17 +126,22 @@ export default function Dashboard() {
         )}
         <Card>
           <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="text-lg font-medium">{t('dashboard.classFill')}</h2>
-            <span className="text-sm font-medium text-success">{t('dashboard.freeSeats', { count: data.classFill.freeSeats })}</span>
+            <h2 className="text-lg font-medium">{t('dashboard.groupFill')}</h2>
+            <span className="text-sm font-medium text-success">{t('dashboard.freeSeats', { count: data.groupFill.freeSeats })}</span>
           </div>
+          {data.groupFill.items.length === 0 && <p className="py-8 text-center text-text-muted">{t('dashboard.noOpenGroups')}</p>}
           <ul className="space-y-3">
-            {data.classFill.items.map((c) => {
+            {data.groupFill.items.map((c) => {
               const pctC = Math.round((c.count / c.capacity) * 100);
               return (
                 <li key={c.id}>
-                  <div className="flex justify-between text-sm">
-                    <Link to={`/students?classId=${c.id}`} className="font-medium hover:text-primary">{c.name} · {c.count}/{c.capacity}</Link>
-                    {c.capacity - c.count > 0 && <span className="text-success">+{c.capacity - c.count}</span>}
+                  <div className="flex justify-between gap-2 text-sm">
+                    <Link to={`/students?groupId=${c.id}`} className="min-w-0 truncate font-medium hover:text-primary">
+                      {c.name} <span className="font-normal text-text-muted">· {c.courseName}</span> · {c.count}/{c.capacity}
+                    </Link>
+                    {c.status === 'PLANNED'
+                      ? <span className="shrink-0 text-primary">{t('dashboard.startsOn', { date: fmtDay(c.startDate, i18n.language, 'd MMM') })}</span>
+                      : c.capacity - c.count > 0 && <span className="shrink-0 text-success">+{c.capacity - c.count}</span>}
                   </div>
                   <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div className={pctC >= 100 ? 'h-full bg-red-500' : 'h-full bg-primary'} style={{ width: `${Math.min(100, pctC)}%` }} />
@@ -185,7 +190,7 @@ export default function Dashboard() {
                       <Avatar name={d.name} size={40} />
                       <div className="min-w-0 flex-1">
                         <Link to={`/students/${d.studentId}`} className="block truncate font-medium hover:text-primary">{d.name}</Link>
-                        <p className="text-[13px] text-text-muted">{d.className ?? '—'} · {t('dashboard.days', { count: d.overdueDays })}</p>
+                        <p className="text-[13px] text-text-muted">{d.groupName ?? '—'} · {t('dashboard.days', { count: d.overdueDays })}</p>
                       </div>
                       <span className="font-medium tabular-nums text-danger">{formatMoney(d.debt, cur)}</span>
                     </li>

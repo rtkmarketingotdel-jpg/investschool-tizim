@@ -8,7 +8,7 @@ import { schoolApi } from '@/lib/schoolApi';
 import { todayLocal } from '@/lib/dates';
 import { useDebounce } from '@/lib/useDebounce';
 import { cn } from '@/lib/cn';
-import { PARENT_VARS, SMS_CATEGORIES, STAFF_VARS, smsApi, type Audience, type SmsCategory } from '@/lib/smsApi';
+import { SMS_CATEGORIES, STAFF_VARS, STUDENT_VARS, smsApi, type Audience, type SmsCategory } from '@/lib/smsApi';
 import { Button, Card, Input, Modal, Select, Skeleton, useToast } from '../ui';
 import { Checkbox } from '../FormBits';
 import { MessageEditor } from './MessageEditor';
@@ -17,12 +17,12 @@ type Kind = Audience['kind'];
 
 /** Holidays with a ready greeting; the date is the next occurrence (sent at 09:00). Eid has no fixed date. */
 const HOLIDAYS = [
-  { key: 'navruz', month: 3, day: 21, tpl: 'st4', kind: 'ALL_PARENTS' as Kind },
-  { key: 'women', month: 3, day: 8, tpl: 'st7', kind: 'ALL_PARENTS' as Kind },
-  { key: 'independence', month: 9, day: 1, tpl: 'st5', kind: 'ALL_PARENTS' as Kind },
-  { key: 'teachers', month: 10, day: 1, tpl: 'st8', kind: 'STAFF' as Kind },
-  { key: 'newyear', month: 12, day: 31, tpl: 'st6', kind: 'ALL_PARENTS' as Kind },
-  { key: 'eid', month: 0, day: 0, tpl: 'st9', kind: 'ALL_PARENTS' as Kind },
+  { key: 'navruz', month: 3, day: 21, tpl: 'st9', kind: 'ALL_STUDENTS' as Kind },
+  { key: 'women', month: 3, day: 8, tpl: 'st15', kind: 'ALL_STUDENTS' as Kind },
+  { key: 'independence', month: 9, day: 1, tpl: 'st10', kind: 'ALL_STUDENTS' as Kind },
+  { key: 'teachers', month: 10, day: 1, tpl: 'st12', kind: 'STAFF' as Kind },
+  { key: 'newyear', month: 12, day: 31, tpl: 'st11', kind: 'ALL_STUDENTS' as Kind },
+  { key: 'eid', month: 0, day: 0, tpl: 'st13', kind: 'ALL_STUDENTS' as Kind },
 ];
 
 function nextOccurrence(month: number, day: number): string {
@@ -41,11 +41,12 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
   const canFinance = user?.role !== 'TEACHER';
 
   const [category, setCategory] = useState<SmsCategory>(canFinance ? 'DEBT' : 'WARNING');
-  const [kind, setKind] = useState<Kind>(canFinance ? 'DEBTORS' : 'ALL_PARENTS');
-  const [classIds, setClassIds] = useState<string[]>([]);
+  const [kind, setKind] = useState<Kind>(canFinance ? 'DEBTORS' : 'ALL_STUDENTS');
+  const [groupIds, setGroupIds] = useState<string[]>([]);
+  const [includeGraduates, setIncludeGraduates] = useState(false);
   const [branchId, setBranchId] = useState('');
   const [minOverdue, setMinOverdue] = useState('0');
-  const [scope, setScope] = useState<'ALL' | 'TEACHERS' | 'TUTORS'>('ALL');
+  const [scope, setScope] = useState<'ALL' | 'TEACHERS'>('ALL');
   const [numbers, setNumbers] = useState('');
   const [bothPhones, setBothPhones] = useState(false);
   const [lang, setLang] = useState<'uz' | 'ru'>(i18n.language === 'ru' ? 'ru' : 'uz');
@@ -57,19 +58,21 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
 
   const templates = useQuery({ queryKey: ['sms', 'templates'], queryFn: smsApi.templates });
   const status = useQuery({ queryKey: ['sms', 'status'], queryFn: smsApi.status });
-  const classes = useQuery({ queryKey: ['classes'], queryFn: schoolApi.classes });
+  const groups = useQuery({ queryKey: ['groups'], queryFn: schoolApi.groups });
+  // finished groups stay reachable (alumni news, debt reminders), listed after the running ones
+  const groupChips = useMemo(() => [...(groups.data ?? [])].sort((a, b) => Number(a.status === 'FINISHED') - Number(b.status === 'FINISHED')), [groups.data]);
   const branches = useQuery({ queryKey: ['branches'], queryFn: schoolApi.branches });
 
   const audience: Audience | null = useMemo(() => {
     switch (kind) {
-      case 'CLASSES': return classIds.length ? { kind, classIds } : null;
+      case 'GROUPS': return groupIds.length ? { kind, groupIds } : null;
       case 'BRANCH': return branchId ? { kind, branchId } : null;
       case 'DEBTORS': return { kind, minOverdueDays: Math.max(0, Number(minOverdue) || 0) };
       case 'STAFF': return { kind, scope, branchId: branchId || null };
       case 'NUMBERS': { const n = splitNumbers(numbers); return n.length ? { kind, numbers: n } : null; }
-      default: return { kind: 'ALL_PARENTS' };
+      default: return { kind: 'ALL_STUDENTS', includeGraduates };
     }
-  }, [kind, classIds, branchId, minOverdue, scope, numbers]);
+  }, [kind, groupIds, includeGraduates, branchId, minOverdue, scope, numbers]);
 
   const debouncedText = useDebounce(text, 400);
   const compose = audience && debouncedText.trim() ? { audience, text: debouncedText, bothPhones, lang } : null;
@@ -77,7 +80,7 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
 
   useEffect(() => {
     // a fresh category starts with a sensible audience
-    setKind(category === 'DEBT' && canFinance ? 'DEBTORS' : kind === 'DEBTORS' && category !== 'DEBT' ? 'ALL_PARENTS' : kind);
+    setKind(category === 'DEBT' && canFinance ? 'DEBTORS' : kind === 'DEBTORS' && category !== 'DEBT' ? 'ALL_STUDENTS' : kind);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
@@ -90,6 +93,7 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
     setCategory('GREETING');
     setKind(h.kind);
     if (h.kind === 'STAFF') setScope('ALL');
+    else setIncludeGraduates(true); // greetings also reach the alumni
     pickTemplate(h.tpl);
     if (h.month) { setLater(true); setWhen(`${nextOccurrence(h.month, h.day)}T09:00`); } else setLater(false);
   };
@@ -100,9 +104,9 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
     onError: (e) => { setConfirm(false); toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'); },
   });
 
-  const vars = (kind === 'STAFF' ? STAFF_VARS : kind === 'NUMBERS' ? ['school'] : PARENT_VARS).filter((v) => canFinance || !['debt', 'overdueDays', 'month'].includes(v));
+  const vars = (kind === 'STAFF' ? STAFF_VARS : kind === 'NUMBERS' ? ['school'] : STUDENT_VARS).filter((v) => canFinance || !['debt', 'overdueDays', 'dueDate'].includes(v));
   const tplList = (templates.data ?? []).filter((x) => x.language === lang && (category === 'OTHER' || x.category === category));
-  const isParents = kind !== 'STAFF' && kind !== 'NUMBERS';
+  const isStudents = kind !== 'STAFF' && kind !== 'NUMBERS';
   const previewError = preview.isError ? errorCode(preview.error) : null;
   const badVars = preview.isError && previewError === 'SMS_BAD_VARIABLE' ? ((preview.error as { response?: { data?: { details?: { variables?: string[] } } } }).response?.data?.details?.variables ?? []) : [];
   const canSend = !!audience && !!text.trim() && !!preview.data && preview.data.count > 0 && (!later || !!when);
@@ -138,18 +142,23 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
         <Card className="space-y-4">
           <h3 className="text-lg">{t('sms.compose.audience')}</h3>
           <Select aria-label={t('sms.compose.audience')} value={kind} onChange={(e) => setKind(e.target.value as Kind)}>
-            <option value="ALL_PARENTS">{t('sms.audience.ALL_PARENTS')}</option>
-            <option value="CLASSES">{t('sms.audience.CLASSES')}</option>
+            <option value="ALL_STUDENTS">{t('sms.audience.ALL_STUDENTS')}</option>
+            <option value="GROUPS">{t('sms.audience.GROUPS')}</option>
             <option value="BRANCH">{t('sms.audience.BRANCH')}</option>
             {canFinance && <option value="DEBTORS">{t('sms.audience.DEBTORS')}</option>}
             <option value="STAFF">{t('sms.audience.STAFF')}</option>
             <option value="NUMBERS">{t('sms.audience.NUMBERS')}</option>
           </Select>
-          {kind === 'CLASSES' && (
+          {kind === 'ALL_STUDENTS' && <Checkbox label={t('sms.audience.includeGraduates')} checked={includeGraduates} onChange={setIncludeGraduates} />}
+          {kind === 'GROUPS' && (
             <div className="flex flex-wrap gap-2">
-              {classes.data?.map((c) => {
-                const on = classIds.includes(c.id);
-                return <button key={c.id} type="button" aria-pressed={on} onClick={() => setClassIds(on ? classIds.filter((x) => x !== c.id) : [...classIds, c.id])} className={cn('rounded-full border px-3 py-1.5 text-sm', on ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text-muted')}>{c.name}</button>;
+              {groupChips.map((g) => {
+                const on = groupIds.includes(g.id);
+                return (
+                  <button key={g.id} type="button" aria-pressed={on} title={g.courseName} onClick={() => setGroupIds(on ? groupIds.filter((x) => x !== g.id) : [...groupIds, g.id])} className={cn('rounded-full border px-3 py-1.5 text-sm', on ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text-muted', g.status === 'FINISHED' && !on && 'opacity-60')}>
+                    {g.name}
+                  </button>
+                );
               })}
             </div>
           )}
@@ -164,7 +173,6 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
             <Select aria-label={t('staff.type')} value={scope} onChange={(e) => setScope(e.target.value as typeof scope)}>
               <option value="ALL">{t('sms.audience.staffAll')}</option>
               <option value="TEACHERS">{t('staff.teachersOnly')}</option>
-              <option value="TUTORS">{t('staff.tutorsOnly')}</option>
             </Select>
           )}
           {kind === 'NUMBERS' && (
@@ -173,7 +181,7 @@ export function ComposeTab({ onSent }: { onSent: (campaignId: string) => void })
               <textarea rows={3} value={numbers} onChange={(e) => setNumbers(e.target.value)} placeholder="+998 90 123 45 67" className="w-full rounded-xl border border-border bg-surface-muted p-3" />
             </label>
           )}
-          {isParents && <Checkbox label={t('sms.audience.bothPhones')} checked={bothPhones} onChange={setBothPhones} />}
+          {isStudents && <Checkbox label={t('sms.audience.bothPhones')} checked={bothPhones} onChange={setBothPhones} />}
         </Card>
 
         <Card className="space-y-4">
