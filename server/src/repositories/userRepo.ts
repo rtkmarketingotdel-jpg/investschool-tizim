@@ -2,6 +2,7 @@ import { adjustments, notifications, payrolls } from '../data/mockFinance.js';
 import { attendances, users } from '../data/mockStore.js';
 import { groups } from '../data/mockStudents.js';
 import type { PublicUser, User } from '../data/types.js';
+import { newId } from '../lib/id.js';
 
 export const toPublicUser = (user: User): PublicUser => {
   const { passwordHash, achievements, documents, ...rest } = user;
@@ -10,8 +11,6 @@ export const toPublicUser = (user: User): PublicUser => {
   void documents;
   return rest;
 };
-
-let nextId = 100;
 
 export const userRepo = {
   async findById(id: string) {
@@ -24,7 +23,7 @@ export const userRepo = {
     return [...users];
   },
   async create(data: Omit<User, 'id' | 'createdAt'>) {
-    const rec: User = { id: `u${nextId++}`, createdAt: new Date(), ...data };
+    const rec: User = { id: newId('u'), createdAt: new Date(), ...data };
     users.push(rec);
     return rec;
   },

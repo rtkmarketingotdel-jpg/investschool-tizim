@@ -157,6 +157,10 @@ export interface Student {
   coursePrice: number;
   discountPercent: number;
   status: StudentStatus;
+  /** Id of the trainee in the system that sent them over the API (Nazorat AI); makes repeated sends idempotent. */
+  externalId: string | null;
+  /** Course label the external system sent (kept to place the trainee once the label is linked to a group). */
+  externalCourse: string | null;
   enrolledAt: string; // YYYY-MM-DD
   leftAt: string | null;
   notes: string | null;
@@ -308,4 +312,24 @@ export interface SmsCampaign {
   createdById: string | null;
   auto: boolean;
   messages: SmsMessage[];
+}
+
+/** Key for the integration API (/api/v1). Only a hash is kept; the full key is shown once when it is created. */
+export interface ApiKey {
+  id: string;
+  name: string;
+  /** First characters of the key, shown in the list to tell keys apart. */
+  prefix: string;
+  hash: string;
+  createdAt: Date;
+  createdById: string | null;
+  lastUsedAt: Date | null;
+}
+
+/** Maps a course label used by an external system (e.g. Nazorat AI "Samarqand santexnika") to a group of this centre. */
+export interface CourseLink {
+  id: string;
+  label: string;
+  /** null until the director links the label (it is recorded automatically when a trainee arrives with it). */
+  groupId: string | null;
 }

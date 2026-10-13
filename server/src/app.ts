@@ -22,6 +22,9 @@ import { publicContractsRouter } from './routes/publicContracts.js';
 import { settingsRouter } from './routes/settings.js';
 import { attendanceRouter } from './routes/attendance.js';
 import { UPLOAD_DIR } from './services/attendance.js';
+import { schedulePersist } from './db/store.js';
+import { integrationRouter } from './routes/integration.js';
+import { v1Router } from './routes/v1.js';
 
 export function createApp() {
   const app = express();
@@ -29,6 +32,11 @@ export function createApp() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({ origin: [...env.clientUrl.split(',').map((u) => u.trim()), 'http://localhost:5173'] }));
   app.use(express.json({ limit: '8mb' }));
+  // every write request is saved to the database once it has been answered
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') res.on('finish', () => schedulePersist());
+    next();
+  });
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
   app.use('/api/auth', authRouter);
@@ -49,6 +57,8 @@ export function createApp() {
   app.use('/api/settings', settingsRouter);
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/dashboard', dashboardRouter);
+  app.use('/api/integration', integrationRouter);
+  app.use('/api/v1', v1Router);
   app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use(notFound);

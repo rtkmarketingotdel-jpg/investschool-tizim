@@ -52,17 +52,15 @@ export const contractTemplates: ContractTemplate[] = [
   { id: 't1', name: 'Kasbga oʻqitish shartnomasi (uz)', language: 'uz', body: TEMPLATE_UZ, isDefault: true },
 ];
 
-let seq = 1;
 export const contracts: Contract[] = [
   {
-    id: 'ct1', number: `${settings.contractPrefix}-${today.slice(0, 4)}-${String(seq++).padStart(4, '0')}`, studentId: student.id,
+    id: 'ct1', number: `${settings.contractPrefix}-${today.slice(0, 4)}-0001`, studentId: student.id,
     templateId: 't1', language: 'uz', price, startDate: group.startDate, endDate: group.endDate, status: 'SIGNED',
     publicToken: randomBytes(16).toString('hex'), otpHash: null, otpExpiresAt: null, otpAttempts: 0, otpDemoCode: null,
     signedAt: new Date(`${student.enrolledAt}T12:00:00+05:00`), signedIp: '84.54.72.10', signedUserAgent: 'Mozilla/5.0 (Linux; Android 13)',
     signerPhone: student.phone, snapshot: null, createdAt: new Date(`${student.enrolledAt}T10:00:00+05:00`),
   },
 ];
-export const nextContractSeq = () => seq++;
 
 export const notifications: Notification[] = [
   {

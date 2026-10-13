@@ -163,7 +163,7 @@ meRouter.post('/group/:groupId/students', validateBody(groupStudentSchema), asyn
     const course = await courseRepo.findById(group.courseId);
     const body = req.body as z.infer<typeof groupStudentSchema>;
     const rec = await studentRepo.create({
-      ...body, groupId: group.id, passport: null, pinfl: null, coursePrice: course?.price ?? 0, discountPercent: 0, status: 'ACTIVE',
+      ...body, groupId: group.id, passport: null, pinfl: null, externalId: null, externalCourse: null, coursePrice: course?.price ?? 0, discountPercent: 0, status: 'ACTIVE',
       enrolledAt: toLocalDate(), leftAt: null, notes: null,
     });
     await syncCourseCharge(rec);

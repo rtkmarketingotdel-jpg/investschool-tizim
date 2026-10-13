@@ -47,6 +47,7 @@ export default function StudentDetail() {
     [t('students.course'), s.courseName ?? '—'],
     [t('students.group'), s.groupName ?? '—'],
     [t('students.enrolledAt'), fmtDay(s.enrolledAt, i18n.language, 'd MMMM yyyy')],
+    ...(s.externalId ? [[t('students.fromNazorat'), `${s.externalCourse ?? '—'} · ID ${s.externalId}`] as [string, string]] : []),
     ...(s.leftAt ? [[t('students.leftAt'), fmtDay(s.leftAt, i18n.language, 'd MMMM yyyy')] as [string, string]] : []),
     ...(seesFinance
       ? [

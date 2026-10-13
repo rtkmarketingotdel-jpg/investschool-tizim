@@ -149,7 +149,7 @@ studentsRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(studen
   try {
     const body = req.body as StudentInput;
     await assertSeat(body.groupId, body.status);
-    const rec = await studentRepo.create({ ...body, leftAt: body.status === 'LEFT' ? toLocalDate() : null });
+    const rec = await studentRepo.create({ ...body, externalId: null, externalCourse: null, leftAt: body.status === 'LEFT' ? toLocalDate() : null });
     await syncCourseCharge(rec);
     res.status(201).json(await present(rec));
   } catch (e) {

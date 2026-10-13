@@ -1,8 +1,7 @@
 import { groups } from '../data/mockStudents.js';
 import type { Group, GroupStatus } from '../data/types.js';
 import { toLocalDate } from '../lib/date.js';
-
-let counter = groups.length + 1;
+import { newId } from '../lib/id.js';
 
 export const groupStatus = (g: Pick<Group, 'startDate' | 'endDate'>, today = toLocalDate()): GroupStatus =>
   today < g.startDate ? 'PLANNED' : today > g.endDate ? 'FINISHED' : 'ACTIVE';
@@ -19,7 +18,7 @@ export const groupRepo = {
     return groups.find((g) => g.name.toLowerCase() === name.toLowerCase()) ?? null;
   },
   async create(data: Omit<Group, 'id'>) {
-    const rec: Group = { id: `g${counter++}`, ...data };
+    const rec: Group = { id: newId('g'), ...data };
     groups.push(rec);
     return rec;
   },

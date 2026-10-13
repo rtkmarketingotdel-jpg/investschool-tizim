@@ -5,9 +5,10 @@ adult trainees, one-off course billing with instalments, staff attendance and pa
 
 Monorepo: `client/` (React + Vite, Vercel) and `server/` (Express, Railway).
 
-> **No database yet.** The API runs on in-memory mock data (`server/src/data/mockStore.ts`) behind
-> repositories (`server/src/repositories`). Data resets on every restart. The Postgres host (Uzbekistan)
-> will replace only the repository layer. `server/prisma/schema.prisma` is a reference schema.
+> **Storage:** Postgres via `DATABASE_URL` (Railway Postgres). At start-up the server loads all records into memory and
+> writes every change back (one JSONB row per record in the `records` table, see `server/src/db/store.ts`). An empty
+> database is seeded with one demo example of each record. Without `DATABASE_URL` the server runs on that demo data in
+> memory (reset on every restart). Uploaded files (staff photos/documents) still live on the server disk.
 
 ## Deploy
 Push to `main` on GitHub (`rtkmarketingotdel-jpg/investschool-tizim`): Vercel builds `client/` and Railway builds `server/` automatically.
@@ -53,6 +54,15 @@ Until Eskiz is connected it runs in **demo mode** (messages are only recorded, n
 `SMS_PROVIDER=eskiz`, `ESKIZ_EMAIL`, `ESKIZ_PASSWORD`, optionally `ESKIZ_FROM` (sender, default `4546`), then send a test SMS
 from SMS → “Avtomatik va sinov”. Eskiz usually requires templates to be approved first, so keep the approved text in the templates.
 Uzbek text is normalised to plain ASCII apostrophes so it stays GSM-7 (160 chars per part instead of 70).
+
+## Integration API (Nazorat AI)
+Settings → API (director): create an API key (shown once), link external course labels (e.g. "Samarqand santexnika") to groups.
+Requests send `X-API-Key: rtk_…` to `<server>/api/v1`:
+- `POST /students` — a trainee arrived: `externalId`, `firstName`, `lastName`, `phone` required; `course` (label) or `groupId`.
+  The same `externalId` updates instead of duplicating. A linked label places the trainee in the group at the course price
+  (course bill opened); an unknown label is listed in Settings and its waiting trainees are placed as soon as it is linked.
+  Response field `placement`: `placed | unlinked | group_full | group_finished | already_in_group | no_course | group_missing`.
+- `GET /students`, `/students/:id`, `/courses`, `/groups`, `/payments`, `/debtors`, `/staff` (no salaries), `/attendance`.
 
 ## Install as an app (PWA)
 The client is an installable web app: `manifest.webmanifest` is generated at build time from `VITE_BRAND_NAME` / `VITE_BRAND_SHORT`

@@ -1,8 +1,7 @@
 import { adjustments, charges, payments, payrolls } from '../data/mockFinance.js';
 import type { Payment, Payroll, PayrollAdjustment, StudentCharge } from '../data/types.js';
+import { newId } from '../lib/id.js';
 
-let counter = 100_000;
-const nid = (p: string) => `${p}${counter++}`;
 
 export const chargeRepo = {
   async byStudent(studentId: string) {
@@ -12,7 +11,7 @@ export const chargeRepo = {
     return charges;
   },
   async create(data: Omit<StudentCharge, 'id' | 'createdAt'>) {
-    const rec = { id: nid('ch'), createdAt: new Date(), ...data };
+    const rec = { id: newId('ch'), createdAt: new Date(), ...data };
     charges.push(rec);
     return rec;
   },
@@ -33,7 +32,7 @@ export const paymentRepo = {
     return payments.find((p) => p.id === id) ?? null;
   },
   async create(data: Omit<Payment, 'id'>) {
-    const rec = { id: nid('pay'), ...data };
+    const rec = { id: newId('pay'), ...data };
     payments.push(rec);
     return rec;
   },
@@ -47,7 +46,7 @@ export const adjustmentRepo = {
     return adjustments.filter((a) => a.userId === userId);
   },
   async create(data: Omit<PayrollAdjustment, 'id' | 'createdAt'>) {
-    const rec = { id: nid('adj'), createdAt: new Date(), ...data };
+    const rec = { id: newId('adj'), createdAt: new Date(), ...data };
     adjustments.push(rec);
     return rec;
   },
@@ -79,7 +78,7 @@ export const payrollRepo = {
   async upsert(userId: string, period: string, data: Omit<Payroll, 'id' | 'userId' | 'period' | 'status' | 'approvedAt' | 'paidAt'>) {
     const existing = payrolls.find((p) => p.userId === userId && p.period === period);
     if (existing) return Object.assign(existing, data);
-    const rec: Payroll = { id: nid('pr'), userId, period, status: 'DRAFT', approvedAt: null, paidAt: null, ...data };
+    const rec: Payroll = { id: newId('pr'), userId, period, status: 'DRAFT', approvedAt: null, paidAt: null, ...data };
     payrolls.push(rec);
     return rec;
   },

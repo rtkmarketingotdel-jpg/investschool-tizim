@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { financeApi } from '@/lib/financeApi';
 import { PageHeader } from '@/components/PageHeader';
 import { InterfaceTab } from '@/components/settings/InterfaceTab';
+import { ApiTab } from '@/components/settings/ApiTab';
 import { BranchesTab } from '@/components/settings/BranchesTab';
 import { PaymentsTab } from '@/components/settings/PaymentsTab';
 import { TelegramTab } from '@/components/settings/TelegramTab';
@@ -14,13 +15,13 @@ import { WorkTab } from '@/components/settings/WorkTab';
 import { EmptyState, Skeleton, Tabs } from '@/components/ui';
 import { Settings as SettingsIcon } from 'lucide-react';
 
-type Tab = 'branches' | 'work' | 'payments' | 'users' | 'templates' | 'telegram' | 'interface';
+type Tab = 'branches' | 'work' | 'payments' | 'users' | 'templates' | 'telegram' | 'api' | 'interface';
 
 export default function Settings() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isDirector = user?.role === 'DIRECTOR';
-  const tabs: Tab[] = isDirector ? ['branches', 'work', 'payments', 'users', 'templates', 'telegram', 'interface'] : ['branches', 'templates', 'interface'];
+  const tabs: Tab[] = isDirector ? ['branches', 'work', 'payments', 'users', 'templates', 'telegram', 'api', 'interface'] : ['branches', 'templates', 'interface'];
   const [tab, setTab] = useState<Tab>('branches');
   const { data, isLoading, isError } = useQuery({ queryKey: ['settings'], queryFn: financeApi.settings });
 
@@ -38,6 +39,7 @@ export default function Settings() {
           {tab === 'users' && <UsersTab />}
           {tab === 'templates' && <TemplatesTab />}
           {tab === 'telegram' && <TelegramTab settings={data} />}
+          {tab === 'api' && <ApiTab />}
           {tab === 'interface' && <InterfaceTab />}
         </>
       )}

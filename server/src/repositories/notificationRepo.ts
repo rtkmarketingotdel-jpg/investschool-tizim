@@ -1,8 +1,7 @@
 import { auditLogs, notifications } from '../data/mockFinance.js';
 import type { Role } from '../data/types.js';
 import { userRepo } from './userRepo.js';
-
-let counter = 1;
+import { newId } from '../lib/id.js';
 
 export const notificationRepo = {
   async forUser(userId: string) {
@@ -27,11 +26,11 @@ export async function notifyRoles(
   for (const u of await userRepo.list()) {
     if (!u.isActive || !roles.includes(u.role)) continue;
     notifications.push({
-      id: `nn${counter++}`, userId: u.id, title: `${key}.title`, body: `${key}.body`, params, link, isRead: false, createdAt: new Date(),
+      id: newId('n'), userId: u.id, title: `${key}.title`, body: `${key}.body`, params, link, isRead: false, createdAt: new Date(),
     });
   }
 }
 
 export async function audit(userId: string | null, action: string, entity: string, entityId: string | null, meta: Record<string, unknown> | null = null) {
-  auditLogs.push({ id: `au${counter++}`, userId, action, entity, entityId, meta, createdAt: new Date() });
+  auditLogs.push({ id: newId('au'), userId, action, entity, entityId, meta, createdAt: new Date() });
 }

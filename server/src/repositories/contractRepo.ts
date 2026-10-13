@@ -1,8 +1,14 @@
-import { contractTemplates, contracts, nextContractSeq } from '../data/mockFinance.js';
+import { contractTemplates, contracts } from '../data/mockFinance.js';
 import type { Contract, ContractTemplate } from '../data/types.js';
 import { randomBytes } from 'node:crypto';
+import { newId } from '../lib/id.js';
 
-let counter = 1;
+/** Next number in the "<prefix>-<year>-NNNN" series, continuing from the contracts already stored. */
+function nextNumber(prefix: string) {
+  const head = `${prefix}-${new Date().getFullYear()}-`;
+  const last = contracts.reduce((max, c) => (c.number.startsWith(head) ? Math.max(max, Number(c.number.slice(head.length)) || 0) : max), 0);
+  return `${head}${String(last + 1).padStart(4, '0')}`;
+}
 
 export const contractRepo = {
   async all() {
@@ -16,8 +22,8 @@ export const contractRepo = {
   },
   async create(data: Omit<Contract, 'id' | 'number' | 'publicToken' | 'createdAt' | 'otpHash' | 'otpExpiresAt' | 'otpAttempts' | 'otpDemoCode' | 'signedAt' | 'signedIp' | 'signedUserAgent' | 'signerPhone' | 'snapshot'>, prefix: string) {
     const rec: Contract = {
-      id: `ctn${counter++}`,
-      number: `${prefix}-${new Date().getFullYear()}-${String(nextContractSeq()).padStart(4, '0')}`,
+      id: newId('ct'),
+      number: nextNumber(prefix),
       publicToken: randomBytes(16).toString('hex'),
       createdAt: new Date(),
       otpHash: null, otpExpiresAt: null, otpAttempts: 0, otpDemoCode: null,
@@ -41,7 +47,7 @@ export const templateRepo = {
     return contractTemplates.find((t) => t.id === id) ?? null;
   },
   async create(data: Omit<ContractTemplate, 'id'>) {
-    const rec = { id: `tn${counter++}`, ...data };
+    const rec = { id: newId('t'), ...data };
     if (rec.isDefault) contractTemplates.forEach((t) => t.language === rec.language && (t.isDefault = false));
     contractTemplates.push(rec);
     return rec;

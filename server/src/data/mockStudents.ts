@@ -22,7 +22,7 @@ export const students: Student[] = [
   {
     id: 's1', firstName: 'Madina', lastName: 'Karimova', middleName: 'Rustamovna', birthDate: '1998-04-12', gender: 'FEMALE',
     groupId: 'g1', phone: '+998901234567', phone2: null, passport: 'AB1234567', pinfl: '49804121234567',
-    address: null, district: 'Samarqand sh.', coursePrice: 2_400_000, discountPercent: 0, status: 'ACTIVE',
+    address: null, district: 'Samarqand sh.', coursePrice: 2_400_000, discountPercent: 0, status: 'ACTIVE', externalId: null, externalCourse: null,
     enrolledAt: addDays(startDate, -3), leftAt: null, notes: null,
   },
 ];

@@ -1,8 +1,7 @@
 import { branches, users } from '../data/mockStore.js';
 import { groups } from '../data/mockStudents.js';
 import type { Branch } from '../data/types.js';
-
-let counter = 1;
+import { newId } from '../lib/id.js';
 
 export const branchRepo = {
   async list() {
@@ -12,7 +11,7 @@ export const branchRepo = {
     return branches.find((b) => b.id === id) ?? null;
   },
   async create(data: Omit<Branch, 'id'>) {
-    const rec: Branch = { id: `bn${counter++}`, ...data };
+    const rec: Branch = { id: newId('b'), ...data };
     branches.push(rec);
     return rec;
   },

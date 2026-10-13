@@ -134,7 +134,9 @@
     "GROUP_CAPACITY_BELOW_OCCUPANCY": "Guruh sigʻimi hozirgi tinglovchilar sonidan kam boʻlishi mumkin emas",
     "GROUP_COURSE_LOCKED": "Guruhda tinglovchilar bor: kursni oʻzgartirib boʻlmaydi",
     "GROUP_NOT_EMPTY": "Guruhda tinglovchilar bor, oʻchirib boʻlmaydi",
-    "GROUP_FINISHED": "Guruh tugagan, unga tinglovchi qoʻshib boʻlmaydi"
+    "GROUP_FINISHED": "Guruh tugagan, unga tinglovchi qoʻshib boʻlmaydi",
+    "API_KEY_REQUIRED": "API kalit kerak",
+    "API_KEY_INVALID": "API kalit notoʻgʻri"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",
@@ -309,7 +311,8 @@
     "billed": "Kurs narxi",
     "paid": "Toʻlangan",
     "dueBy": "Muddat: {{date}}",
-    "chargeCourse": "Kurs uchun hisob · muddat {{date}}"
+    "chargeCourse": "Kurs uchun hisob · muddat {{date}}",
+    "fromNazorat": "Nazorat AI dan kelgan"
   },
   "staff": {
     "subtitle": "Barcha xodimlar · Jami: {{count}}",
@@ -569,7 +572,8 @@
       "templates": "Shartnoma shablonlari",
       "telegram": "Telegram",
       "interface": "Interfeys",
-      "branches": "Filiallar"
+      "branches": "Filiallar",
+      "api": "API"
     },
     "location": {
       "hint": "Xodimlar davomatini markaz joylashuviga nisbatan tekshirish uchun koordinata va radiusni kiriting. Markazda turib “Hozirgi joylashuvimni olish” tugmasini bosing.",
@@ -1037,5 +1041,49 @@
       "failed": "Telegram xabari yuborilmadi"
     },
     "linkedHint": "Oylik toʻlanganda bot shu Telegramga xabar yuboradi."
+  },
+  "api": {
+    "keys": {
+      "title": "API kalitlar",
+      "hint": "Boshqa tizim (masalan, Nazorat AI) shu kalit bilan maʼlumot oladi va tinglovchi yuboradi. Kalitni faqat ishonchli tizimga bering.",
+      "name": "Kalit nomi",
+      "create": "Kalit yaratish",
+      "empty": "Hali kalit yaratilmagan",
+      "key": "Kalit",
+      "created": "Yaratilgan",
+      "lastUsed": "Oxirgi ishlatilgan",
+      "deleteConfirm": "“{{name}}” kaliti oʻchirilsinmi? Uni ishlatayotgan tizim darhol ulana olmay qoladi.",
+      "createdTitle": "Yangi API kalit",
+      "onceWarning": "Kalit faqat hozir koʻrsatiladi. Nusxa olib, Nazorat AI sozlamalariga qoʻying: keyin uni qayta koʻrib boʻlmaydi."
+    },
+    "links": {
+      "title": "Nazorat AI kurslari",
+      "hint": "Nazorat AI yuborgan kurs nomini (masalan, “Samarqand santexnika”) shu tizimdagi guruhga bogʻlang. Yangi nom birinchi tinglovchi kelganda roʻyxatda oʻzi paydo boʻladi. Bogʻlanganda shu nom bilan kutayotgan tinglovchilar guruhga oʻtadi.",
+      "label": "Nazorat AI kursi",
+      "labelPlaceholder": "Masalan: Fargʻona santexnika",
+      "group": "Guruh",
+      "noGroup": "— bogʻlanmagan —",
+      "waiting": "Guruhsiz kutmoqda",
+      "unlinked": "Guruhga bogʻlanmagan",
+      "add": "Qoʻshish",
+      "placed": "{{count}} ta tinglovchi guruhga oʻtkazildi",
+      "deleteConfirm": "“{{label}}” bogʻlanishi oʻchirilsinmi?"
+    },
+    "docs": {
+      "title": "Qanday ulanadi",
+      "baseUrl": "Manzil",
+      "auth": "Sarlavha (header)",
+      "example": "Kelgan tinglovchini yuborish (POST /students):",
+      "postStudents": "Markazga kelgan tinglovchini yuborish (externalId bir xil boʻlsa, qayta yaratilmaydi)",
+      "getStudents": "Tinglovchilar roʻyxati (q, status, groupId, courseId, externalId, page, limit)",
+      "getStudent": "Bitta tinglovchi va uning toʻlovlari, qarzi",
+      "getCourses": "Kurslar: narx, davomiylik",
+      "getGroups": "Guruhlar: jadval, boʻsh oʻrinlar (status=PLANNED|ACTIVE|FINISHED)",
+      "getPayments": "Toʻlovlar (from, to, studentId)",
+      "getDebtors": "Qarzdorlar",
+      "getStaff": "Xodimlar (maoshsiz)",
+      "getAttendance": "Xodimlar davomati (from, to, userId)",
+      "placement": "Javobdagi “placement”: placed — guruhga joylandi; unlinked — kurs nomi hali guruhga bogʻlanmagan (yuqoridagi roʻyxatda bogʻlang); group_full — guruh toʻlgan; group_finished — guruh tugagan; already_in_group — tinglovchi allaqachon guruhda."
+    }
   }
 }

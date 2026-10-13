@@ -1,8 +1,7 @@
 import { users } from '../data/mockStore.js';
 import { courses, groups } from '../data/mockStudents.js';
 import type { Course } from '../data/types.js';
-
-let counter = 1;
+import { newId } from '../lib/id.js';
 
 export const courseRepo = {
   async list() {
@@ -15,7 +14,7 @@ export const courseRepo = {
     return courses.find((c) => c.name.toLowerCase() === name.toLowerCase()) ?? null;
   },
   async create(data: Omit<Course, 'id'>) {
-    const rec: Course = { id: `crn${counter++}`, ...data };
+    const rec: Course = { id: newId('cr'), ...data };
     courses.push(rec);
     return rec;
   },

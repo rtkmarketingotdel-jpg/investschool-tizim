@@ -10,6 +10,7 @@ import { validateBody } from '../middleware/validate.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { deliverSms, smsBalance, smsStatus } from '../services/sms.js';
 import { createCampaign, prepare, retryFailed, runDebtAuto, type Audience } from '../services/smsCampaigns.js';
+import { newId } from '../lib/id.js';
 
 export const smsRouter = Router();
 smsRouter.use(requireAuth, requireRole('DIRECTOR', 'MANAGER', 'ACCOUNTANT'));
@@ -71,14 +72,13 @@ const templateSchema = z.object({
   language: z.enum(['uz', 'ru']),
   body: z.string().min(5).max(700),
 });
-let tplCounter = 1;
 
 smsRouter.get('/templates', (_req, res) => {
   res.json({ items: smsTemplates });
 });
 smsRouter.post('/templates', validateBody(templateSchema), async (req, res, next) => {
   try {
-    const rec = { id: `stn${tplCounter++}`, ...(req.body as z.infer<typeof templateSchema>) };
+    const rec = { id: newId('st'), ...(req.body as z.infer<typeof templateSchema>) };
     smsTemplates.push(rec);
     await audit(req.user!.id, 'sms.template.create', 'sms', rec.id);
     res.status(201).json(rec);

@@ -31,13 +31,16 @@ export interface Student {
   coursePrice: number;
   discountPercent: number;
   status: StudentStatus;
+  /** set when the trainee came from another system over the API (Nazorat AI) */
+  externalId?: string | null;
+  externalCourse?: string | null;
   enrolledAt: string;
   leftAt: string | null;
   notes: string | null;
   /** null when the current role may not see finances */
   debt: number | null;
 }
-export type StudentInput = Omit<Student, 'id' | 'fullName' | 'groupName' | 'courseId' | 'courseName' | 'leftAt' | 'debt'>;
+export type StudentInput = Omit<Student, 'id' | 'fullName' | 'groupName' | 'courseId' | 'courseName' | 'leftAt' | 'debt' | 'externalId' | 'externalCourse'>;
 
 export interface StudentFilters {
   q?: string;

@@ -1,7 +1,6 @@
 import { groups, students } from '../data/mockStudents.js';
 import type { Student, StudentStatus } from '../data/types.js';
-
-let counter = students.length + 1;
+import { newId } from '../lib/id.js';
 
 export interface StudentFilter {
   q?: string;
@@ -50,7 +49,7 @@ export const studentRepo = {
     return map;
   },
   async create(data: Omit<Student, 'id'>) {
-    const rec: Student = { id: `s${counter++}`, ...data };
+    const rec: Student = { id: newId('s'), ...data };
     students.push(rec);
     return rec;
   },
