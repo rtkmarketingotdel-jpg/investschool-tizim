@@ -7,6 +7,7 @@ import { validateBody } from '../middleware/validate.js';
 import { courseRepo } from '../repositories/courseRepo.js';
 import { groupRepo, groupStatus } from '../repositories/groupRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
+import { coursePlanRepo } from '../repositories/planRepo.js';
 import { studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 
@@ -79,6 +80,7 @@ catalogRouter.delete('/courses/:id', manage, async (req, res, next) => {
     const used = courseRepo.usage(rec);
     if (used.groups + used.teachers > 0) throw new ApiError(409, 'CATALOG_IN_USE', used);
     await courseRepo.remove(rec.id);
+    await coursePlanRepo.removeForCourse(rec.id);
     await audit(req.user!.id, 'course.delete', 'course', rec.id, { name: rec.name });
     res.json({ ok: true });
   } catch (e) {

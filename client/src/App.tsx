@@ -28,6 +28,10 @@ const loaders = {
   Contracts: () => import('@/pages/finance/Contracts'),
   ContractGroup: () => import('@/pages/finance/ContractGroup'),
   PublicContract: () => import('@/pages/PublicContract'),
+  Plans: () => import('@/pages/Plans'),
+  CoursePlan: () => import('@/pages/CoursePlan'),
+  GroupPlan: () => import('@/pages/GroupPlan'),
+  PublicPlan: () => import('@/pages/PublicPlan'),
 };
 const Login = lazy(loaders.Login);
 const Dashboard = lazy(loaders.Dashboard);
@@ -49,6 +53,10 @@ const Payroll = lazy(loaders.Payroll);
 const Contracts = lazy(loaders.Contracts);
 const ContractGroup = lazy(loaders.ContractGroup);
 const PublicContract = lazy(loaders.PublicContract);
+const Plans = lazy(loaders.Plans);
+const CoursePlan = lazy(loaders.CoursePlan);
+const GroupPlan = lazy(loaders.GroupPlan);
+const PublicPlan = lazy(loaders.PublicPlan);
 
 const ALL = ['DIRECTOR', 'MANAGER', 'ACCOUNTANT'] as const;
 
@@ -68,7 +76,7 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 800));
-    idle(() => Object.entries(loaders).forEach(([name, load]) => name !== 'PublicContract' && void load().catch(() => undefined)));
+    idle(() => Object.entries(loaders).forEach(([name, load]) => name !== 'PublicContract' && name !== 'PublicPlan' && void load().catch(() => undefined)));
   }, [user]);
 
   return (
@@ -76,11 +84,17 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/c/:token" element={<PublicContract />} />
+        <Route path="/p/:token" element={<PublicPlan />} />
         <Route path="/profile/setup" element={<RequireAuth><ProfileSetup /></RequireAuth>} />
         <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route path="/me" element={<Me />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/attendance" element={<Attendance />} />
+          <Route element={<RoleGuard roles={['DIRECTOR', 'MANAGER', 'TEACHER']} />}>
+            <Route path="/plans" element={<Plans />} />
+            <Route path="/plans/course/:courseId" element={<CoursePlan />} />
+            <Route path="/plans/group/:groupId" element={<GroupPlan />} />
+          </Route>
           <Route element={<RoleGuard roles={[...ALL]} />}>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/students" element={<Students />} />

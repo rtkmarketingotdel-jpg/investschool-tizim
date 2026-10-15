@@ -333,3 +333,38 @@ export interface CourseLink {
   /** null until the director links the label (it is recorded automatically when a trainee arrives with it). */
   groupId: string | null;
 }
+
+export type TopicKind = 'THEORY' | 'PRACTICE';
+
+/** One topic of a lesson plan; `lessons` is how many lessons it takes. */
+export interface PlanTopic {
+  id: string;
+  title: string;
+  description: string | null;
+  kind: TopicKind;
+  lessons: number;
+  /** Optional link or note about materials. */
+  materials: string | null;
+}
+
+/** The course's master plan: a group copies it and then orders it with its trainees. */
+export interface CoursePlan {
+  id: string;
+  courseId: string;
+  topics: PlanTopic[];
+  updatedAt: Date;
+  updatedById: string | null;
+}
+
+/** A group's own plan; topic order is the teaching order, dates follow from the group schedule. */
+export interface GroupPlan {
+  id: string;
+  groupId: string;
+  topics: PlanTopic[];
+  /** Ids of the topics already taught. */
+  done: string[];
+  /** Token of the public link (/p/:token); renewing it disables the old link. */
+  publicToken: string;
+  updatedAt: Date;
+  updatedById: string | null;
+}

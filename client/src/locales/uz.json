@@ -21,7 +21,8 @@
     "communication": "Aloqa",
     "sms": "SMS",
     "groups": "Guruhlar",
-    "courses": "Kurslar"
+    "courses": "Kurslar",
+    "plans": "Dars rejalari"
   },
   "roles": {
     "DIRECTOR": "Direktor",
@@ -136,7 +137,8 @@
     "GROUP_NOT_EMPTY": "Guruhda tinglovchilar bor, oʻchirib boʻlmaydi",
     "GROUP_FINISHED": "Guruh tugagan, unga tinglovchi qoʻshib boʻlmaydi",
     "API_KEY_REQUIRED": "API kalit kerak",
-    "API_KEY_INVALID": "API kalit notoʻgʻri"
+    "API_KEY_INVALID": "API kalit notoʻgʻri",
+    "PLAN_EXISTS": "Bu guruhda dars rejasi allaqachon bor"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",
@@ -1084,6 +1086,85 @@
       "getStaff": "Xodimlar (maoshsiz)",
       "getAttendance": "Xodimlar davomati (from, to, userId)",
       "placement": "Javobdagi “placement”: placed — guruhga joylandi; unlinked — kurs nomi hali guruhga bogʻlanmagan (yuqoridagi roʻyxatda bogʻlang); group_full — guruh toʻlgan; group_finished — guruh tugagan; already_in_group — tinglovchi allaqachon guruhda."
+    }
+  },
+  "plans": {
+    "subtitle": "Kurslar va guruhlar boʻyicha dars rejalari: qaysi kuni qaysi mavzu oʻtiladi",
+    "noCourses": "Kurslar yoʻq",
+    "templateSummary": "{{topics}} mavzu · {{lessons}} dars",
+    "noTemplate": "Asosiy reja hali tuzilmagan",
+    "noGroups": "Bu kursda guruhlar yoʻq",
+    "noPlan": "Reja tuzilmagan",
+    "courseSubtitle": "Kursning asosiy rejasi va guruhlar rejalari · {{months}} oy",
+    "template": "Asosiy reja (shablon)",
+    "templateHint": "Har bir guruh shu rejadan nusxa oladi va tinglovchilar bilan kelishib oʻz tartibini tuzadi. Bu yerdagi oʻzgarish mavjud guruh rejalariga taʼsir qilmaydi.",
+    "groupPlans": "Guruhlar rejalari",
+    "doneOf": "{{done}} / {{total}} oʻtildi",
+    "saved": "Reja saqlandi",
+    "groupPlan": "Dars rejasi",
+    "edit": "Tahrirlash",
+    "order": "Tartiblash",
+    "lessonsOfCapacity": "Rejada {{lessons}} dars · guruhda {{capacity}} dars kuni",
+    "noPlanTitle": "Bu guruhda hali dars rejasi yoʻq",
+    "noPlanHint": "Kursning asosiy rejasidan nusxa oling yoki rejani boshidan tuzing. Sanalar guruh jadvalidan avtomatik qoʻyiladi.",
+    "fromTemplate": "Kurs rejasidan nusxa olish ({{count}} mavzu)",
+    "createEmpty": "Boʻsh reja yaratish",
+    "askTeacher": "Rejani guruh oʻqituvchisi yoki rahbariyat tuzadi.",
+    "orderTitle": "Tinglovchilar bilan kelishilgan tartibda bosing",
+    "orderHint": "Birinchi bosilgan mavzu 1-boʻladi, keyingisi 2-va hokazo. Qayta bossangiz, raqami olib tashlanadi. Belgilanmaganlari oxiriga hozirgi tartibda qoʻshiladi.",
+    "orderProgress": "Tartiblandi: {{picked}} / {{total}}",
+    "orderReset": "Boshidan",
+    "orderSave": "Tartibni saqlash",
+    "orderSaveRest": "Saqlash (qolganlari oxiriga)",
+    "progress": "Kurs jarayoni",
+    "overflow": "Rejada {{lessons}} dars bor, guruhda esa {{capacity}} dars kuni: oxirgi mavzular guruh tugaganidan keyinga tushadi.",
+    "emptyPlan": "Rejada hali mavzu yoʻq",
+    "next": "Navbatdagi mavzu",
+    "markDone": "Oʻtildi deb belgilash",
+    "markUndone": "Belgini olib tashlash",
+    "taught": "Oʻtildi",
+    "addTopic": "Mavzu qoʻshish",
+    "paste": "Roʻyxatni joylash",
+    "pasteHint": "Har bir qatorga bitta mavzu yozing yoki roʻyxatni nusxalab tashlang. Raqamlar va belgilar (1., -, •) avtomatik olib tashlanadi.",
+    "pastePlaceholder": "Xavfsizlik texnikasi\nTikuv mashinasi bilan tanishish\nOʻlchov olish",
+    "pasteAdd_one": "{{count}} ta mavzu qoʻshish",
+    "pasteAdd_other": "{{count}} ta mavzu qoʻshish",
+    "moveUp": "Yuqoriga",
+    "moveDown": "Pastga",
+    "more": "Batafsil",
+    "less": "Yopish",
+    "lessons_one": "{{count}} dars",
+    "lessons_other": "{{count}} dars",
+    "kind": {
+      "THEORY": "Nazariy",
+      "PRACTICE": "Amaliy"
+    },
+    "topic": {
+      "title": "Mavzu nomi",
+      "titlePlaceholder": "Mavzu nomi…",
+      "kindToggle": "Nazariy / amaliy",
+      "lessons": "Necha dars",
+      "lessonsShort": "dars",
+      "description": "Qisqa izoh",
+      "materials": "Material yoki havola"
+    },
+    "share": {
+      "title": "Tinglovchilarga ulashish",
+      "hint": "Havola hamma uchun ochiq: tinglovchi kirishsiz rejani koʻradi. Unda tinglovchilarning shaxsiy maʼlumotlari yoʻq.",
+      "open": "Ochish",
+      "telegram": "Telegramda ulashish",
+      "qr": "QR kod",
+      "downloadQr": "QR kodni yuklab olish",
+      "renew": "Havolani yangilash",
+      "renewConfirm": "Yangi havola yaratilsinmi? Eski havola ishlamay qoladi.",
+      "renewed": "Yangi havola yaratildi"
+    },
+    "public": {
+      "title": "Dars rejasi",
+      "group": "{{name}} guruhi",
+      "today": "Bugun",
+      "notFound": "Dars rejasi topilmadi yoki havola yangilangan",
+      "updated": "Yangilangan: {{date}}"
     }
   }
 }

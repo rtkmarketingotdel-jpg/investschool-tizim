@@ -25,6 +25,7 @@ import { UPLOAD_DIR } from './services/attendance.js';
 import { schedulePersist } from './db/store.js';
 import { integrationRouter } from './routes/integration.js';
 import { v1Router } from './routes/v1.js';
+import { plansRouter, publicPlansRouter } from './routes/plans.js';
 
 export function createApp() {
   const app = express();
@@ -59,6 +60,8 @@ export function createApp() {
   app.use('/api/dashboard', dashboardRouter);
   app.use('/api/integration', integrationRouter);
   app.use('/api/v1', v1Router);
+  app.use('/api/plans', plansRouter);
+  app.use('/api/public/plans', publicPlansRouter);
   app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use(notFound);
