@@ -17,6 +17,7 @@ import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 import { debtMap, studentDebt } from '../services/finance.js';
 import { placeByCourseLabel, placeInGroup } from '../services/integration.js';
+import { brand } from '../brand.config.js';
 
 /**
  * Integration API for other systems (Nazorat AI): read the centre's data and send trainees who arrived.
@@ -59,7 +60,7 @@ function publicStudent(s: Student, l: Lookups, debt: number | null) {
 // ---------- index ----------
 v1Router.get('/', (_req, res) => {
   res.json({
-    name: 'RTK Maktab integration API', version: 1,
+    name: `${brand.name} integration API`, version: 1,
     endpoints: [
       'GET /api/v1/students', 'GET /api/v1/students/:id', 'POST /api/v1/students',
       'GET /api/v1/courses', 'GET /api/v1/groups', 'GET /api/v1/payments', 'GET /api/v1/debtors',
