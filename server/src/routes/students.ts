@@ -9,7 +9,10 @@ import { courseRepo } from '../repositories/courseRepo.js';
 import { groupRepo } from '../repositories/groupRepo.js';
 import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import type { Student } from '../data/types.js';
-import { chargeRepo, paymentRepo } from '../repositories/financeRepo.js';
+import { chargeRepo, paymentRepo, removeStudentFinance } from '../repositories/financeRepo.js';
+import { contractRepo } from '../repositories/contractRepo.js';
+import { audit } from '../repositories/notificationRepo.js';
+import { lastDebtSms } from '../data/mockSms.js';
 import { toLocalDate } from '../lib/date.js';
 import { debtMap, studentDebt, syncCourseCharge } from '../services/finance.js';
 
@@ -167,6 +170,31 @@ studentsRouter.patch('/:id', requireRole('DIRECTOR', 'MANAGER'), validateBody(st
     const updated = (await studentRepo.update(current.id, { ...body, leftAt }))!;
     await syncCourseCharge(updated); // the course bill follows the price, discount and group
     res.json(await present(updated));
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * Deletes a trainee together with their course bill, payments and contracts.
+ * Payments are money history: deleting a trainee who paid is the director's call only, and must be confirmed with ?withPayments=true.
+ */
+studentsRouter.delete('/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
+  try {
+    const s = await studentRepo.findById(req.params.id!);
+    if (!s) throw new ApiError(404, 'NOT_FOUND');
+    const paid = await paymentRepo.byStudent(s.id);
+    if (paid.length) {
+      if (req.user!.role !== 'DIRECTOR') throw new ApiError(403, 'STUDENT_HAS_PAYMENTS', { count: paid.length });
+      if (req.query.withPayments !== 'true') throw new ApiError(409, 'STUDENT_HAS_PAYMENTS', { count: paid.length });
+    }
+    const removed = { ...removeStudentFinance(s.id), contracts: await contractRepo.removeByStudent(s.id) };
+    lastDebtSms.delete(s.id);
+    await studentRepo.remove(s.id);
+    await audit(req.user!.id, 'student.delete', 'student', s.id, {
+      name: fullName(s), phone: s.phone, externalId: s.externalId, paidTotal: paid.reduce((n, p) => n + p.amount, 0), ...removed,
+    });
+    res.json({ ok: true, removed });
   } catch (e) {
     next(e);
   }

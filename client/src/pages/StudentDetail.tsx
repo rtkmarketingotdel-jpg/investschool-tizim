@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileSignature, Pencil, Printer, UserX, Wallet } from 'lucide-react';
+import { ArrowLeft, FileSignature, Pencil, Printer, Trash2, UserX, Wallet } from 'lucide-react';
 import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi } from '@/lib/schoolApi';
 import { financeApi, openPdf } from '@/lib/financeApi';
@@ -12,6 +12,7 @@ import { StudentDrawer } from '@/components/students/StudentDrawer';
 import { PaymentDrawer } from '@/components/finance/PaymentDrawer';
 import { ContractDrawer } from '@/components/finance/ContractDrawer';
 import { ContractTable } from '@/components/finance/ContractTable';
+import { DeleteStudentDialog } from '@/components/students/DeleteStudentDialog';
 import { Avatar, Badge, Button, Card, EmptyState, Skeleton, Tabs } from '@/components/ui';
 import { statusTone } from './Students';
 
@@ -26,6 +27,8 @@ export default function StudentDetail() {
   const [editing, setEditing] = useState(false);
   const [paying, setPaying] = useState(false);
   const [contracting, setContracting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
   const seesFinance = user?.role !== 'TEACHER';
   const canContract = seesFinance;
   const { data: s, isLoading, isError } = useQuery({ queryKey: ['student', id], queryFn: () => schoolApi.student(id) });
@@ -84,6 +87,11 @@ export default function StudentDetail() {
           {seesFinance && (
             <Button variant="secondary" onClick={() => setPaying(true)}>
               <Wallet className="h-4 w-4" /> {t('finance.payments.receive')}
+            </Button>
+          )}
+          {canEdit && (
+            <Button variant="ghost" aria-label={t('students.delete')} title={t('students.delete')} onClick={() => setDeleting(true)} className="px-3 text-danger">
+              <Trash2 className="h-5 w-5" />
             </Button>
           )}
           {canContract && (
@@ -189,6 +197,7 @@ export default function StudentDetail() {
 
       <StudentDrawer open={editing} student={s} onClose={() => setEditing(false)} />
       <PaymentDrawer open={paying} onClose={() => setPaying(false)} student={{ id: s.id, fullName: s.fullName, groupName: s.groupName, debt: s.debt ?? 0 }} />
+      <DeleteStudentDialog student={deleting ? { id: s.id, fullName: s.fullName } : null} onClose={() => setDeleting(false)} onDeleted={() => navigate('/students', { replace: true })} />
       <ContractDrawer open={contracting} onClose={() => setContracting(false)} student={{ id: s.id, fullName: s.fullName }} />
     </div>
   );

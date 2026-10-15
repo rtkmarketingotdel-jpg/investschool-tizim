@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Download, Eye, LayoutGrid, List, Plus, Search, GraduationCap } from 'lucide-react';
+import { Download, Eye, Trash2, LayoutGrid, List, Plus, Search, GraduationCap } from 'lucide-react';
 import { useAuth, isManagement } from '@/context/AuthContext';
 import { schoolApi, type Student, type StudentStatus } from '@/lib/schoolApi';
 import { fmtDay } from '@/lib/dates';
@@ -13,6 +13,7 @@ import { cn } from '@/lib/cn';
 import { PageHeader } from '@/components/PageHeader';
 import { Pagination } from '@/components/Pagination';
 import { StudentDrawer } from '@/components/students/StudentDrawer';
+import { DeleteStudentDialog } from '@/components/students/DeleteStudentDialog';
 import { Avatar, Badge, Button, Card, EmptyState, Input, Select, Skeleton, Table, Td, Th, Thead, Tr, type BadgeTone } from '@/components/ui';
 
 export const statusTone: Record<StudentStatus, BadgeTone> = { ACTIVE: 'success', GRADUATED: 'info', LEFT: 'danger' };
@@ -28,6 +29,7 @@ export default function Students() {
   const q = useDebounce(search);
   const [view, setView] = useState<'table' | 'cards'>('table');
   const [drawer, setDrawer] = useState<{ open: boolean; student: Student | null }>({ open: false, student: null });
+  const [deleting, setDeleting] = useState<Student | null>(null);
 
   const status = params.get('status') ?? '';
   const groupId = params.get('groupId') ?? '';
@@ -177,7 +179,7 @@ export default function Students() {
                   <Th numeric>{t('students.coursePrice')}</Th>
                   {seesFinance && <Th numeric>{t('students.debt')}</Th>}
                   <Th>{t('students.enrolledAt')}</Th>
-                  <Th className="w-16"><span className="sr-only">{t('common.details')}</span></Th>
+                  <Th className="w-24"><span className="sr-only">{t('common.details')}</span></Th>
                 </tr>
               </Thead>
               <tbody>
@@ -207,9 +209,16 @@ export default function Students() {
                     )}
                     <Td className="whitespace-nowrap text-text-muted">{fmtDay(s.enrolledAt, i18n.language, 'd MMM yyyy')}</Td>
                     <Td>
-                      <Link to={`/students/${s.id}`} aria-label={t('common.details')} className="inline-flex rounded-lg p-2 text-text-muted hover:bg-surface-muted">
-                        <Eye className="h-5 w-5" />
-                      </Link>
+                      <div className="flex">
+                        <Link to={`/students/${s.id}`} aria-label={t('common.details')} className="inline-flex rounded-lg p-2 text-text-muted hover:bg-surface-muted">
+                          <Eye className="h-5 w-5" />
+                        </Link>
+                        {canEdit && (
+                          <button type="button" aria-label={t('students.delete')} title={t('students.delete')} onClick={() => setDeleting(s)} className="rounded-lg p-2 text-text-muted hover:bg-surface-muted hover:text-danger">
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        )}
+                      </div>
                     </Td>
                   </Tr>
                 ))}
@@ -241,6 +250,7 @@ export default function Students() {
         </>
       )}
 
+      <DeleteStudentDialog student={deleting} onClose={() => setDeleting(null)} />
       <StudentDrawer open={drawer.open} student={drawer.student} onClose={() => setDrawer({ open: false, student: null })} />
     </div>
   );

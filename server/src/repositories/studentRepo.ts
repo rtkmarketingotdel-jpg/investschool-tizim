@@ -53,6 +53,10 @@ export const studentRepo = {
     students.push(rec);
     return rec;
   },
+  async remove(id: string) {
+    const i = students.findIndex((s) => s.id === id);
+    if (i >= 0) students.splice(i, 1);
+  },
   async update(id: string, patch: Partial<Omit<Student, 'id'>>) {
     const rec = students.find((s) => s.id === id);
     if (!rec) return null;

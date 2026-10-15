@@ -33,6 +33,11 @@ export const contractRepo = {
     contracts.push(rec);
     return rec;
   },
+  async removeByStudent(studentId: string) {
+    let n = 0;
+    for (let k = contracts.length - 1; k >= 0; k--) if (contracts[k]!.studentId === studentId) { contracts.splice(k, 1); n++; }
+    return n;
+  },
   async update(id: string, patch: Partial<Contract>) {
     const rec = contracts.find((c) => c.id === id);
     return rec ? Object.assign(rec, patch) : null;

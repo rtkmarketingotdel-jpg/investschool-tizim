@@ -135,6 +135,7 @@ export const schoolApi = {
   student: (id: string) => api.get<Student>(`/students/${id}`).then((r) => r.data),
   createStudent: (d: StudentInput) => api.post<Student>('/students', d).then((r) => r.data),
   updateStudent: (id: string, d: StudentInput) => api.patch<Student>(`/students/${id}`, d).then((r) => r.data),
+  deleteStudent: (id: string, withPayments: boolean) => api.delete(`/students/${id}`, { params: withPayments ? { withPayments: 'true' } : {} }).then((r) => r.data),
   exportStudents: (f: Omit<StudentFilters, 'page' | 'limit' | 'debtor'>) =>
     api.get<Blob>('/students/export', { params: clean(f), responseType: 'blob' }).then((r) => r.data),
 

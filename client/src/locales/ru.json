@@ -138,7 +138,8 @@
     "GROUP_FINISHED": "Группа завершена, добавить слушателя нельзя",
     "API_KEY_REQUIRED": "Нужен API-ключ",
     "API_KEY_INVALID": "Неверный API-ключ",
-    "PLAN_EXISTS": "У этой группы уже есть план"
+    "PLAN_EXISTS": "У этой группы уже есть план",
+    "STUDENT_HAS_PAYMENTS": "Слушатель вносил платежи: удалить может только директор"
   },
   "attendance": {
     "subtitle": "Время прихода и ухода сотрудников и геолокация. Селфи отправляется директору в Telegram",
@@ -314,7 +315,23 @@
     "paid": "Оплачено",
     "dueBy": "Срок: {{date}}",
     "chargeCourse": "Счёт за курс · срок {{date}}",
-    "fromNazorat": "Пришёл из Nazorat AI"
+    "fromNazorat": "Пришёл из Nazorat AI",
+    "delete": "Удалить слушателя",
+    "deleted": "Слушатель удалён",
+    "deleteConfirm": "Удалить «{{name}}» полностью? Действие нельзя отменить. Вместе с ним удалятся:",
+    "deleteWhat": {
+      "bill": "Счёт за курс: {{amount}}",
+      "payments_one": "Платежи: {{count}}, всего {{amount}}",
+      "payments_few": "Платежи: {{count}}, всего {{amount}}",
+      "payments_many": "Платежи: {{count}}, всего {{amount}}",
+      "payments_other": "Платежи: {{count}}, всего {{amount}}",
+      "contracts_one": "Договоры: {{count}}",
+      "contracts_few": "Договоры: {{count}}",
+      "contracts_many": "Договоры: {{count}}",
+      "contracts_other": "Договоры: {{count}}"
+    },
+    "deletePaymentsAgree": "Понимаю, что история платежей тоже удалится",
+    "deleteDirectorOnly": "Этот слушатель вносил платежи: удалить его может только директор."
   },
   "staff": {
     "subtitle": "Все сотрудники · Всего: {{count}}",

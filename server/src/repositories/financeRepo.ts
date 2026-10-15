@@ -21,6 +21,14 @@ export const chargeRepo = {
   },
 };
 
+/** Removes every row of a deleted trainee from a list (in place, other modules hold the same array). */
+const dropForStudent = <T extends { studentId: string }>(arr: T[], studentId: string) => {
+  let n = 0;
+  for (let k = arr.length - 1; k >= 0; k--) if (arr[k]!.studentId === studentId) { arr.splice(k, 1); n++; }
+  return n;
+};
+export const removeStudentFinance = (studentId: string) => ({ charges: dropForStudent(charges, studentId), payments: dropForStudent(payments, studentId) });
+
 export const paymentRepo = {
   async all() {
     return payments;

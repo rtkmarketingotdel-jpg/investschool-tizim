@@ -138,7 +138,8 @@
     "GROUP_FINISHED": "Guruh tugagan, unga tinglovchi qoʻshib boʻlmaydi",
     "API_KEY_REQUIRED": "API kalit kerak",
     "API_KEY_INVALID": "API kalit notoʻgʻri",
-    "PLAN_EXISTS": "Bu guruhda dars rejasi allaqachon bor"
+    "PLAN_EXISTS": "Bu guruhda dars rejasi allaqachon bor",
+    "STUDENT_HAS_PAYMENTS": "Tinglovchi toʻlov qilgan: uni faqat direktor oʻchira oladi"
   },
   "attendance": {
     "subtitle": "Xodimlar kelish-ketish vaqti va joylashuv. Selfi direktorga Telegram orqali yuboriladi",
@@ -314,7 +315,19 @@
     "paid": "Toʻlangan",
     "dueBy": "Muddat: {{date}}",
     "chargeCourse": "Kurs uchun hisob · muddat {{date}}",
-    "fromNazorat": "Nazorat AI dan kelgan"
+    "fromNazorat": "Nazorat AI dan kelgan",
+    "delete": "Tinglovchini oʻchirish",
+    "deleted": "Tinglovchi oʻchirildi",
+    "deleteConfirm": "“{{name}}” butunlay oʻchirilsinmi? Bu amalni qaytarib boʻlmaydi. U bilan birga quyidagilar ham oʻchadi:",
+    "deleteWhat": {
+      "bill": "Kurs hisobi: {{amount}}",
+      "payments_one": "Toʻlovlar: {{count}} ta, jami {{amount}}",
+      "payments_other": "Toʻlovlar: {{count}} ta, jami {{amount}}",
+      "contracts_one": "Shartnomalar: {{count}} ta",
+      "contracts_other": "Shartnomalar: {{count}} ta"
+    },
+    "deletePaymentsAgree": "Toʻlovlar tarixi ham oʻchishini tushunaman",
+    "deleteDirectorOnly": "Bu tinglovchi toʻlov qilgan: uni faqat direktor oʻchira oladi."
   },
   "staff": {
     "subtitle": "Barcha xodimlar · Jami: {{count}}",

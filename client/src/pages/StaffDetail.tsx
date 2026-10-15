@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileText, Trophy, UserX } from 'lucide-react';
+import { ArrowLeft, FileText, Trash2, Trophy, UserX } from 'lucide-react';
 import { financeApi } from '@/lib/financeApi';
-import { uploadUrl } from '@/lib/api';
+import { errorCode, uploadUrl } from '@/lib/api';
+import { schoolApi } from '@/lib/schoolApi';
+import { useAuth } from '@/context/AuthContext';
 import { formatMoney } from '@/lib/format';
 import { fmtDay, fmtTime, todayLocal } from '@/lib/dates';
 import { cn } from '@/lib/cn';
 import { StatusBadge } from '@/components/attendance/StatusBadge';
 import { useReasonText } from '@/components/finance/AdjustmentReason';
-import { Avatar, Badge, Card, EmptyState, Input, Skeleton } from '@/components/ui';
+import { Avatar, Badge, Button, Card, EmptyState, Input, Modal, Skeleton, useToast } from '@/components/ui';
 import { payrollTone } from '@/pages/finance/Payroll';
 
 const dot: Record<string, string> = { ON_TIME: 'bg-green-500', LATE: 'bg-amber-400', ABSENT: 'bg-red-500', EXCUSED: 'bg-slate-400' };
@@ -22,11 +24,27 @@ export default function StaffDetail() {
   const [month, setMonth] = useState(todayLocal().slice(0, 7));
   const { data, isLoading, isError } = useQuery({ queryKey: ['staff-overview', id, month], queryFn: () => financeApi.staffOverview(id, month) });
   const cur = t('common.currency');
+  const { user: me } = useAuth();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
+  const remove = useMutation({
+    mutationFn: () => schoolApi.deleteStaff(id),
+    onSuccess: () => {
+      toast(t('staff.deleted'));
+      for (const k of ['staff', 'groups', 'payroll', 'attendance']) void qc.invalidateQueries({ queryKey: [k] });
+      navigate('/staff', { replace: true });
+    },
+    onError: (e) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error'),
+  });
 
   if (isLoading) return <Skeleton className="h-72" />;
   if (isError || !data) return <EmptyState icon={UserX} title={t('errors.NOT_FOUND')} action={<Link to="/staff" className="text-primary">{t('common.back')}</Link>} />;
 
   const { user, attendance, payrolls, adjustments, profile } = data;
+  // same rule as the staff list: nobody deletes themselves or a director
+  const canDelete = !!me && me.id !== user.id && user.role !== 'DIRECTOR';
   const byDate = new Map(attendance.map((a) => [a.date, a]));
   const first = new Date(`${month}-01T00:00:00Z`);
   const daysInMonth = new Date(first.getUTCFullYear(), first.getUTCMonth() + 1, 0).getDate();
@@ -48,6 +66,11 @@ export default function StaffDetail() {
             {!profile.completed && <Badge tone="warning">{t('staff.profileIncomplete')}</Badge>}
           </div>
         </div>
+        {canDelete && (
+          <Button variant="ghost" className="px-3 text-danger" aria-label={t('staff.delete')} title={t('staff.delete')} onClick={() => setDeleting(true)}>
+            <Trash2 className="h-5 w-5" /> <span className="hidden sm:inline">{t('staff.delete')}</span>
+          </Button>
+        )}
         <div className="w-[calc(50%-0.375rem)] sm:w-52"><Input type="month" aria-label={t('finance.payments.period')} value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></div>
       </Card>
 
@@ -162,6 +185,13 @@ export default function StaffDetail() {
           </Card>
         </div>
       )}
+      <Modal open={deleting} onClose={() => setDeleting(false)} title={t('staff.delete')}>
+        <p className="text-text-muted">{t('staff.deleteConfirm', { name: user.fullName })}</p>
+        <div className="mt-6 flex gap-3">
+          <Button variant="secondary" className="flex-1" onClick={() => setDeleting(false)}>{t('common.cancel')}</Button>
+          <Button variant="danger" className="flex-1" loading={remove.isPending} onClick={() => remove.mutate()}>{t('staff.delete')}</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
