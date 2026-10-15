@@ -13,6 +13,8 @@ import { chargeRepo, paymentRepo, removeStudentFinance } from '../repositories/f
 import { contractRepo } from '../repositories/contractRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { lastDebtSms } from '../data/mockSms.js';
+import { feedbackRepo } from '../repositories/feedbackRepo.js';
+import { studentBotLink } from '../services/studentTelegram.js';
 import { toLocalDate } from '../lib/date.js';
 import { debtMap, studentDebt, syncCourseCharge } from '../services/finance.js';
 
@@ -61,7 +63,9 @@ const listQuery = z.object({
 async function present(s: Student, debt: number | null = null) {
   const group = s.groupId ? await groupRepo.findById(s.groupId) : null;
   const course = group ? await courseRepo.findById(group.courseId) : null;
-  return { ...s, fullName: fullName(s), groupName: group?.name ?? null, courseId: course?.id ?? null, courseName: course?.name ?? null, debt };
+  const { telegramCode: _code, telegramChatId, ...rest } = s;
+  void _code;
+  return { ...rest, telegramLinked: !!telegramChatId, fullName: fullName(s), groupName: group?.name ?? null, courseId: course?.id ?? null, courseName: course?.name ?? null, debt };
 }
 
 const seesFinance = (role: string) => role !== 'TEACHER';
@@ -152,7 +156,7 @@ studentsRouter.post('/', requireRole('DIRECTOR', 'MANAGER'), validateBody(studen
   try {
     const body = req.body as StudentInput;
     await assertSeat(body.groupId, body.status);
-    const rec = await studentRepo.create({ ...body, externalId: null, externalCourse: null, leftAt: body.status === 'LEFT' ? toLocalDate() : null });
+    const rec = await studentRepo.create({ ...body, externalId: null, externalCourse: null, telegramChatId: null, telegramCode: null, leftAt: body.status === 'LEFT' ? toLocalDate() : null });
     await syncCourseCharge(rec);
     res.status(201).json(await present(rec));
   } catch (e) {
@@ -190,11 +194,36 @@ studentsRouter.delete('/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, re
     }
     const removed = { ...removeStudentFinance(s.id), contracts: await contractRepo.removeByStudent(s.id) };
     lastDebtSms.delete(s.id);
+    await feedbackRepo.removeForStudent(s.id);
     await studentRepo.remove(s.id);
     await audit(req.user!.id, 'student.delete', 'student', s.id, {
       name: fullName(s), phone: s.phone, externalId: s.externalId, paidTotal: paid.reduce((n, p) => n + p.amount, 0), ...removed,
     });
     res.json({ ok: true, removed });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/** The trainee's personal bot link (made on first request); renew=true makes a new one and the old link stops working. */
+studentsRouter.post('/:id/telegram-link', requireRole('DIRECTOR', 'MANAGER'), validateBody(z.object({ renew: z.boolean().default(false) })), async (req, res, next) => {
+  try {
+    const s = await studentRepo.findById(req.params.id!);
+    if (!s) throw new ApiError(404, 'NOT_FOUND');
+    const link = await studentBotLink(s, (req.body as { renew: boolean }).renew);
+    if (!link) throw new ApiError(400, 'TELEGRAM_NOT_CONFIGURED');
+    res.json({ link, linked: !!s.telegramChatId });
+  } catch (e) {
+    next(e);
+  }
+});
+
+studentsRouter.delete('/:id/telegram', requireRole('DIRECTOR', 'MANAGER'), async (req, res, next) => {
+  try {
+    const s = await studentRepo.update(req.params.id!, { telegramChatId: null });
+    if (!s) throw new ApiError(404, 'NOT_FOUND');
+    await audit(req.user!.id, 'student.telegram.unlink', 'student', s.id);
+    res.json({ linked: false });
   } catch (e) {
     next(e);
   }

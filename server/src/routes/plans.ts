@@ -14,6 +14,10 @@ import { coursePlanRepo, groupPlanRepo } from '../repositories/planRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 import { lessonCapacity, scheduleTopics } from '../services/lessonPlan.js';
 import { brand } from '../brand.config.js';
+import { feedbackRepo } from '../repositories/feedbackRepo.js';
+import { fullName, studentRepo } from '../repositories/studentRepo.js';
+import { requestFeedback } from '../services/feedback.js';
+import { studentBotLink } from '../services/studentTelegram.js';
 
 /** Lesson plans: a course's master plan and each group's own ordered copy with dates from the group schedule. */
 export const plansRouter = Router();
@@ -46,6 +50,19 @@ async function presentGroupPlan(g: Group, p: GroupPlan | null) {
     courseRepo.findById(g.courseId), g.teacherId ? userRepo.findById(g.teacherId) : null, g.branchId ? branchRepo.findById(g.branchId) : null,
   ]);
   const schedule = p ? new Map(scheduleTopics(g, p.topics).map((s) => [s.topicId, s])) : new Map();
+  // ratings per topic (trainees rate a topic over Telegram once it is marked as taught)
+  const rated = new Map<string, { sum: number; count: number; comments: number; asked: number }>();
+  for (const f of await feedbackRepo.byGroup(g.id)) {
+    const r = rated.get(f.topicId) ?? { sum: 0, count: 0, comments: 0, asked: 0 };
+    r.asked++;
+    if (f.rating) { r.sum += f.rating; r.count++; }
+    if (f.comment) r.comments++;
+    rated.set(f.topicId, r);
+  }
+  const ratingOf = (id: string) => {
+    const r = rated.get(id);
+    return r ? { avg: r.count ? Math.round((r.sum / r.count) * 10) / 10 : null, count: r.count, comments: r.comments, asked: r.asked } : null;
+  };
   return {
     group: {
       id: g.id, name: g.name, status: groupStatus(g), startDate: g.startDate, endDate: g.endDate, days: g.days, timeStart: g.timeStart,
@@ -54,7 +71,7 @@ async function presentGroupPlan(g: Group, p: GroupPlan | null) {
     },
     plan: p && {
       id: p.id, publicToken: p.publicToken, updatedAt: p.updatedAt, done: p.done,
-      topics: p.topics.map((t) => ({ ...t, ...schedule.get(t.id), done: p.done.includes(t.id) })),
+      topics: p.topics.map((t) => ({ ...t, ...schedule.get(t.id), done: p.done.includes(t.id), rating: ratingOf(t.id) })),
       lessons: p.topics.reduce((n, t) => n + t.lessons, 0),
     },
   };
@@ -154,8 +171,46 @@ plansRouter.put('/group/:groupId/done', validateBody(z.object({ topicId: z.strin
     if (!canEditGroup(req.user!, g)) throw new ApiError(403, 'FORBIDDEN');
     const b = req.body as { topicId: string; done: boolean };
     const cur = await groupPlanRepo.byGroup(g.id);
-    if (!cur || !cur.topics.some((t) => t.id === b.topicId)) throw new ApiError(404, 'NOT_FOUND');
-    res.json(await presentGroupPlan(g, await groupPlanRepo.setDone(g.id, b.topicId, b.done)));
+    const topic = cur?.topics.find((t) => t.id === b.topicId);
+    if (!cur || !topic) throw new ApiError(404, 'NOT_FOUND');
+    const wasDone = cur.done.includes(topic.id);
+    const updated = await groupPlanRepo.setDone(g.id, b.topicId, b.done);
+    // the lesson is over: this group's trainees are asked to rate it on Telegram
+    const feedbackRequested = b.done && !wasDone ? await requestFeedback(g, topic) : 0;
+    res.json({ ...(await presentGroupPlan(g, updated)), feedbackRequested });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/** Personal bot links of the group's trainees, to hand out (each opens the bot and links that trainee). */
+plansRouter.get('/group/:groupId/telegram', async (req, res, next) => {
+  try {
+    const g = await loadGroup(req.params.groupId!);
+    if (!canEditGroup(req.user!, g)) throw new ApiError(403, 'FORBIDDEN');
+    const roster = (await studentRepo.list({ groupId: g.id, sort: 'name' })).filter((s) => s.status !== 'LEFT');
+    const items = [];
+    for (const s of roster) items.push({ id: s.id, fullName: fullName(s), phone: s.phone, linked: !!s.telegramChatId, link: await studentBotLink(s) });
+    res.json({ configured: items.length === 0 || items.some((i) => !!i.link), items });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/** Ratings and comments of the group's trainees (topicId narrows it to one topic). */
+plansRouter.get('/group/:groupId/feedback', async (req, res, next) => {
+  try {
+    const g = await loadGroup(req.params.groupId!);
+    if (!canEditGroup(req.user!, g) && req.user!.role !== 'ACCOUNTANT') throw new ApiError(403, 'FORBIDDEN');
+    const topicId = typeof req.query.topicId === 'string' ? req.query.topicId : null;
+    const names = new Map((await studentRepo.list({ groupId: g.id })).map((s) => [s.id, fullName(s)]));
+    const rows = (await feedbackRepo.byGroup(g.id)).filter((f) => !topicId || f.topicId === topicId).sort((a, b) => b.askedAt.getTime() - a.askedAt.getTime());
+    res.json({
+      items: rows.map((f) => ({
+        id: f.id, topicId: f.topicId, topicTitle: f.topicTitle, studentId: f.studentId, studentName: names.get(f.studentId) ?? '—',
+        status: f.status, rating: f.rating, comment: f.comment, askedAt: f.askedAt, ratedAt: f.ratedAt,
+      })),
+    });
   } catch (e) {
     next(e);
   }

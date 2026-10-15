@@ -64,6 +64,13 @@ Requests send `X-API-Key: rtk_…` to `<server>/api/v1`:
   Response field `placement`: `placed | unlinked | group_full | group_finished | already_in_group | no_course | group_missing`.
 - `GET /students`, `/students/:id`, `/courses`, `/groups`, `/payments`, `/debtors`, `/staff` (no salaries), `/attendance`.
 
+## Telegram bot for trainees (lesson ratings)
+The server receives bot updates by long polling (`services/telegramBot.ts`, one instance; `TELEGRAM_POLLING=false` turns it off).
+Every trainee has a personal link `t.me/<bot>?start=s_<code>` (trainee page, group plan page → "Tinglovchilar boti", and the
+`telegram.link` field of `POST /api/v1/students`). When a teacher marks a plan topic as taught, the linked trainees of that group
+get "Dars yakunlandi" with 1–5 rating buttons, then a request for a comment; results show next to the topic.
+Staff "/start <code>" links and the director's chat detection go through the same receiver (no webhook may be set on the bot).
+
 ## Install as an app (PWA)
 The client is an installable web app: `manifest.webmanifest` is generated at build time from `VITE_BRAND_NAME` / `VITE_BRAND_SHORT`
 (icons in `client/public/brand/`: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` — replace them when rebranding).

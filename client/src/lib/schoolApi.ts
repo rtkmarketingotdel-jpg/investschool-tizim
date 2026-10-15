@@ -34,13 +34,15 @@ export interface Student {
   /** set when the trainee came from another system over the API (Nazorat AI) */
   externalId?: string | null;
   externalCourse?: string | null;
+  /** the trainee opened their personal bot link (lesson ratings reach them) */
+  telegramLinked?: boolean;
   enrolledAt: string;
   leftAt: string | null;
   notes: string | null;
   /** null when the current role may not see finances */
   debt: number | null;
 }
-export type StudentInput = Omit<Student, 'id' | 'fullName' | 'groupName' | 'courseId' | 'courseName' | 'leftAt' | 'debt' | 'externalId' | 'externalCourse'>;
+export type StudentInput = Omit<Student, 'id' | 'fullName' | 'groupName' | 'courseId' | 'courseName' | 'leftAt' | 'debt' | 'externalId' | 'externalCourse' | 'telegramLinked'>;
 
 export interface StudentFilters {
   q?: string;
@@ -135,6 +137,8 @@ export const schoolApi = {
   student: (id: string) => api.get<Student>(`/students/${id}`).then((r) => r.data),
   createStudent: (d: StudentInput) => api.post<Student>('/students', d).then((r) => r.data),
   updateStudent: (id: string, d: StudentInput) => api.patch<Student>(`/students/${id}`, d).then((r) => r.data),
+  studentBotLink: (id: string, renew = false) => api.post<{ link: string; linked: boolean }>(`/students/${id}/telegram-link`, { renew }).then((r) => r.data),
+  unlinkStudentBot: (id: string) => api.delete(`/students/${id}/telegram`).then((r) => r.data),
   deleteStudent: (id: string, withPayments: boolean) => api.delete(`/students/${id}`, { params: withPayments ? { withPayments: 'true' } : {} }).then((r) => r.data),
   exportStudents: (f: Omit<StudentFilters, 'page' | 'limit' | 'debtor'>) =>
     api.get<Blob>('/students/export', { params: clean(f), responseType: 'blob' }).then((r) => r.data),

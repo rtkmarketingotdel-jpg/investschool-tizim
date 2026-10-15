@@ -19,6 +19,27 @@ export interface ScheduledTopic extends Topic {
   lastDate: string;
   overflow: boolean;
   done: boolean;
+  /** trainees' ratings over Telegram (null until the topic was marked as taught) */
+  rating?: { avg: number | null; count: number; comments: number; asked: number } | null;
+}
+export interface BotLinkRow {
+  id: string;
+  fullName: string;
+  phone: string;
+  linked: boolean;
+  link: string | null;
+}
+export interface FeedbackRow {
+  id: string;
+  topicId: string;
+  topicTitle: string;
+  studentId: string;
+  studentName: string;
+  status: 'ASKED' | 'RATED' | 'DONE';
+  rating: number | null;
+  comment: string | null;
+  askedAt: string;
+  ratedAt: string | null;
 }
 export interface PlanGroup {
   id: string;
@@ -69,7 +90,9 @@ export const plansApi = {
   group: (id: string) => api.get<GroupPlanData>(`/plans/group/${id}`).then((r) => r.data),
   createGroup: (id: string, fromTemplate: boolean) => api.post<GroupPlanData>(`/plans/group/${id}`, { fromTemplate }).then((r) => r.data),
   saveGroup: (id: string, topics: Topic[]) => api.put<GroupPlanData>(`/plans/group/${id}`, { topics: toPayload(topics) }).then((r) => r.data),
-  setDone: (id: string, topicId: string, done: boolean) => api.put<GroupPlanData>(`/plans/group/${id}/done`, { topicId, done }).then((r) => r.data),
+  setDone: (id: string, topicId: string, done: boolean) => api.put<GroupPlanData & { feedbackRequested: number }>(`/plans/group/${id}/done`, { topicId, done }).then((r) => r.data),
+  botLinks: (id: string) => api.get<{ configured: boolean; items: BotLinkRow[] }>(`/plans/group/${id}/telegram`).then((r) => r.data),
+  feedback: (id: string, topicId?: string) => api.get<{ items: FeedbackRow[] }>(`/plans/group/${id}/feedback`, { params: topicId ? { topicId } : {} }).then((r) => r.data.items),
   renewToken: (id: string) => api.post<GroupPlanData>(`/plans/group/${id}/token`).then((r) => r.data),
   publicPlan: (token: string) => api.get<PublicPlan>(`/public/plans/${token}`).then((r) => r.data),
 };

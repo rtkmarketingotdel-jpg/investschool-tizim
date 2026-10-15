@@ -1178,6 +1178,29 @@
       "today": "Bugun",
       "notFound": "Dars rejasi topilmadi yoki havola yangilangan",
       "updated": "Yangilangan: {{date}}"
+    },
+    "bot": {
+      "title": "Tinglovchilar boti",
+      "hint": "Har bir tinglovchi oʻz shaxsiy havolasini bir marta ochib Start bosadi. Shundan soʻng har bir mavzu “Oʻtildi” deb belgilanganda bot undan darsni baholashni va fikr yozishni soʻraydi.",
+      "notConfigured": "Telegram bot sozlanmagan.",
+      "linked": "Botga ulanganlar",
+      "copyAll": "Ulanmaganlar havolalarini nusxalash ({{count}})",
+      "on": "Ulangan",
+      "studentTitle": "Telegram bot",
+      "studentLinked": "Botga ulangan: darslarni baholaydi",
+      "studentHint": "Shaxsiy havolani tinglovchiga yuboring: u botni ochib Start bossa, ulanadi.",
+      "showLink": "Shaxsiy havola",
+      "unlinkConfirm": "Tinglovchini botdan uzasizmi? Baholash soʻrovlari unga bormay qoladi.",
+      "renewConfirm": "Yangi havola yaratilsinmi? Eski havola ishlamay qoladi."
+    },
+    "feedback": {
+      "requested_one": "{{count}} ta tinglovchiga darsni baholash soʻrovi yuborildi",
+      "requested_other": "{{count}} ta tinglovchiga darsni baholash soʻrovi yuborildi",
+      "open": "Baholar va fikrlar",
+      "short": "{{rated}}/{{asked}} baholadi",
+      "none": "Hali baho yoʻq",
+      "summary": "{{asked}} kishidan {{rated}} tasi baholadi",
+      "notRated": "Baholamagan"
     }
   }
 }

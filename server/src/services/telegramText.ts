@@ -95,3 +95,33 @@ export function salaryPaidMessage(p: { name: string; period: string; total: numb
 export function linkedMessage(name: string) {
   return [`✅ <b>Telegram ulandi</b>`, LINE, `${esc(name)}, oylik toʻlanganda shu yerga xabar keladi.`, '', footer()].join('\n');
 }
+
+// ---------- trainee bot: lesson feedback ----------
+const stars = (n: number) => '⭐'.repeat(n) + '☆'.repeat(5 - n);
+
+/** Sent to each trainee of the group when a topic is marked as taught (with 1-5 rating buttons). */
+export function feedbackRequestMessage(p: { course: string; group: string; topic: string; rating?: number | null }) {
+  return [
+    '✅ <b>Dars yakunlandi</b>',
+    LINE,
+    `📘 ${esc(p.course)} · ${esc(p.group)}`,
+    `Mavzu: <b>${esc(p.topic)}</b>`,
+    '',
+    p.rating ? `Bahoingiz: ${stars(p.rating)} (${p.rating})` : 'Darsni baholang: 1 — juda yomon, 5 — aʼlo.',
+  ].join('\n');
+}
+
+export const askCommentMessage = () => 'Rahmat! Endi dars haqida qisqacha fikringizni yozing: nima yoqdi, nimani yaxshilash kerak.';
+export const commentThanksMessage = () => 'Fikringiz uchun rahmat! 🙏';
+export const commentSkippedMessage = () => 'Mayli. Bahoingiz saqlandi, rahmat!';
+
+export function studentLinkedMessage(p: { name: string; course: string | null; group: string | null }) {
+  const lines = ['✅ <b>Siz botga ulandingiz</b>', LINE, `${esc(p.name)}, har dars yakunida shu yerda darsni baholaysiz va fikringizni yozasiz.`];
+  if (p.course) lines.push(`📘 ${esc(p.course)}${p.group ? ` · ${esc(p.group)}` : ''}`);
+  lines.push('', footer());
+  return lines.join('\n');
+}
+
+export const startHelpMessage = () =>
+  ['👋 Assalomu alaykum!', '', 'Botga ulanish uchun markazdan olingan shaxsiy havolani bosing.', '', footer()].join('\n');
+export const idleHelpMessage = () => 'Dars yakunlanganda baholash soʻrovi shu yerga keladi.';

@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { apiKeys, courseLinks } from '../data/integration.js';
 import { coursePlans, groupPlans } from '../data/lessonPlans.js';
+import { feedbacks } from '../data/feedback.js';
 import { auditLogs, charges, contractTemplates, contracts, notifications, payments, payrolls, adjustments } from '../data/mockFinance.js';
 import { lastDebtSms, smsCampaigns, smsTemplates } from '../data/mockSms.js';
 import { attendances, branches, settings, users } from '../data/mockStore.js';
@@ -15,7 +16,7 @@ import { diffRows, parseRecord } from './rows.js';
 
 const collections: Record<string, Array<{ id: string }>> = {
   users, branches, attendances, courses, groups, students, charges, payments, adjustments, payrolls,
-  contractTemplates, contracts, notifications, auditLogs, smsTemplates, smsCampaigns, apiKeys, courseLinks, coursePlans, groupPlans,
+  contractTemplates, contracts, notifications, auditLogs, smsTemplates, smsCampaigns, apiKeys, courseLinks, coursePlans, groupPlans, feedbacks,
 };
 
 /** Singletons kept as rows of the "meta" collection. */

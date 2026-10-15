@@ -18,6 +18,7 @@ import { userRepo } from '../repositories/userRepo.js';
 import { debtMap, studentDebt } from '../services/finance.js';
 import { placeByCourseLabel, placeInGroup } from '../services/integration.js';
 import { brand } from '../brand.config.js';
+import { studentBotLink } from '../services/studentTelegram.js';
 
 /**
  * Integration API for other systems (Nazorat AI): read the centre's data and send trainees who arrived.
@@ -149,7 +150,7 @@ v1Router.post('/students', validateBody(arrivalSchema), async (req, res, next) =
       s = (await studentRepo.update(existing.id, { ...personal, externalCourse: b.course ?? existing.externalCourse }))!;
     } else {
       s = await studentRepo.create({
-        ...personal, externalId: b.externalId, externalCourse: b.course, groupId: null, coursePrice: 0, discountPercent: 0,
+        ...personal, externalId: b.externalId, externalCourse: b.course, telegramChatId: null, telegramCode: null, groupId: null, coursePrice: 0, discountPercent: 0,
         status: 'ACTIVE', enrolledAt: b.arrivedAt ?? toLocalDate(), leftAt: null, notes: b.notes,
       });
     }
@@ -157,7 +158,11 @@ v1Router.post('/students', validateBody(arrivalSchema), async (req, res, next) =
     await audit(null, existing ? 'api.student.update' : 'api.student.create', 'student', s.id, { key: req.apiKey!.name, externalId: b.externalId, placement });
     const l = await lookups();
     const fresh = (await studentRepo.findById(s.id))!;
-    res.status(existing ? 200 : 201).json({ created: !existing, placement, student: publicStudent(fresh, l, Math.max(0, (await studentDebt(fresh.id)).debt)) });
+    res.status(existing ? 200 : 201).json({
+      created: !existing, placement, student: publicStudent(fresh, l, Math.max(0, (await studentDebt(fresh.id)).debt)),
+      // personal link to the centre's bot: send it to the trainee so they rate their lessons
+      telegram: { linked: !!fresh.telegramChatId, link: await studentBotLink(fresh) },
+    });
   } catch (e) {
     next(e);
   }

@@ -78,23 +78,28 @@ export interface TelegramChat {
   title: string;
 }
 
-/**
- * Lists the chats that recently wrote to the bot (someone pressed Start, or the bot was added to a group),
- * so the director can pick the chat id without hunting for it. Works only while no webhook is set.
- */
+/** Chats seen by the update receiver (services/telegramBot.ts) since start-up: someone pressed Start or added the bot. */
+export const seenChats = new Map<string, TelegramChat>();
+/** "/start <code>" messages seen by the update receiver: code -> private chat id. */
+export const startCodes = new Map<string, string>();
+
+/** Chats that wrote to the bot, so the director can pick the chat id without hunting for it. */
 export async function findTelegramChats(): Promise<TelegramChat[]> {
-  if (!env.telegramToken) return [];
-  const res = await fetch(`${env.telegramApiUrl}/bot${env.telegramToken}/getUpdates?limit=100`, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) return [];
-  const json = (await res.json()) as { result?: Array<Record<string, { chat?: { id: number; type: string; title?: string; first_name?: string; last_name?: string; username?: string } }>> };
-  const chats = new Map<string, TelegramChat>();
-  for (const u of json.result ?? []) {
-    const chat = (u.message ?? u.my_chat_member ?? u.channel_post ?? u.edited_message)?.chat;
-    if (!chat) continue;
-    const title = chat.title ?? ([chat.first_name, chat.last_name].filter(Boolean).join(' ') || chat.username || String(chat.id));
-    chats.set(String(chat.id), { id: String(chat.id), type: chat.type, title });
+  return [...seenChats.values()];
+}
+
+/** Calls a Bot API method; null when the bot is not configured or Telegram refused it. */
+export async function tgCall<T = unknown>(method: string, body: Record<string, unknown>, timeoutMs = 10_000): Promise<{ ok: boolean; result?: T; error_code?: number; description?: string } | null> {
+  if (!env.telegramToken) return null;
+  try {
+    const res = await fetch(`${env.telegramApiUrl}/bot${env.telegramToken}/${method}`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs),
+    });
+    return (await res.json()) as { ok: boolean; result?: T; error_code?: number; description?: string };
+  } catch (e) {
+    if ((e as Error).name !== 'TimeoutError') console.error(`[telegram] ${method} failed`, e);
+    return null;
   }
-  return [...chats.values()];
 }
 
 let botUsername: string | null = null;
@@ -113,18 +118,7 @@ export async function getBotUsername(): Promise<string | null> {
   return botUsername;
 }
 
-/**
- * Finds the private chat that sent "/start <code>" to the bot (the employee opened the t.me link and pressed Start).
- * Reads getUpdates without confirming them, so the director's "find chat" keeps seeing the same updates.
- */
+/** The private chat that sent "/start <code>" (the employee opened their t.me link and pressed Start). */
 export async function findStartChat(code: string): Promise<string | null> {
-  if (!env.telegramToken) return null;
-  const res = await fetch(`${env.telegramApiUrl}/bot${env.telegramToken}/getUpdates?limit=100&allowed_updates=["message"]`, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) return null;
-  const json = (await res.json()) as { result?: Array<{ message?: { text?: string; chat?: { id: number; type: string } } }> };
-  for (const u of [...(json.result ?? [])].reverse()) {
-    const m = u.message;
-    if (m?.chat?.type === 'private' && m.text?.trim() === `/start ${code}`) return String(m.chat.id);
-  }
-  return null;
+  return startCodes.get(code) ?? null;
 }

@@ -10,6 +10,8 @@ import { plansApi, type GroupPlanData, type ScheduledTopic } from '@/lib/plansAp
 import { PageHeader } from '@/components/PageHeader';
 import { scheduleText, statusTone } from '@/components/groups/parts';
 import { SharePanel } from '@/components/plans/SharePanel';
+import { BotLinksPanel } from '@/components/plans/BotLinksPanel';
+import { FeedbackModal } from '@/components/plans/FeedbackModal';
 import { draftOf, TopicEditor, type DraftTopic } from '@/components/plans/TopicEditor';
 import { Badge, Button, Card, EmptyState, Skeleton, useToast } from '@/components/ui';
 
@@ -32,6 +34,7 @@ export default function GroupPlan() {
   const [draft, setDraft] = useState<DraftTopic[]>([]);
   /** order mode: topic ids in the order they were tapped */
   const [picked, setPicked] = useState<string[]>([]);
+  const [feedbackOf, setFeedbackOf] = useState<{ id: string; title: string } | null>(null);
 
   const fail = (e: unknown) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error');
   const apply = (d: Omit<GroupPlanData, 'templateTopics' | 'canEdit'>) => {
@@ -44,7 +47,16 @@ export default function GroupPlan() {
     onSuccess: (d) => { apply(d); setMode('view'); toast(t('plans.saved')); },
     onError: fail,
   });
-  const tick = useMutation({ mutationFn: (v: { id: string; done: boolean }) => plansApi.setDone(groupId, v.id, v.done), onSuccess: apply, onError: fail });
+  const tick = useMutation({
+    mutationFn: (v: { id: string; done: boolean }) => plansApi.setDone(groupId, v.id, v.done),
+    onSuccess: (d) => {
+      apply(d);
+      // the trainees of this group were asked on Telegram to rate the lesson
+      if (d.feedbackRequested) toast(t('plans.feedback.requested', { count: d.feedbackRequested }));
+      void qc.invalidateQueries({ queryKey: ['plans', 'bot', groupId] });
+    },
+    onError: fail,
+  });
   const renew = useMutation({ mutationFn: () => plansApi.renewToken(groupId), onSuccess: (d) => { apply(d); toast(t('plans.share.renewed')); }, onError: fail });
 
   const data = q.data;
@@ -167,6 +179,11 @@ export default function GroupPlan() {
                             <Badge tone={x.kind === 'THEORY' ? 'info' : 'success'}>{t(`plans.kind.${x.kind}`)}</Badge>
                             {x.lessons > 1 && <span>{t('plans.lessons', { count: x.lessons })}</span>}
                             {x.id === next?.id && <span className="text-primary">{t('plans.next')}</span>}
+                            {x.rating && (
+                              <button type="button" onClick={() => setFeedbackOf({ id: x.id, title: x.title })} className="rounded-full bg-warning/10 px-2.5 py-0.5 text-xs text-warning hover:bg-warning/20" title={t('plans.feedback.open')}>
+                                ★ {x.rating.avg ?? '—'} · {t('plans.feedback.short', { rated: x.rating.count, asked: x.rating.asked })}{x.rating.comments ? ` · 💬 ${x.rating.comments}` : ''}
+                              </button>
+                            )}
                           </p>
                           {x.description && <p className="mt-1.5 text-sm text-text-muted">{x.description}</p>}
                           {x.materials && <p className="mt-1 text-sm text-text-muted">📎 {x.materials}</p>}
@@ -187,10 +204,12 @@ export default function GroupPlan() {
             )}
           </div>
           <div className="space-y-4">
+            {data.canEdit && <BotLinksPanel groupId={groupId} />}
             <SharePanel token={plan.publicToken} title={`${g.name} · ${g.courseName}`} canRenew={data.canEdit} renewing={renew.isPending} onRenew={() => renew.mutate()} />
           </div>
         </div>
       )}
+      <FeedbackModal groupId={groupId} topic={feedbackOf} onClose={() => setFeedbackOf(null)} />
     </div>
   );
 }

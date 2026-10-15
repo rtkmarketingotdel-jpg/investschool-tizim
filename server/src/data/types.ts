@@ -161,6 +161,10 @@ export interface Student {
   externalId: string | null;
   /** Course label the external system sent (kept to place the trainee once the label is linked to a group). */
   externalCourse: string | null;
+  /** Telegram chat linked through the trainee's own bot link (lesson feedback requests go there). */
+  telegramChatId: string | null;
+  /** Code of the trainee's personal bot link (t.me/<bot>?start=s_<code>); renewing it disables the old link. */
+  telegramCode: string | null;
   enrolledAt: string; // YYYY-MM-DD
   leftAt: string | null;
   notes: string | null;
@@ -367,4 +371,24 @@ export interface GroupPlan {
   publicToken: string;
   updatedAt: Date;
   updatedById: string | null;
+}
+
+export type FeedbackStatus = 'ASKED' | 'RATED' | 'DONE';
+
+/** A trainee's rating (1-5) and comment for a topic, asked over Telegram when the topic is marked as taught. */
+export interface LessonFeedback {
+  id: string;
+  groupId: string;
+  topicId: string;
+  topicTitle: string;
+  studentId: string;
+  chatId: string;
+  /** Telegram message with the rating buttons (edited once rated). */
+  messageId: number | null;
+  status: FeedbackStatus;
+  rating: number | null;
+  comment: string | null;
+  askedAt: Date;
+  ratedAt: Date | null;
+  commentedAt: Date | null;
 }

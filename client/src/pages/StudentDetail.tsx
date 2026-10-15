@@ -13,6 +13,7 @@ import { PaymentDrawer } from '@/components/finance/PaymentDrawer';
 import { ContractDrawer } from '@/components/finance/ContractDrawer';
 import { ContractTable } from '@/components/finance/ContractTable';
 import { DeleteStudentDialog } from '@/components/students/DeleteStudentDialog';
+import { StudentBotCard } from '@/components/students/StudentBotCard';
 import { Avatar, Badge, Button, Card, EmptyState, Skeleton, Tabs } from '@/components/ui';
 import { statusTone } from './Students';
 
@@ -112,6 +113,8 @@ export default function StudentDetail() {
         ]}
       />
       {tab === 'info' ? (
+        <div className="space-y-4">
+        {canEdit && <StudentBotCard student={s} />}
         <Card>
           <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
             {rows.map(([k, v]) => (
@@ -122,6 +125,7 @@ export default function StudentDetail() {
             ))}
           </dl>
         </Card>
+        </div>
       ) : tab === 'payments' ? (
         !seesFinance ? (
           <EmptyState icon={Wallet} title={t('errors.FORBIDDEN')} />
