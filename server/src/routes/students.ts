@@ -14,6 +14,7 @@ import { contractRepo } from '../repositories/contractRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { lastDebtSms } from '../data/mockSms.js';
 import { feedbackRepo } from '../repositories/feedbackRepo.js';
+import { gradeRepo } from '../repositories/gradeRepo.js';
 import { studentBotLink } from '../services/studentTelegram.js';
 import { toLocalDate } from '../lib/date.js';
 import { debtMap, studentDebt, syncCourseCharge } from '../services/finance.js';
@@ -195,6 +196,7 @@ studentsRouter.delete('/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, re
     const removed = { ...removeStudentFinance(s.id), contracts: await contractRepo.removeByStudent(s.id) };
     lastDebtSms.delete(s.id);
     await feedbackRepo.removeForStudent(s.id);
+    await gradeRepo.removeForStudent(s.id);
     await studentRepo.remove(s.id);
     await audit(req.user!.id, 'student.delete', 'student', s.id, {
       name: fullName(s), phone: s.phone, externalId: s.externalId, paidTotal: paid.reduce((n, p) => n + p.amount, 0), ...removed,

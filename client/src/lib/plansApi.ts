@@ -21,6 +21,14 @@ export interface ScheduledTopic extends Topic {
   done: boolean;
   /** trainees' ratings over Telegram (null until the topic was marked as taught) */
   rating?: { avg: number | null; count: number; comments: number; asked: number } | null;
+  /** the teacher's marks for this topic */
+  grades?: { avg: number; count: number } | null;
+}
+export interface GradeRow {
+  studentId: string;
+  fullName: string;
+  status: 'ACTIVE' | 'GRADUATED' | 'LEFT';
+  grade: number | null;
 }
 export interface BotLinkRow {
   id: string;
@@ -91,6 +99,9 @@ export const plansApi = {
   createGroup: (id: string, fromTemplate: boolean) => api.post<GroupPlanData>(`/plans/group/${id}`, { fromTemplate }).then((r) => r.data),
   saveGroup: (id: string, topics: Topic[]) => api.put<GroupPlanData>(`/plans/group/${id}`, { topics: toPayload(topics) }).then((r) => r.data),
   setDone: (id: string, topicId: string, done: boolean) => api.put<GroupPlanData & { feedbackRequested: number }>(`/plans/group/${id}/done`, { topicId, done }).then((r) => r.data),
+  grades: (id: string, topicId: string) => api.get<{ items: GradeRow[] }>(`/plans/group/${id}/grades`, { params: { topicId } }).then((r) => r.data.items),
+  saveGrades: (id: string, topicId: string, grades: Array<{ studentId: string; grade: number | null }>) =>
+    api.put<GroupPlanData>(`/plans/group/${id}/grades`, { topicId, grades }).then((r) => r.data),
   botLinks: (id: string) => api.get<{ configured: boolean; items: BotLinkRow[] }>(`/plans/group/${id}/telegram`).then((r) => r.data),
   feedback: (id: string, topicId?: string) => api.get<{ items: FeedbackRow[] }>(`/plans/group/${id}/feedback`, { params: topicId ? { topicId } : {} }).then((r) => r.data.items),
   renewToken: (id: string) => api.post<GroupPlanData>(`/plans/group/${id}/token`).then((r) => r.data),

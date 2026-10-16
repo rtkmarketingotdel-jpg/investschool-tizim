@@ -1201,6 +1201,16 @@
       "none": "Hali baho yoʻq",
       "summary": "{{asked}} kishidan {{rated}} tasi baholadi",
       "notRated": "Baholamagan"
+    },
+    "grades": {
+      "title": "Baholash",
+      "hint": "Har bir tinglovchiga 1 dan 5 gacha baho qoʻying. Bahoni qayta bossangiz, olib tashlanadi. Baho qoʻyilmaganlar baholanmagan hisoblanadi.",
+      "readOnly": "Oʻqituvchi qoʻygan baholar.",
+      "summary": "Baholandi: {{given}} / {{total}} · oʻrtacha {{avg}}",
+      "later": "Keyinroq",
+      "saved": "Baholar saqlandi",
+      "chip": "Baho: ⌀{{avg}} · {{count}} kishi",
+      "give": "Baho qoʻyish"
     }
   }
 }

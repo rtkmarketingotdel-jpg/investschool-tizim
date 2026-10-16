@@ -12,6 +12,7 @@ import { scheduleText, statusTone } from '@/components/groups/parts';
 import { SharePanel } from '@/components/plans/SharePanel';
 import { BotLinksPanel } from '@/components/plans/BotLinksPanel';
 import { FeedbackModal } from '@/components/plans/FeedbackModal';
+import { GradeModal } from '@/components/plans/GradeModal';
 import { draftOf, TopicEditor, type DraftTopic } from '@/components/plans/TopicEditor';
 import { Badge, Button, Card, EmptyState, Skeleton, useToast } from '@/components/ui';
 
@@ -35,6 +36,7 @@ export default function GroupPlan() {
   /** order mode: topic ids in the order they were tapped */
   const [picked, setPicked] = useState<string[]>([]);
   const [feedbackOf, setFeedbackOf] = useState<{ id: string; title: string } | null>(null);
+  const [gradesOf, setGradesOf] = useState<{ id: string; title: string } | null>(null);
 
   const fail = (e: unknown) => toast(t(`errors.${errorCode(e)}`, { defaultValue: t('errors.INTERNAL_ERROR') }), 'error');
   const apply = (d: Omit<GroupPlanData, 'templateTopics' | 'canEdit'>) => {
@@ -49,8 +51,13 @@ export default function GroupPlan() {
   });
   const tick = useMutation({
     mutationFn: (v: { id: string; done: boolean }) => plansApi.setDone(groupId, v.id, v.done),
-    onSuccess: (d) => {
+    onSuccess: (d, v) => {
       apply(d);
+      // the lesson is over: the teacher marks the trainees right away
+      if (v.done) {
+        const topic = d.plan?.topics.find((x) => x.id === v.id);
+        if (topic) setGradesOf({ id: topic.id, title: topic.title });
+      }
       // the trainees of this group were asked on Telegram to rate the lesson
       if (d.feedbackRequested) toast(t('plans.feedback.requested', { count: d.feedbackRequested }));
       void qc.invalidateQueries({ queryKey: ['plans', 'bot', groupId] });
@@ -179,6 +186,12 @@ export default function GroupPlan() {
                             <Badge tone={x.kind === 'THEORY' ? 'info' : 'success'}>{t(`plans.kind.${x.kind}`)}</Badge>
                             {x.lessons > 1 && <span>{t('plans.lessons', { count: x.lessons })}</span>}
                             {x.id === next?.id && <span className="text-primary">{t('plans.next')}</span>}
+                            {x.done && (
+                              <button type="button" onClick={() => setGradesOf({ id: x.id, title: x.title })}
+                                className={cn('rounded-full px-2.5 py-0.5 text-xs', x.grades ? 'bg-primary-soft text-primary hover:bg-primary/15' : 'border border-dashed border-primary/50 text-primary hover:bg-primary-soft')}>
+                                {x.grades ? t('plans.grades.chip', { avg: x.grades.avg, count: x.grades.count }) : t('plans.grades.give')}
+                              </button>
+                            )}
                             {x.rating && (
                               <button type="button" onClick={() => setFeedbackOf({ id: x.id, title: x.title })} className="rounded-full bg-warning/10 px-2.5 py-0.5 text-xs text-warning hover:bg-warning/20" title={t('plans.feedback.open')}>
                                 ★ {x.rating.avg ?? '—'} · {t('plans.feedback.short', { rated: x.rating.count, asked: x.rating.asked })}{x.rating.comments ? ` · 💬 ${x.rating.comments}` : ''}
@@ -210,6 +223,7 @@ export default function GroupPlan() {
         </div>
       )}
       <FeedbackModal groupId={groupId} topic={feedbackOf} onClose={() => setFeedbackOf(null)} />
+      <GradeModal groupId={groupId} topic={gradesOf} canEdit={!!data?.canEdit} onClose={() => setGradesOf(null)} onSaved={apply} />
     </div>
   );
 }

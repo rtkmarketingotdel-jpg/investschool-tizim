@@ -15,6 +15,7 @@ import { userRepo } from '../repositories/userRepo.js';
 import { lessonCapacity, scheduleTopics } from '../services/lessonPlan.js';
 import { brand } from '../brand.config.js';
 import { feedbackRepo } from '../repositories/feedbackRepo.js';
+import { gradeRepo } from '../repositories/gradeRepo.js';
 import { fullName, studentRepo } from '../repositories/studentRepo.js';
 import { requestFeedback } from '../services/feedback.js';
 import { studentBotLink } from '../services/studentTelegram.js';
@@ -59,6 +60,18 @@ async function presentGroupPlan(g: Group, p: GroupPlan | null) {
     if (f.comment) r.comments++;
     rated.set(f.topicId, r);
   }
+  // the teacher's marks per topic
+  const marks = new Map<string, { sum: number; count: number }>();
+  for (const m of await gradeRepo.byGroup(g.id)) {
+    const r = marks.get(m.topicId) ?? { sum: 0, count: 0 };
+    r.sum += m.grade;
+    r.count++;
+    marks.set(m.topicId, r);
+  }
+  const gradesOf = (id: string) => {
+    const r = marks.get(id);
+    return r ? { avg: Math.round((r.sum / r.count) * 10) / 10, count: r.count } : null;
+  };
   const ratingOf = (id: string) => {
     const r = rated.get(id);
     return r ? { avg: r.count ? Math.round((r.sum / r.count) * 10) / 10 : null, count: r.count, comments: r.comments, asked: r.asked } : null;
@@ -71,7 +84,7 @@ async function presentGroupPlan(g: Group, p: GroupPlan | null) {
     },
     plan: p && {
       id: p.id, publicToken: p.publicToken, updatedAt: p.updatedAt, done: p.done,
-      topics: p.topics.map((t) => ({ ...t, ...schedule.get(t.id), done: p.done.includes(t.id), rating: ratingOf(t.id) })),
+      topics: p.topics.map((t) => ({ ...t, ...schedule.get(t.id), done: p.done.includes(t.id), rating: ratingOf(t.id), grades: gradesOf(t.id) })),
       lessons: p.topics.reduce((n, t) => n + t.lessons, 0),
     },
   };
@@ -211,6 +224,43 @@ plansRouter.get('/group/:groupId/feedback', async (req, res, next) => {
         status: f.status, rating: f.rating, comment: f.comment, askedAt: f.askedAt, ratedAt: f.ratedAt,
       })),
     });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/** The trainees of the group with their mark for a topic (current trainees; one who left keeps a mark already given). */
+plansRouter.get('/group/:groupId/grades', async (req, res, next) => {
+  try {
+    const g = await loadGroup(req.params.groupId!);
+    if (!canEditGroup(req.user!, g) && req.user!.role !== 'ACCOUNTANT') throw new ApiError(403, 'FORBIDDEN');
+    const topicId = z.string().min(1).parse(req.query.topicId);
+    const marks = new Map((await gradeRepo.byGroup(g.id)).filter((m) => m.topicId === topicId).map((m) => [m.studentId, m.grade]));
+    const roster = (await studentRepo.list({ groupId: g.id, sort: 'name' })).filter((s) => s.status !== 'LEFT' || marks.has(s.id));
+    res.json({ items: roster.map((s) => ({ studentId: s.id, fullName: fullName(s), status: s.status, grade: marks.get(s.id) ?? null })) });
+  } catch (e) {
+    next(e);
+  }
+});
+
+const gradesSchema = z.object({
+  topicId: z.string().min(1),
+  grades: z.array(z.object({ studentId: z.string(), grade: z.number().int().min(1).max(5).nullable() })).max(200),
+});
+
+plansRouter.put('/group/:groupId/grades', validateBody(gradesSchema), async (req, res, next) => {
+  try {
+    const g = await loadGroup(req.params.groupId!);
+    if (!canEditGroup(req.user!, g)) throw new ApiError(403, 'FORBIDDEN');
+    const b = req.body as z.infer<typeof gradesSchema>;
+    const plan = await groupPlanRepo.byGroup(g.id);
+    if (!plan?.topics.some((t) => t.id === b.topicId)) throw new ApiError(404, 'NOT_FOUND');
+    const members = new Set((await studentRepo.list({ groupId: g.id })).map((s) => s.id));
+    for (const x of b.grades) {
+      if (members.has(x.studentId)) await gradeRepo.set(g.id, b.topicId, x.studentId, x.grade, req.user!.id);
+    }
+    await audit(req.user!.id, 'plan.grades.save', 'group', g.id, { topicId: b.topicId, count: b.grades.filter((x) => x.grade).length });
+    res.json(await presentGroupPlan(g, plan));
   } catch (e) {
     next(e);
   }

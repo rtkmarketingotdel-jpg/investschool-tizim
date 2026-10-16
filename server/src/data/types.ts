@@ -392,3 +392,14 @@ export interface LessonFeedback {
   ratedAt: Date | null;
   commentedAt: Date | null;
 }
+
+/** The teacher's mark (1-5) for a trainee on a taught topic. */
+export interface LessonGrade {
+  id: string;
+  groupId: string;
+  topicId: string;
+  studentId: string;
+  grade: number;
+  gradedById: string | null;
+  gradedAt: Date;
+}

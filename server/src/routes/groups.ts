@@ -8,6 +8,7 @@ import { courseRepo } from '../repositories/courseRepo.js';
 import { groupRepo, groupStatus } from '../repositories/groupRepo.js';
 import { audit } from '../repositories/notificationRepo.js';
 import { groupPlanRepo } from '../repositories/planRepo.js';
+import { gradeRepo } from '../repositories/gradeRepo.js';
 import { studentRepo } from '../repositories/studentRepo.js';
 import { userRepo } from '../repositories/userRepo.js';
 
@@ -103,6 +104,7 @@ groupsRouter.delete('/:id', requireRole('DIRECTOR', 'MANAGER'), async (req, res,
     if (members) throw new ApiError(409, 'GROUP_NOT_EMPTY', { count: members });
     await groupRepo.remove(g.id);
     await groupPlanRepo.removeForGroup(g.id);
+    await gradeRepo.removeForGroup(g.id);
     await audit(req.user!.id, 'group.delete', 'group', g.id, { name: g.name });
     res.json({ ok: true });
   } catch (e) {
